@@ -77,8 +77,9 @@ public class DASAuthnDataPublisherImpl extends AbstractAuthenticationDataPublish
 
     private void publishAuthenticationData(AuthenticationData authenticationData) {
 
-        String roleList = getCommaSeparatedUserRoles(authenticationData.getUserStoreDomain + "/" +
-                authenticationData.getUsername(), authenticationData.getTenantDomain());
+        String roleList = getCommaSeparatedUserRoles(
+                authenticationData.getUserStoreDomain() + "/" + authenticationData.getUsername(),
+                authenticationData.getTenantDomain());
 
         Object[] payloadData = new Object[20];
         payloadData[0] = authenticationData.getContextId();
