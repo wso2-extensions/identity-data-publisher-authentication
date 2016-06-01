@@ -85,7 +85,7 @@
                         </Import-Package>
                         <Export-Package>
                             !org.wso2.carbon.identity.data.publisher.application.authentication.internal,
-                            org.wso2.carbon.identity.data.publisher.application.authentication.*;version="${carbon.identity.data.publisher.export.version}"
+                            org.wso2.carbon.identity.data.publisher.application.authentication.*;version="${carbon.identity.data.publisher.package.export.version}"
                         </Export-Package>
                     </instructions>
                 </configuration>
