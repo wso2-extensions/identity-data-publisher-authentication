@@ -79,13 +79,13 @@
                             !org.wso2.carbon.identity.data.publisher.application.authentication.*,
                             org.wso2.carbon; version="${carbon.kernel.package.import.version.range}",
                             org.apache.commons.logging; version="${commons-logging.osgi.version.range}",
-                            org.wso2.carbon.identity.application.authentication.framework.*;version="${carbon.identity.package.import.version.range}",
+                            org.wso2.carbon.identity.application.authentication.framework.*;version="${carbon.identity.framework.package.import.version.range}",
                             org.wso2.carbon.databridge.commons; version="${carbon.analytics-common.version}",
                             *;resolution:=optional
                         </Import-Package>
                         <Export-Package>
                             !org.wso2.carbon.identity.data.publisher.application.authentication.internal,
-                            org.wso2.carbon.identity.data.publisher.application.authentication.*;version="${carbon.identity.package.export.version}"
+                            org.wso2.carbon.identity.data.publisher.application.authentication.*;version="${carbon.identity.data.publisher.export.version}"
                         </Export-Package>
                     </instructions>
                 </configuration>

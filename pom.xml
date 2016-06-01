@@ -242,13 +242,14 @@
         <carbon.kernel.version>4.4.5</carbon.kernel.version>
         <carbon.kernel.package.import.version.range>[4.4.0, 5.0.0)</carbon.kernel.package.import.version.range>
         <identity.framework.version>5.1.1-SNAPSHOT</identity.framework.version>
-        <carbon.identity.package.export.version>5.1.1-SNAPSHOT</carbon.identity.package.export.version>
-        <carbon.identity.package.import.version.range>[5.0.0, 6.0.0)</carbon.identity.package.import.version.range>
+        <carbon.identity.data.publisher.export.version>5.1.1-SNAPSHOT</carbon.identity.data.publisher.export.version>
+        <carbon.identity.data.publisher.package.import.version.range>[5.0.0, 6.0.0)</carbon.identity.data.publisher.package.import.version.range>
         <carbon.identity.framework.package.import.version.range>[5.0.0, 6.0.0)</carbon.identity.framework.package.import.version.range>
         <carbon.analytics-common.version>5.0.11</carbon.analytics-common.version>
         <carbon.analytics-common.imp.pkg.version.range>[5.0.0,6.0.0)</carbon.analytics-common.imp.pkg.version.range>
         <carbon.p2.plugin.version>1.5.3</carbon.p2.plugin.version>
         <maven.buildnumber.plugin.version>1.4</maven.buildnumber.plugin.version>
+        <commons-logging.osgi.version.range>[1.2,2.0)</commons-logging.osgi.version.range>
     </properties>
 
 </project>
