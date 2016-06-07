@@ -26,6 +26,7 @@ import org.wso2.carbon.core.util.AnonymousSessionUtil;
 import org.wso2.carbon.databridge.commons.Event;
 import org.wso2.carbon.identity.application.authentication.framework.AbstractAuthenticationDataPublisher;
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticationData;
+import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.data.publisher.application.authentication.AuthPublisherConstants;
 import org.wso2.carbon.identity.data.publisher.application.authentication.internal.AuthenticationDataPublisherDataHolder;
 import org.wso2.carbon.registry.core.service.RegistryService;
@@ -38,6 +39,12 @@ public class DASAuthnDataPublisherImpl extends AbstractAuthenticationDataPublish
 
     public static final Log LOG = LogFactory.getLog(DASAuthnDataPublisherImpl.class);
     public static final String DAS_PUBLISHER_NAME = "DAS_AUTHN_DATA_PUBLISHER";
+    public static final String CONFIG_PREFIX = "ISAnalytics.DefaultValues.";
+    public static final String USERNAME = "userName";
+    public static final String USERSTORE_DOMAIN = "userStoreDomain";
+    public static final String ROLES = "rolesCommaSeperated";
+    public static final String SERVICE_PROVIDER = "serviceprovider";
+    public static final String IDENTITY_PROVIDER = "identityProvider";
 
     @Override
     public void doPublishAuthenticationStepSuccess(AuthenticationData authenticationData) {
@@ -77,25 +84,26 @@ public class DASAuthnDataPublisherImpl extends AbstractAuthenticationDataPublish
 
     private void publishAuthenticationData(AuthenticationData authenticationData) {
 
-        String roleList = getCommaSeparatedUserRoles(authenticationData.getUserStoreDomain + "/" +
-                authenticationData.getUsername(), authenticationData.getTenantDomain());
+        String roleList = getCommaSeparatedUserRoles(
+                authenticationData.getUserStoreDomain() + "/" + authenticationData.getUsername(),
+                authenticationData.getTenantDomain());
 
         Object[] payloadData = new Object[20];
         payloadData[0] = authenticationData.getContextId();
         payloadData[1] = authenticationData.getEventId();
         payloadData[2] = authenticationData.isAuthnSuccess();
-        payloadData[3] = authenticationData.getUsername();
-        payloadData[4] = authenticationData.getUserStoreDomain();
+        payloadData[3] = replaceIfNotAvailable(USERNAME, authenticationData.getUsername());
+        payloadData[4] = replaceIfNotAvailable(USERSTORE_DOMAIN, authenticationData.getUserStoreDomain());
         payloadData[5] = authenticationData.getTenantDomain();
         payloadData[6] = authenticationData.getRemoteIp();
         payloadData[7] = authenticationData.getInboundProtocol();
-        payloadData[8] = authenticationData.getServiceProvider();
+        payloadData[8] = replaceIfNotAvailable(SERVICE_PROVIDER, authenticationData.getServiceProvider());
         payloadData[9] = authenticationData.isRememberMe();
         payloadData[10] = authenticationData.isForcedAuthn();
         payloadData[11] = authenticationData.isPassive();
-        payloadData[12] = roleList;
+        payloadData[12] = replaceIfNotAvailable(ROLES, roleList);
         payloadData[13] = String.valueOf(authenticationData.getStepNo());
-        payloadData[14] = authenticationData.getIdentityProvider();
+        payloadData[14] = replaceIfNotAvailable(IDENTITY_PROVIDER, authenticationData.getIdentityProvider());
         payloadData[15] = authenticationData.isSuccess();
         payloadData[16] = authenticationData.getAuthenticator();
         payloadData[17] = authenticationData.isInitialLogin();
@@ -145,5 +153,15 @@ public class DASAuthnDataPublisherImpl extends AbstractAuthenticationDataPublish
             LOG.error("Error when getting user store for " + userName + "@" + tenantDomain, e);
         }
         return StringUtils.EMPTY;
+    }
+
+    protected String replaceIfNotAvailable(String name, String value) {
+        if (StringUtils.isNotEmpty(name) && StringUtils.isEmpty(value)) {
+            String defaultValue = IdentityUtil.getProperty(CONFIG_PREFIX + name);
+            if (defaultValue != null) {
+                return defaultValue;
+            }
+        }
+        return value;
     }
 }
