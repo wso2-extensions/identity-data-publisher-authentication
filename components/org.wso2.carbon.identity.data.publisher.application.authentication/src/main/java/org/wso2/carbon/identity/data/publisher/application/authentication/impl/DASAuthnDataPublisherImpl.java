@@ -72,14 +72,23 @@ public class DASAuthnDataPublisherImpl extends AbstractAuthenticationDataPublish
     }
 
     @Override
-    public void doPublishSessionCreation(String user, String userStoreDomain, String tenantDomain, String sessionId,
-                                         long timestamp, boolean isRememberMe) {
+    public void doPublishSessionCreation(String user, String userStoreDomain, String tenantDomain,
+                                         String sessionId, long createdTimestamp, long updatedTimestamp,
+                                         long terminationTimestamp, boolean isRememberMe) {
 
     }
 
     @Override
-    public void doPublishSessionTermination(String user, String userStoreDomain, String tenantDomain, String sessionId,
-                                            long timestamp, boolean isRememberMe) {
+    public void doPublishSessionTermination(String user, String userStoreDomain, String tenantDomain,
+                                            String sessionId, long createdTimestamp, long updatedTimestamp,
+                                            long terminationTimestamp, boolean isRememberMe) {
+
+    }
+
+    @Override
+    public void doPublishSessionUpdate(String user, String userStoreDomain, String tenantDomain,
+                                       String sessionId, long createdTimestamp, long updatedTimestamp,
+                                       long terminationTimestamp, boolean isRememberMe) {
 
     }
 
