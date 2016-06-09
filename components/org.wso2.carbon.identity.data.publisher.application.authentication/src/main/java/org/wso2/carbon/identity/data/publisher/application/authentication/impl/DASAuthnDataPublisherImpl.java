@@ -45,6 +45,7 @@ public class DASAuthnDataPublisherImpl extends AbstractAuthenticationDataPublish
     public static final String ROLES = "rolesCommaSeperated";
     public static final String SERVICE_PROVIDER = "serviceprovider";
     public static final String IDENTITY_PROVIDER = "identityProvider";
+    public static final String NOT_AVAILABLE = "NOT_AVAILABLE";
 
     @Override
     public void doPublishAuthenticationStepSuccess(AuthenticationData authenticationData) {
@@ -168,6 +169,9 @@ public class DASAuthnDataPublisherImpl extends AbstractAuthenticationDataPublish
             if (defaultValue != null) {
                 return defaultValue;
             }
+        }
+        if (StringUtils.isEmpty(value)) {
+            return NOT_AVAILABLE;
         }
         return value;
     }
