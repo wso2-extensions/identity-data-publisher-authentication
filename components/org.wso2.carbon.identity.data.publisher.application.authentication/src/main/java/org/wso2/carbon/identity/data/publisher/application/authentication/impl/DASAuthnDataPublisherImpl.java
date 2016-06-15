@@ -26,6 +26,7 @@ import org.wso2.carbon.core.util.AnonymousSessionUtil;
 import org.wso2.carbon.databridge.commons.Event;
 import org.wso2.carbon.identity.application.authentication.framework.AbstractAuthenticationDataPublisher;
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticationData;
+import org.wso2.carbon.identity.application.authentication.framework.model.SessionData;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.data.publisher.application.authentication.AuthPublisherConstants;
 import org.wso2.carbon.identity.data.publisher.application.authentication.internal.AuthenticationDataPublisherDataHolder;
@@ -72,31 +73,28 @@ public class DASAuthnDataPublisherImpl extends AbstractAuthenticationDataPublish
     }
 
     @Override
-    public void doPublishSessionCreation(String user, String userStoreDomain, String tenantDomain,
-                                         String sessionId, long createdTimestamp, long updatedTimestamp,
-                                         long terminationTimestamp, boolean isRememberMe) {
+    public void doPublishSessionCreation(SessionData sessionData) {
+        // To be implemented
+    }
+
+    @Override
+    public void doPublishSessionTermination(SessionData sessionData) {
+        // To be implemented
 
     }
 
     @Override
-    public void doPublishSessionTermination(String user, String userStoreDomain, String tenantDomain,
-                                            String sessionId, long createdTimestamp, long updatedTimestamp,
-                                            long terminationTimestamp, boolean isRememberMe) {
-
-    }
-
-    @Override
-    public void doPublishSessionUpdate(String user, String userStoreDomain, String tenantDomain,
-                                       String sessionId, long createdTimestamp, long updatedTimestamp,
-                                       long terminationTimestamp, boolean isRememberMe) {
-
+    public void doPublishSessionUpdate(SessionData sessionData) {
+        // To be implemented
     }
 
     private void publishAuthenticationData(AuthenticationData authenticationData) {
 
-        String roleList = getCommaSeparatedUserRoles(
-                authenticationData.getUserStoreDomain() + "/" + authenticationData.getUsername(),
-                authenticationData.getTenantDomain());
+        String roleList = null;
+        if (!authenticationData.isFederated()) {
+            roleList = getCommaSeparatedUserRoles(authenticationData.getUserStoreDomain() + "/" + authenticationData
+                            .getUsername(), authenticationData.getTenantDomain());
+        }
 
         Object[] payloadData = new Object[20];
         payloadData[0] = authenticationData.getContextId();
@@ -126,7 +124,6 @@ public class DASAuthnDataPublisherImpl extends AbstractAuthenticationDataPublish
 
     @Override
     public String getName() {
-
         return DAS_PUBLISHER_NAME;
     }
 
