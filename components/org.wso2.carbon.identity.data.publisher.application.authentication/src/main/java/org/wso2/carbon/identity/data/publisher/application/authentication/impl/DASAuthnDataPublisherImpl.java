@@ -39,36 +39,36 @@ import org.wso2.carbon.user.core.service.RealmService;
 public class DASAuthnDataPublisherImpl extends AbstractAuthenticationDataPublisher {
 
     public static final Log LOG = LogFactory.getLog(DASAuthnDataPublisherImpl.class);
-    public static final String DAS_PUBLISHER_NAME = "DAS_AUTHN_DATA_PUBLISHER";
-    public static final String CONFIG_PREFIX = "ISAnalytics.DefaultValues.";
-    public static final String USERNAME = "userName";
-    public static final String USERSTORE_DOMAIN = "userStoreDomain";
-    public static final String ROLES = "rolesCommaSeperated";
-    public static final String SERVICE_PROVIDER = "serviceprovider";
-    public static final String IDENTITY_PROVIDER = "identityProvider";
-    public static final String NOT_AVAILABLE = "NOT_AVAILABLE";
 
     @Override
     public void doPublishAuthenticationStepSuccess(AuthenticationData authenticationData) {
-
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Publishing authentication step success results");
+        }
         publishAuthenticationData(authenticationData);
     }
 
     @Override
     public void doPublishAuthenticationStepFailure(AuthenticationData authenticationData) {
-
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Publishing authentication step failure results");
+        }
         publishAuthenticationData(authenticationData);
     }
 
     @Override
     public void doPublishAuthenticationSuccess(AuthenticationData authenticationData) {
-
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Publishing authentication success results");
+        }
         publishAuthenticationData(authenticationData);
     }
 
     @Override
     public void doPublishAuthenticationFailure(AuthenticationData authenticationData) {
-
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Publishing authentication failure results");
+        }
         publishAuthenticationData(authenticationData);
     }
 
@@ -93,30 +93,43 @@ public class DASAuthnDataPublisherImpl extends AbstractAuthenticationDataPublish
         String roleList = null;
         if (!authenticationData.isFederated()) {
             roleList = getCommaSeparatedUserRoles(authenticationData.getUserStoreDomain() + "/" + authenticationData
-                            .getUsername(), authenticationData.getTenantDomain());
+                    .getUsername(), authenticationData.getTenantDomain());
         }
 
         Object[] payloadData = new Object[20];
         payloadData[0] = authenticationData.getContextId();
         payloadData[1] = authenticationData.getEventId();
         payloadData[2] = authenticationData.isAuthnSuccess();
-        payloadData[3] = replaceIfNotAvailable(USERNAME, authenticationData.getUsername());
-        payloadData[4] = replaceIfNotAvailable(USERSTORE_DOMAIN, authenticationData.getUserStoreDomain());
+        payloadData[3] = replaceIfNotAvailable(AuthPublisherConstants.USERNAME, authenticationData.getUsername());
+        payloadData[4] = replaceIfNotAvailable(AuthPublisherConstants.USER_STORE_DOMAIN, authenticationData
+                .getUserStoreDomain());
         payloadData[5] = authenticationData.getTenantDomain();
         payloadData[6] = authenticationData.getRemoteIp();
         payloadData[7] = authenticationData.getInboundProtocol();
-        payloadData[8] = replaceIfNotAvailable(SERVICE_PROVIDER, authenticationData.getServiceProvider());
+        payloadData[8] = replaceIfNotAvailable(AuthPublisherConstants.SERVICE_PROVIDER, authenticationData
+                .getServiceProvider());
         payloadData[9] = authenticationData.isRememberMe();
         payloadData[10] = authenticationData.isForcedAuthn();
         payloadData[11] = authenticationData.isPassive();
-        payloadData[12] = replaceIfNotAvailable(ROLES, roleList);
+        payloadData[12] = replaceIfNotAvailable(AuthPublisherConstants.ROLES, roleList);
         payloadData[13] = String.valueOf(authenticationData.getStepNo());
-        payloadData[14] = replaceIfNotAvailable(IDENTITY_PROVIDER, authenticationData.getIdentityProvider());
+        payloadData[14] = replaceIfNotAvailable(AuthPublisherConstants.IDENTITY_PROVIDER, authenticationData.getIdentityProvider());
         payloadData[15] = authenticationData.isSuccess();
         payloadData[16] = authenticationData.getAuthenticator();
         payloadData[17] = authenticationData.isInitialLogin();
         payloadData[18] = authenticationData.isFederated();
         payloadData[19] = System.currentTimeMillis();
+
+        if (LOG.isDebugEnabled()) {
+            for (int i = 0; i < 19; i++) {
+                if (payloadData[i] != null) {
+                    LOG.debug("Payload data for entry " + i + " " + payloadData[i].toString());
+                } else {
+                    LOG.debug("Payload data for entry " + i + " is null");
+                }
+
+            }
+        }
         Event event = new Event(AuthPublisherConstants.AUTHN_DATA_STREAM_NAME, System.currentTimeMillis(), null, null,
                 payloadData);
         AuthenticationDataPublisherDataHolder.getInstance().getPublisherService().publish(event);
@@ -124,11 +137,14 @@ public class DASAuthnDataPublisherImpl extends AbstractAuthenticationDataPublish
 
     @Override
     public String getName() {
-        return DAS_PUBLISHER_NAME;
+        return AuthPublisherConstants.DAS_PUBLISHER_NAME;
     }
 
     private String getCommaSeparatedUserRoles(String userName, String tenantDomain) {
 
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Retrieving roles for user " + userName + ", tenant domain " + tenantDomain);
+        }
         if (tenantDomain == null || userName == null) {
             return StringUtils.EMPTY;
         }
@@ -150,6 +166,9 @@ public class DASAuthnDataPublisherImpl extends AbstractAuthenticationDataPublish
                     sb.append(",").append(role);
                 }
                 if (sb.length() > 0) {
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Returning roles, " + sb.substring(1));
+                    }
                     return sb.substring(1); //remove the first comma
                 }
 
@@ -158,6 +177,9 @@ public class DASAuthnDataPublisherImpl extends AbstractAuthenticationDataPublish
             LOG.error("Error when getting realm for " + userName + "@" + tenantDomain, e);
         } catch (UserStoreException e) {
             LOG.error("Error when getting user store for " + userName + "@" + tenantDomain, e);
+        }
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("No roles found. Returning empty string");
         }
         return StringUtils.EMPTY;
     }
@@ -171,14 +193,47 @@ public class DASAuthnDataPublisherImpl extends AbstractAuthenticationDataPublish
      */
     protected String replaceIfNotAvailable(String name, String value) {
         if (StringUtils.isNotEmpty(name) && StringUtils.isEmpty(value)) {
-            String defaultValue = IdentityUtil.getProperty(CONFIG_PREFIX + name);
+            String defaultValue = IdentityUtil.getProperty(AuthPublisherConstants.CONFIG_PREFIX + name);
             if (defaultValue != null) {
                 return defaultValue;
             }
         }
         if (StringUtils.isEmpty(value)) {
-            return NOT_AVAILABLE;
+            return AuthPublisherConstants.NOT_AVAILABLE;
         }
         return value;
+    }
+
+    protected void publishSessionData(SessionData sessionData, int actionId) {
+
+        if (sessionData != null) {
+            Object[] payloadData = new Object[11];
+            payloadData[0] = replaceIfNotAvailable(AuthPublisherConstants.SESSION_ID, sessionData.getSessionId());
+            payloadData[1] = sessionData.getCreatedTimestamp();
+            payloadData[2] = sessionData.getUpdatedTimestamp();
+            payloadData[3] = sessionData.getTerminationTimestamp();
+            payloadData[4] = actionId;
+            payloadData[5] = replaceIfNotAvailable(AuthPublisherConstants.USERNAME, sessionData.getUser());
+            payloadData[6] = replaceIfNotAvailable(AuthPublisherConstants.USER_STORE_DOMAIN, sessionData
+                    .getUserStoreDomain());
+            payloadData[7] = sessionData.getRemoteIP();
+            payloadData[8] = sessionData.getTenantDomain();
+            payloadData[9] = sessionData.isRememberMe();
+            payloadData[10] = System.currentTimeMillis();
+
+            if (LOG.isDebugEnabled()) {
+                for (int i = 0; i < 10; i++) {
+                    if (payloadData[i] != null) {
+                        LOG.debug("Payload data for entry " + i + " " + payloadData[i].toString());
+                    } else {
+                        LOG.debug("Payload data for entry " + i + " is null");
+                    }
+
+                }
+            }
+            Event event = new Event(AuthPublisherConstants.SESSION_DATA_STREAM_NAME, System.currentTimeMillis(), null, null,
+                    payloadData);
+            AuthenticationDataPublisherDataHolder.getInstance().getPublisherService().publish(event);
+        }
     }
 }
