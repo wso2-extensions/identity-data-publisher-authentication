@@ -61,6 +61,8 @@
                                         <include>p2.inf</include>
                                         <include>AuthenticationDataPublisher.xml</include>
                                         <include>authentication-analytics-stream_1.0.0.json</include>
+                                        <include>SessionDataPublisher.xml</include>
+                                        <include>session-analytics-stream_1.0.0.json</include>
                                     </includes>
                                 </resource>
                             </resources>
