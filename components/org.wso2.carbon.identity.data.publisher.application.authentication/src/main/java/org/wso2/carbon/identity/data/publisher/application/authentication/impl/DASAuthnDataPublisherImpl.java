@@ -27,6 +27,7 @@ import org.wso2.carbon.databridge.commons.Event;
 import org.wso2.carbon.identity.application.authentication.framework.AbstractAuthenticationDataPublisher;
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticationData;
 import org.wso2.carbon.identity.application.authentication.framework.model.SessionData;
+import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkConstants;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.data.publisher.application.authentication.AuthPublisherConstants;
 import org.wso2.carbon.identity.data.publisher.application.authentication.internal.AuthenticationDataPublisherDataHolder;
@@ -91,7 +92,7 @@ public class DASAuthnDataPublisherImpl extends AbstractAuthenticationDataPublish
     private void publishAuthenticationData(AuthenticationData authenticationData) {
 
         String roleList = null;
-        if (!authenticationData.isFederated()) {
+        if (FrameworkConstants.LOCAL_IDP_NAME.equalsIgnoreCase(authenticationData.getIdentityProviderType())) {
             roleList = getCommaSeparatedUserRoles(authenticationData.getUserStoreDomain() + "/" + authenticationData
                     .getUsername(), authenticationData.getTenantDomain());
         }
@@ -117,7 +118,7 @@ public class DASAuthnDataPublisherImpl extends AbstractAuthenticationDataPublish
         payloadData[15] = authenticationData.isSuccess();
         payloadData[16] = authenticationData.getAuthenticator();
         payloadData[17] = authenticationData.isInitialLogin();
-        payloadData[18] = authenticationData.isFederated();
+        payloadData[18] = authenticationData.getIdentityProviderType();
         payloadData[19] = System.currentTimeMillis();
 
         if (LOG.isDebugEnabled()) {
