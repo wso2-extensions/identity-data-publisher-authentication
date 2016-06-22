@@ -20,8 +20,8 @@ package org.wso2.carbon.identity.data.publisher.application.authentication;
 
 public class AuthPublisherConstants {
 
-    public static final String AUTHN_DATA_STREAM_NAME = "authentication-analytics-stream:1.0.0";
-    public static final String SESSION_DATA_STREAM_NAME = "session-analytics-stream:1.0.0";
+    public static final String AUTHN_DATA_STREAM_NAME = "org.wso2.is.analytics.stream.OverallAuthentication:1.0.0";
+    public static final String SESSION_DATA_STREAM_NAME = "org.wso2.is.analytics.stream.OverallSession:1.0.0";
 
     public static final String DAS_PUBLISHER_NAME = "DAS_AUTHN_DATA_PUBLISHER";
     public static final String CONFIG_PREFIX = "ISAnalytics.DefaultValues.";

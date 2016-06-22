@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <eventPublisher name="SessionDataPublisher" statistics="disable" trace="disable" xmlns="http://wso2.org/carbon/eventpublisher">
-  <from streamName="session-analytics-stream" version="1.0.0"/>
+  <from streamName="org.wso2.is.analytics.stream.OverallSession" version="1.0.0"/>
   <mapping customMapping="disable" type="wso2event"/>
   <to eventAdapterType="wso2event">
     <property name="username">admin</property>
