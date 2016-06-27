@@ -75,18 +75,18 @@ public class DASAuthnDataPublisherImpl extends AbstractAuthenticationDataPublish
 
     @Override
     public void doPublishSessionCreation(SessionData sessionData) {
-        // To be implemented
+        publishSessionData(sessionData, AuthPublisherConstants.SESSION_CREATION_STATUS);
     }
 
     @Override
     public void doPublishSessionTermination(SessionData sessionData) {
-        // To be implemented
+        publishSessionData(sessionData, AuthPublisherConstants.SESSION_TERMINATION_STATUS);
 
     }
 
     @Override
     public void doPublishSessionUpdate(SessionData sessionData) {
-        // To be implemented
+        publishSessionData(sessionData, AuthPublisherConstants.SESSION_UPDATE_STATUS);
     }
 
     private void publishAuthenticationData(AuthenticationData authenticationData) {
