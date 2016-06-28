@@ -37,9 +37,9 @@ import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
 
-public class DASAuthnDataPublisherImpl extends AbstractAuthenticationDataPublisher {
+public class DASLoginDataPublisherImpl extends AbstractAuthenticationDataPublisher {
 
-    public static final Log LOG = LogFactory.getLog(DASAuthnDataPublisherImpl.class);
+    public static final Log LOG = LogFactory.getLog(DASLoginDataPublisherImpl.class);
 
     @Override
     public void doPublishAuthenticationStepSuccess(AuthenticationData authenticationData) {
@@ -75,18 +75,14 @@ public class DASAuthnDataPublisherImpl extends AbstractAuthenticationDataPublish
 
     @Override
     public void doPublishSessionCreation(SessionData sessionData) {
-        // To be implemented
     }
 
     @Override
     public void doPublishSessionTermination(SessionData sessionData) {
-        // To be implemented
-
     }
 
     @Override
     public void doPublishSessionUpdate(SessionData sessionData) {
-        // To be implemented
     }
 
     private void publishAuthenticationData(AuthenticationData authenticationData) {
@@ -138,7 +134,7 @@ public class DASAuthnDataPublisherImpl extends AbstractAuthenticationDataPublish
 
     @Override
     public String getName() {
-        return AuthPublisherConstants.DAS_PUBLISHER_NAME;
+        return AuthPublisherConstants.DAS_LOGIN_PUBLISHER_NAME;
     }
 
     private String getCommaSeparatedUserRoles(String userName, String tenantDomain) {
@@ -205,36 +201,4 @@ public class DASAuthnDataPublisherImpl extends AbstractAuthenticationDataPublish
         return value;
     }
 
-    protected void publishSessionData(SessionData sessionData, int actionId) {
-
-        if (sessionData != null) {
-            Object[] payloadData = new Object[11];
-            payloadData[0] = replaceIfNotAvailable(AuthPublisherConstants.SESSION_ID, sessionData.getSessionId());
-            payloadData[1] = sessionData.getCreatedTimestamp();
-            payloadData[2] = sessionData.getUpdatedTimestamp();
-            payloadData[3] = sessionData.getTerminationTimestamp();
-            payloadData[4] = actionId;
-            payloadData[5] = replaceIfNotAvailable(AuthPublisherConstants.USERNAME, sessionData.getUser());
-            payloadData[6] = replaceIfNotAvailable(AuthPublisherConstants.USER_STORE_DOMAIN, sessionData
-                    .getUserStoreDomain());
-            payloadData[7] = sessionData.getRemoteIP();
-            payloadData[8] = sessionData.getTenantDomain();
-            payloadData[9] = sessionData.isRememberMe();
-            payloadData[10] = System.currentTimeMillis();
-
-            if (LOG.isDebugEnabled()) {
-                for (int i = 0; i < 10; i++) {
-                    if (payloadData[i] != null) {
-                        LOG.debug("Payload data for entry " + i + " " + payloadData[i].toString());
-                    } else {
-                        LOG.debug("Payload data for entry " + i + " is null");
-                    }
-
-                }
-            }
-            Event event = new Event(AuthPublisherConstants.SESSION_DATA_STREAM_NAME, System.currentTimeMillis(), null, null,
-                    payloadData);
-            AuthenticationDataPublisherDataHolder.getInstance().getPublisherService().publish(event);
-        }
-    }
 }

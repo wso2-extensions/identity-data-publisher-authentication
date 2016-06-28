@@ -59,8 +59,10 @@
                                     <directory>resources</directory>
                                     <includes>
                                         <include>p2.inf</include>
-                                        <include>AuthenticationDataPublisher.xml</include>
+                                        <include>IsAnalytics-Publisher-wso2event-AuthenticationData.xml</include>
                                         <include>org.wso2.is.analytics.stream.OverallAuthentication_1.0.0.json</include>
+                                        <include>IsAnalytics-Publisher-wso2event-SessionData.xml</include>
+                                        <include>org.wso2.is.analytics.stream.OverallSession_1.0.0.json</include>
                                     </includes>
                                 </resource>
                             </resources>

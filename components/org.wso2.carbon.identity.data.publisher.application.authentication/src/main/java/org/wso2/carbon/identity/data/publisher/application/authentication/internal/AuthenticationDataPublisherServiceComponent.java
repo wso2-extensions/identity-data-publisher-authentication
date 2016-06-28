@@ -22,7 +22,8 @@ import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.event.stream.core.EventStreamService;
 import org.wso2.carbon.identity.application.authentication.framework.AbstractAuthenticationDataPublisher;
-import org.wso2.carbon.identity.data.publisher.application.authentication.impl.DASAuthnDataPublisherImpl;
+import org.wso2.carbon.identity.data.publisher.application.authentication.impl.DASLoginDataPublisherImpl;
+import org.wso2.carbon.identity.data.publisher.application.authentication.impl.DASSessionDataPublisherImpl;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
 
@@ -46,8 +47,9 @@ public class AuthenticationDataPublisherServiceComponent {
 
         BundleContext bundleContext = context.getBundleContext();
         bundleContext
-                .registerService(AbstractAuthenticationDataPublisher.class.getName(), new DASAuthnDataPublisherImpl(), null);
-
+                .registerService(AbstractAuthenticationDataPublisher.class.getName(), new DASLoginDataPublisherImpl(), null);
+        bundleContext
+                .registerService(AbstractAuthenticationDataPublisher.class.getName(), new DASSessionDataPublisherImpl(), null);
     }
 
     protected void setEventStreamService(EventStreamService publisherService) {
