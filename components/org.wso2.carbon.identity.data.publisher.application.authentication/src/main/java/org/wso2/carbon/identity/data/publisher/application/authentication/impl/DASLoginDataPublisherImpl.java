@@ -28,8 +28,8 @@ import org.wso2.carbon.identity.application.authentication.framework.AbstractAut
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticationData;
 import org.wso2.carbon.identity.application.authentication.framework.model.SessionData;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkConstants;
-import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.data.publisher.application.authentication.AuthPublisherConstants;
+import org.wso2.carbon.identity.data.publisher.application.authentication.AuthnDataPublisherUtils;
 import org.wso2.carbon.identity.data.publisher.application.authentication.internal.AuthenticationDataPublisherDataHolder;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -97,20 +97,24 @@ public class DASLoginDataPublisherImpl extends AbstractAuthenticationDataPublish
         payloadData[0] = authenticationData.getContextId();
         payloadData[1] = authenticationData.getEventId();
         payloadData[2] = authenticationData.isAuthnSuccess();
-        payloadData[3] = replaceIfNotAvailable(AuthPublisherConstants.USERNAME, authenticationData.getUsername());
-        payloadData[4] = replaceIfNotAvailable(AuthPublisherConstants.USER_STORE_DOMAIN, authenticationData
-                .getUserStoreDomain());
+        payloadData[3] = AuthnDataPublisherUtils.replaceIfNotAvailable(AuthPublisherConstants.CONFIG_PREFIX +
+                AuthPublisherConstants.USERNAME, authenticationData.getUsername());
+        payloadData[4] = AuthnDataPublisherUtils.replaceIfNotAvailable(AuthPublisherConstants.CONFIG_PREFIX +
+                AuthPublisherConstants.USER_STORE_DOMAIN, authenticationData.getUserStoreDomain());
         payloadData[5] = authenticationData.getTenantDomain();
         payloadData[6] = authenticationData.getRemoteIp();
         payloadData[7] = authenticationData.getInboundProtocol();
-        payloadData[8] = replaceIfNotAvailable(AuthPublisherConstants.SERVICE_PROVIDER, authenticationData
+        payloadData[8] = AuthnDataPublisherUtils.replaceIfNotAvailable(AuthPublisherConstants.CONFIG_PREFIX +
+                AuthPublisherConstants.SERVICE_PROVIDER, authenticationData
                 .getServiceProvider());
         payloadData[9] = authenticationData.isRememberMe();
         payloadData[10] = authenticationData.isForcedAuthn();
         payloadData[11] = authenticationData.isPassive();
-        payloadData[12] = replaceIfNotAvailable(AuthPublisherConstants.ROLES, roleList);
+        payloadData[12] = AuthnDataPublisherUtils.replaceIfNotAvailable(AuthPublisherConstants.CONFIG_PREFIX +
+                AuthPublisherConstants.ROLES, roleList);
         payloadData[13] = String.valueOf(authenticationData.getStepNo());
-        payloadData[14] = replaceIfNotAvailable(AuthPublisherConstants.IDENTITY_PROVIDER, authenticationData.getIdentityProvider());
+        payloadData[14] = AuthnDataPublisherUtils.replaceIfNotAvailable(AuthPublisherConstants.CONFIG_PREFIX +
+                AuthPublisherConstants.IDENTITY_PROVIDER, authenticationData.getIdentityProvider());
         payloadData[15] = authenticationData.isSuccess();
         payloadData[16] = authenticationData.getAuthenticator();
         payloadData[17] = authenticationData.isInitialLogin();
@@ -179,26 +183,6 @@ public class DASLoginDataPublisherImpl extends AbstractAuthenticationDataPublish
             LOG.debug("No roles found. Returning empty string");
         }
         return StringUtils.EMPTY;
-    }
-
-    /**
-     * Add default values if the values coming in are null or empty
-     *
-     * @param name  Name of the property configured in identity.xml
-     * @param value In coming value
-     * @return
-     */
-    protected String replaceIfNotAvailable(String name, String value) {
-        if (StringUtils.isNotEmpty(name) && StringUtils.isEmpty(value)) {
-            String defaultValue = IdentityUtil.getProperty(AuthPublisherConstants.CONFIG_PREFIX + name);
-            if (defaultValue != null) {
-                return defaultValue;
-            }
-        }
-        if (StringUtils.isEmpty(value)) {
-            return AuthPublisherConstants.NOT_AVAILABLE;
-        }
-        return value;
     }
 
 }

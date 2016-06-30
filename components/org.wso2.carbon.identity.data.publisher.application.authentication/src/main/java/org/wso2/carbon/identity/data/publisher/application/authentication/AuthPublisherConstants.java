@@ -33,6 +33,7 @@ public class AuthPublisherConstants {
     public static final String SERVICE_PROVIDER = "serviceprovider";
     public static final String IDENTITY_PROVIDER = "identityProvider";
     public static final String NOT_AVAILABLE = "NOT_AVAILABLE";
+    public static final String SHA_256 = "SHA-256";
 
     public static final int SESSION_CREATION_STATUS = 1;
     public static final int SESSION_TERMINATION_STATUS = 0;
