@@ -25,6 +25,8 @@ import org.wso2.carbon.CarbonException;
 import org.wso2.carbon.core.util.AnonymousSessionUtil;
 import org.wso2.carbon.databridge.commons.Event;
 import org.wso2.carbon.identity.application.authentication.framework.AbstractAuthenticationDataPublisher;
+import org.wso2.carbon.identity.application.authentication.framework.context.AuthenticationContext;
+import org.wso2.carbon.identity.application.authentication.framework.context.SessionContext;
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticationData;
 import org.wso2.carbon.identity.application.authentication.framework.model.SessionData;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkConstants;
@@ -37,9 +39,27 @@ import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
 
+import javax.servlet.http.HttpServletRequest;
+import java.util.Map;
+
 public class DASLoginDataPublisherImpl extends AbstractAuthenticationDataPublisher {
 
     public static final Log LOG = LogFactory.getLog(DASLoginDataPublisherImpl.class);
+
+    @Override
+    public void publishSessionCreation(HttpServletRequest request, AuthenticationContext context, SessionContext sessionContext, Map<String, Object> params) {
+        // This method is overridden to do nothing since this is a login data publisher.
+    }
+
+    @Override
+    public void publishSessionUpdate(HttpServletRequest request, AuthenticationContext context, SessionContext sessionContext, Map<String, Object> params) {
+        // This method is overridden to do nothing since this is a session data publisher.
+    }
+
+    @Override
+    public void publishSessionTermination(HttpServletRequest request, AuthenticationContext context, SessionContext sessionContext, Map<String, Object> params) {
+        // This method is overridden to do nothing since this is a session data publisher.
+    }
 
     @Override
     public void doPublishAuthenticationStepSuccess(AuthenticationData authenticationData) {
@@ -75,14 +95,17 @@ public class DASLoginDataPublisherImpl extends AbstractAuthenticationDataPublish
 
     @Override
     public void doPublishSessionCreation(SessionData sessionData) {
+        // This method is not implemented since there is no usage of it in login publishing
     }
 
     @Override
     public void doPublishSessionTermination(SessionData sessionData) {
+        // This method is not implemented since there is no usage of it in login publishing
     }
 
     @Override
     public void doPublishSessionUpdate(SessionData sessionData) {
+        // This method is not implemented since there is no usage of it in login publishing
     }
 
     private void publishAuthenticationData(AuthenticationData authenticationData) {
