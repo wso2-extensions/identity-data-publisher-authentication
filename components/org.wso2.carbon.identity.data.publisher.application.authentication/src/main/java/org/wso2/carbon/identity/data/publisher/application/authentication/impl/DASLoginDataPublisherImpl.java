@@ -93,7 +93,7 @@ public class DASLoginDataPublisherImpl extends AbstractAuthenticationDataPublish
                     .getUsername(), authenticationData.getTenantDomain());
         }
 
-        Object[] payloadData = new Object[20];
+        Object[] payloadData = new Object[21];
         payloadData[0] = authenticationData.getContextId();
         payloadData[1] = authenticationData.getEventId();
         payloadData[2] = authenticationData.isAuthnSuccess();
@@ -103,23 +103,24 @@ public class DASLoginDataPublisherImpl extends AbstractAuthenticationDataPublish
                 AuthPublisherConstants.USER_STORE_DOMAIN, authenticationData.getUserStoreDomain());
         payloadData[5] = authenticationData.getTenantDomain();
         payloadData[6] = authenticationData.getRemoteIp();
-        payloadData[7] = authenticationData.getInboundProtocol();
-        payloadData[8] = AuthnDataPublisherUtils.replaceIfNotAvailable(AuthPublisherConstants.CONFIG_PREFIX +
+        payloadData[7] = AuthPublisherConstants.NOT_AVAILABLE;
+        payloadData[8] = authenticationData.getInboundProtocol();
+        payloadData[9] = AuthnDataPublisherUtils.replaceIfNotAvailable(AuthPublisherConstants.CONFIG_PREFIX +
                 AuthPublisherConstants.SERVICE_PROVIDER, authenticationData
                 .getServiceProvider());
-        payloadData[9] = authenticationData.isRememberMe();
-        payloadData[10] = authenticationData.isForcedAuthn();
-        payloadData[11] = authenticationData.isPassive();
-        payloadData[12] = AuthnDataPublisherUtils.replaceIfNotAvailable(AuthPublisherConstants.CONFIG_PREFIX +
+        payloadData[10] = authenticationData.isRememberMe();
+        payloadData[11] = authenticationData.isForcedAuthn();
+        payloadData[12] = authenticationData.isPassive();
+        payloadData[13] = AuthnDataPublisherUtils.replaceIfNotAvailable(AuthPublisherConstants.CONFIG_PREFIX +
                 AuthPublisherConstants.ROLES, roleList);
-        payloadData[13] = String.valueOf(authenticationData.getStepNo());
-        payloadData[14] = AuthnDataPublisherUtils.replaceIfNotAvailable(AuthPublisherConstants.CONFIG_PREFIX +
+        payloadData[14] = String.valueOf(authenticationData.getStepNo());
+        payloadData[15] = AuthnDataPublisherUtils.replaceIfNotAvailable(AuthPublisherConstants.CONFIG_PREFIX +
                 AuthPublisherConstants.IDENTITY_PROVIDER, authenticationData.getIdentityProvider());
-        payloadData[15] = authenticationData.isSuccess();
-        payloadData[16] = authenticationData.getAuthenticator();
-        payloadData[17] = authenticationData.isInitialLogin();
-        payloadData[18] = authenticationData.getIdentityProviderType();
-        payloadData[19] = System.currentTimeMillis();
+        payloadData[16] = authenticationData.isSuccess();
+        payloadData[17] = authenticationData.getAuthenticator();
+        payloadData[18] = authenticationData.isInitialLogin();
+        payloadData[19] = authenticationData.getIdentityProviderType();
+        payloadData[20] = System.currentTimeMillis();
 
         if (LOG.isDebugEnabled()) {
             for (int i = 0; i < 19; i++) {
