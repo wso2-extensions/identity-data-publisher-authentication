@@ -22,47 +22,83 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.databridge.commons.Event;
 import org.wso2.carbon.identity.application.authentication.framework.AbstractAuthenticationDataPublisher;
+import org.wso2.carbon.identity.application.authentication.framework.context.AuthenticationContext;
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticationData;
 import org.wso2.carbon.identity.application.authentication.framework.model.SessionData;
 import org.wso2.carbon.identity.data.publisher.application.authentication.AuthPublisherConstants;
 import org.wso2.carbon.identity.data.publisher.application.authentication.AuthnDataPublisherUtils;
 import org.wso2.carbon.identity.data.publisher.application.authentication.internal.AuthenticationDataPublisherDataHolder;
 
+import javax.servlet.http.HttpServletRequest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Map;
 
 public class DASSessionDataPublisherImpl extends AbstractAuthenticationDataPublisher {
 
     public static final Log LOG = LogFactory.getLog(DASSessionDataPublisherImpl.class);
 
     @Override
+    public void publishAuthenticationStepSuccess(HttpServletRequest request, AuthenticationContext context, Map<String, Object> params) {
+        // This method is overridden to do nothing since this is a session data publisher.
+    }
+
+    @Override
+    public void publishAuthenticationStepFailure(HttpServletRequest request, AuthenticationContext context, Map<String, Object> params) {
+        // This method is overridden to do nothing since this is a session data publisher.
+    }
+
+    @Override
+    public void publishAuthenticationSuccess(HttpServletRequest request, AuthenticationContext context, Map<String, Object> params) {
+        // This method is overridden to do nothing since this is a session data publisher.
+    }
+
+    @Override
+    public void publishAuthenticationFailure(HttpServletRequest request, AuthenticationContext context, Map<String, Object> params) {
+        // This method is overridden to do nothing since this is a session data publisher.
+    }
+
+    @Override
     public void doPublishAuthenticationStepSuccess(AuthenticationData authenticationData) {
+        // This method is not implemented since there is no usage of it in session publishing
     }
 
     @Override
     public void doPublishAuthenticationStepFailure(AuthenticationData authenticationData) {
+        // This method is not implemented since there is no usage of it in session publishing
     }
 
     @Override
     public void doPublishAuthenticationSuccess(AuthenticationData authenticationData) {
+        // This method is not implemented since there is no usage of it in session publishing
     }
 
     @Override
     public void doPublishAuthenticationFailure(AuthenticationData authenticationData) {
+        // This method is not implemented since there is no usage of it in session publishing
     }
 
     @Override
     public void doPublishSessionCreation(SessionData sessionData) {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Publishing session creation to DAS");
+        }
         publishSessionData(sessionData, AuthPublisherConstants.SESSION_CREATION_STATUS);
     }
 
     @Override
     public void doPublishSessionTermination(SessionData sessionData) {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Publishing session termination to DAS");
+        }
         publishSessionData(sessionData, AuthPublisherConstants.SESSION_TERMINATION_STATUS);
 
     }
 
     @Override
     public void doPublishSessionUpdate(SessionData sessionData) {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Publishing session update to DAS");
+        }
         publishSessionData(sessionData, AuthPublisherConstants.SESSION_UPDATE_STATUS);
     }
 
@@ -74,7 +110,7 @@ public class DASSessionDataPublisherImpl extends AbstractAuthenticationDataPubli
     protected void publishSessionData(SessionData sessionData, int actionId) {
 
         if (sessionData != null) {
-            Object[] payloadData = new Object[12];
+            Object[] payloadData = new Object[13];
             try {
                 payloadData[0] = AuthnDataPublisherUtils.replaceIfNotAvailable(AuthPublisherConstants.CONFIG_PREFIX +
                         AuthPublisherConstants.SESSION_ID, AuthnDataPublisherUtils.hashString(sessionData.getSessionId()));
@@ -90,7 +126,8 @@ public class DASSessionDataPublisherImpl extends AbstractAuthenticationDataPubli
                 payloadData[8] = AuthPublisherConstants.NOT_AVAILABLE;
                 payloadData[9] = sessionData.getTenantDomain();
                 payloadData[10] = sessionData.isRememberMe();
-                payloadData[11] = System.currentTimeMillis();
+                payloadData[11] = sessionData.getUserAgent();
+                payloadData[12] = System.currentTimeMillis();
 
                 if (LOG.isDebugEnabled()) {
                     for (int i = 0; i < 10; i++) {
