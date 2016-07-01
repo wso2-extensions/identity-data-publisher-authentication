@@ -74,7 +74,7 @@ public class DASSessionDataPublisherImpl extends AbstractAuthenticationDataPubli
     protected void publishSessionData(SessionData sessionData, int actionId) {
 
         if (sessionData != null) {
-            Object[] payloadData = new Object[11];
+            Object[] payloadData = new Object[12];
             try {
                 payloadData[0] = AuthnDataPublisherUtils.replaceIfNotAvailable(AuthPublisherConstants.CONFIG_PREFIX +
                         AuthPublisherConstants.SESSION_ID, AuthnDataPublisherUtils.hashString(sessionData.getSessionId()));
@@ -87,9 +87,10 @@ public class DASSessionDataPublisherImpl extends AbstractAuthenticationDataPubli
                 payloadData[6] = AuthnDataPublisherUtils.replaceIfNotAvailable(AuthPublisherConstants.CONFIG_PREFIX +
                         AuthPublisherConstants.USER_STORE_DOMAIN, sessionData.getUserStoreDomain());
                 payloadData[7] = sessionData.getRemoteIP();
-                payloadData[8] = sessionData.getTenantDomain();
-                payloadData[9] = sessionData.isRememberMe();
-                payloadData[10] = System.currentTimeMillis();
+                payloadData[8] = AuthPublisherConstants.NOT_AVAILABLE;
+                payloadData[9] = sessionData.getTenantDomain();
+                payloadData[10] = sessionData.isRememberMe();
+                payloadData[11] = System.currentTimeMillis();
 
                 if (LOG.isDebugEnabled()) {
                     for (int i = 0; i < 10; i++) {
