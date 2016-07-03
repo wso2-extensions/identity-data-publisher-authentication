@@ -21,13 +21,13 @@ package org.wso2.carbon.identity.data.publisher.application.authentication.impl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.databridge.commons.Event;
-import org.wso2.carbon.identity.application.authentication.framework.AbstractAuthenticationDataPublisher;
 import org.wso2.carbon.identity.application.authentication.framework.context.AuthenticationContext;
-import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticationData;
-import org.wso2.carbon.identity.application.authentication.framework.model.SessionData;
+import org.wso2.carbon.identity.data.publisher.application.authentication.AbstractAuthenticationDataPublisher;
 import org.wso2.carbon.identity.data.publisher.application.authentication.AuthPublisherConstants;
 import org.wso2.carbon.identity.data.publisher.application.authentication.AuthnDataPublisherUtils;
 import org.wso2.carbon.identity.data.publisher.application.authentication.internal.AuthenticationDataPublisherDataHolder;
+import org.wso2.carbon.identity.data.publisher.application.authentication.model.AuthenticationData;
+import org.wso2.carbon.identity.data.publisher.application.authentication.model.SessionData;
 
 import javax.servlet.http.HttpServletRequest;
 import java.security.NoSuchAlgorithmException;

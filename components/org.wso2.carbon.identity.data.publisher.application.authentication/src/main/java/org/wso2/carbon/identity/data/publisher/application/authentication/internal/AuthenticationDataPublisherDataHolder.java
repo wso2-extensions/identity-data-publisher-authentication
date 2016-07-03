@@ -19,14 +19,19 @@
 package org.wso2.carbon.identity.data.publisher.application.authentication.internal;
 
 import org.wso2.carbon.event.stream.core.EventStreamService;
+import org.wso2.carbon.identity.application.authentication.framework.AuthenticationDataPublisher;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class AuthenticationDataPublisherDataHolder {
 
     private EventStreamService publisherService;
     private RealmService realmService;
     private RegistryService registryService;
+    private List<AuthenticationDataPublisher> dataPublishers = new ArrayList<>();
 
     private static AuthenticationDataPublisherDataHolder
             serviceHolder = new AuthenticationDataPublisherDataHolder();
@@ -68,5 +73,10 @@ public class AuthenticationDataPublisherDataHolder {
     public RegistryService getRegistryService() {
 
         return registryService;
+    }
+
+    public List<AuthenticationDataPublisher> getDataPublishers() {
+
+        return dataPublishers;
     }
 }
