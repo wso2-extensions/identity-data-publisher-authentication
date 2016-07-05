@@ -23,11 +23,11 @@ import org.wso2.carbon.identity.application.authentication.framework.context.Aut
 import org.wso2.carbon.identity.application.authentication.framework.context.SessionContext;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkConstants;
 import org.wso2.carbon.identity.core.handler.AbstractIdentityMessageHandler;
+import org.wso2.carbon.identity.core.handler.MessageHandlerComparator;
 import org.wso2.carbon.identity.data.publisher.application.authentication.internal.AuthenticationDataPublisherDataHolder;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -172,12 +172,7 @@ public class AuthnDataPublishHandlerManager extends AbstractIdentityMessageHandl
      */
     protected void sortDataPublishers(List<AuthenticationDataPublisher> authenticationDataPublishers,
                                       final AuthenticationContext context) {
-        Collections.sort(authenticationDataPublishers, new Comparator<AuthenticationDataPublisher>() {
-            public int compare(AuthenticationDataPublisher publisher1, AuthenticationDataPublisher
-                    publisher2) {
-                return publisher1.getPriority(context) - publisher2.getPriority(context);
-            }
-        });
+        Collections.sort(authenticationDataPublishers, new MessageHandlerComparator(context));
     }
 
     @Override
