@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.identity.data.publisher.application.authentication;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.identity.application.authentication.framework.AuthenticationDataPublisher;
@@ -30,32 +29,15 @@ import org.wso2.carbon.identity.core.bean.context.MessageContext;
 import org.wso2.carbon.identity.core.handler.AbstractIdentityMessageHandler;
 import org.wso2.carbon.identity.data.publisher.application.authentication.model.AuthenticationData;
 import org.wso2.carbon.identity.data.publisher.application.authentication.model.SessionData;
-import org.wso2.carbon.idp.mgt.util.IdPManagementUtil;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 public abstract class AbstractAuthenticationDataPublisher extends AbstractIdentityMessageHandler implements
         AuthenticationDataPublisher {
 
     private static final Log log = LogFactory.getLog(AbstractAuthenticationDataPublisher.class);
-    public static final String UNKNOWN = "unknown";
-    public static final String USER_AGENT = "User-Agent";
-    // HTTP headers which may contain IP address of the client in the order of priority
-    private static final String[] HEADERS_WITH_IP = {
-            "X-Forwarded-For",
-            "Proxy-Client-IP",
-            "WL-Proxy-Client-IP",
-            "HTTP_X_FORWARDED_FOR",
-            "HTTP_X_FORWARDED",
-            "HTTP_X_CLUSTER_CLIENT_IP",
-            "HTTP_CLIENT_IP",
-            "HTTP_FORWARDED_FOR",
-            "HTTP_FORWARDED",
-            "HTTP_VIA",
-            "REMOTE_ADDR"};
 
     /**
      * Publish authentication success
@@ -96,7 +78,7 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
         authenticationData.setContextId(context.getContextIdentifier());
         authenticationData.setEventId(UUID.randomUUID().toString());
         authenticationData.setAuthnSuccess(false);
-        authenticationData.setRemoteIp(getClientIpAddress(request));
+        authenticationData.setRemoteIp(AuthnDataPublisherUtils.getClientIpAddress(request));
         authenticationData.setServiceProvider(context.getServiceProviderName());
         authenticationData.setInboundProtocol(context.getRequestType());
         authenticationData.setRememberMe(context.isRememberMe());
@@ -148,7 +130,7 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
         authenticationData.setContextId(context.getContextIdentifier());
         authenticationData.setEventId(UUID.randomUUID().toString());
         authenticationData.setAuthnSuccess(false);
-        authenticationData.setRemoteIp(getClientIpAddress(request));
+        authenticationData.setRemoteIp(AuthnDataPublisherUtils.getClientIpAddress(request));
         authenticationData.setServiceProvider(context.getServiceProviderName());
         authenticationData.setInboundProtocol(context.getRequestType());
         authenticationData.setRememberMe(context.isRememberMe());
@@ -205,7 +187,7 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
         authenticationData.setContextId(context.getContextIdentifier());
         authenticationData.setEventId(UUID.randomUUID().toString());
         authenticationData.setAuthnSuccess(true);
-        authenticationData.setRemoteIp(getClientIpAddress(request));
+        authenticationData.setRemoteIp(AuthnDataPublisherUtils.getClientIpAddress(request));
         authenticationData.setServiceProvider(context.getServiceProviderName());
         authenticationData.setInboundProtocol(context.getRequestType());
         authenticationData.setRememberMe(context.isRememberMe());
@@ -240,7 +222,7 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
         authenticationData.setContextId(context.getContextIdentifier());
         authenticationData.setEventId(UUID.randomUUID().toString());
         authenticationData.setAuthnSuccess(false);
-        authenticationData.setRemoteIp(getClientIpAddress(request));
+        authenticationData.setRemoteIp(AuthnDataPublisherUtils.getClientIpAddress(request));
         authenticationData.setServiceProvider(context.getServiceProviderName());
         authenticationData.setInboundProtocol(context.getRequestType());
         authenticationData.setRememberMe(context.isRememberMe());
@@ -281,7 +263,8 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
         if (sessionContext != null) {
             Object createdTimeObj = sessionContext.getProperty(FrameworkConstants.CREATED_TIMESTAMP);
             createdTime = (Long) createdTimeObj;
-            terminationTime = getSessionExpirationTime(createdTime, createdTime, tenantDomain, sessionContext.isRememberMe());
+            terminationTime = AuthnDataPublisherUtils.getSessionExpirationTime(createdTime, createdTime,
+                    tenantDomain, sessionContext.isRememberMe());
             sessionData.setIsRememberMe(sessionContext.isRememberMe());
         }
         sessionData.setUser(userName);
@@ -291,8 +274,8 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
         sessionData.setCreatedTimestamp(createdTime);
         sessionData.setUpdatedTimestamp(createdTime);
         sessionData.setTerminationTimestamp(terminationTime);
-        sessionData.setRemoteIP(getClientIpAddress(request));
-        sessionData.setUserAgent(request.getHeader(USER_AGENT));
+        sessionData.setRemoteIP(AuthnDataPublisherUtils.getClientIpAddress(request));
+        sessionData.setUserAgent(request.getHeader(AuthPublisherConstants.USER_AGENT));
 
         doPublishSessionCreation(sessionData);
     }
@@ -332,7 +315,8 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
         if (sessionContext != null) {
             Object createdTimeObj = sessionContext.getProperty(FrameworkConstants.CREATED_TIMESTAMP);
             createdTime = (Long) createdTimeObj;
-            terminationTime = getSessionExpirationTime(createdTime, currentTime, tenantDomain, sessionContext.isRememberMe());
+            terminationTime = AuthnDataPublisherUtils.getSessionExpirationTime(createdTime, currentTime,
+                    tenantDomain, sessionContext.isRememberMe());
             sessionData.setIsRememberMe(sessionContext.isRememberMe());
         }
 
@@ -343,7 +327,7 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
         sessionData.setCreatedTimestamp(createdTime);
         sessionData.setUpdatedTimestamp(currentTime);
         sessionData.setTerminationTimestamp(terminationTime);
-        sessionData.setRemoteIP(getClientIpAddress(request));
+        sessionData.setRemoteIP(AuthnDataPublisherUtils.getClientIpAddress(request));
 
         doPublishSessionUpdate(sessionData);
     }
@@ -390,7 +374,7 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
         sessionData.setCreatedTimestamp(createdTime);
         sessionData.setUpdatedTimestamp(currentTime);
         sessionData.setTerminationTimestamp(currentTime);
-        sessionData.setRemoteIP(getClientIpAddress(request));
+        sessionData.setRemoteIP(AuthnDataPublisherUtils.getClientIpAddress(request));
         doPublishSessionTermination(sessionData);
     }
 
@@ -442,55 +426,6 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
      * @param sessionData Bean with session information
      */
     public abstract void doPublishSessionTermination(SessionData sessionData);
-
-    /**
-     * Get the expiration time of the session
-     *
-     * @param createdTime  Created time of the session
-     * @param updatedTime  Updated time of the session
-     * @param tenantDomain Tenant Domain
-     * @param isRememberMe Whether remember me is enabled
-     * @return Session expiration time
-     */
-    protected long getSessionExpirationTime(long createdTime, long updatedTime, String tenantDomain,
-                                            boolean isRememberMe) {
-        // If remember me is enabled, Session termination time will be fixed
-        if (isRememberMe) {
-            long rememberMeTimeout = TimeUnit.SECONDS.toMillis(IdPManagementUtil.getRememberMeTimeout(tenantDomain));
-            return createdTime + rememberMeTimeout;
-        }
-        long idleSessionTimeOut = TimeUnit.SECONDS.toMillis(IdPManagementUtil.getIdleSessionTimeOut(tenantDomain));
-        return idleSessionTimeOut + updatedTime;
-    }
-
-    /**
-     * Get client IP address from the http request
-     *
-     * @param request http servlet request
-     * @return IP address of the initial client
-     */
-    protected String getClientIpAddress(HttpServletRequest request) {
-        for (String header : HEADERS_WITH_IP) {
-            String ip = request.getHeader(header);
-            if (ip != null && ip.length() != 0 && !UNKNOWN.equalsIgnoreCase(ip)) {
-                return getFirstIP(ip);
-            }
-        }
-        return request.getRemoteAddr();
-    }
-
-    /**
-     * Get the first IP from a comma separated list of IPs
-     *
-     * @param commaSeparatedIPs String which contains comma+space separated IPs
-     * @return First IP
-     */
-    protected String getFirstIP(String commaSeparatedIPs) {
-        if (StringUtils.isNotEmpty(commaSeparatedIPs) && commaSeparatedIPs.contains(",")) {
-            return commaSeparatedIPs.split(",")[0];
-        }
-        return commaSeparatedIPs;
-    }
 
     @Override
     public boolean canHandle(MessageContext messageContext) {
