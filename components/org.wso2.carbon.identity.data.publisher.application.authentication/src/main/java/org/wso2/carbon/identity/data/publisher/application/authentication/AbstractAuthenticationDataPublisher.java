@@ -27,6 +27,7 @@ import org.wso2.carbon.identity.application.authentication.framework.model.Authe
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkConstants;
 import org.wso2.carbon.identity.core.bean.context.MessageContext;
 import org.wso2.carbon.identity.core.handler.AbstractIdentityMessageHandler;
+import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.data.publisher.application.authentication.model.AuthenticationData;
 import org.wso2.carbon.identity.data.publisher.application.authentication.model.SessionData;
 
@@ -78,7 +79,7 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
         authenticationData.setContextId(context.getContextIdentifier());
         authenticationData.setEventId(UUID.randomUUID().toString());
         authenticationData.setAuthnSuccess(false);
-        authenticationData.setRemoteIp(AuthnDataPublisherUtils.getClientIpAddress(request));
+        authenticationData.setRemoteIp(IdentityUtil.getClientIpAddress(request));
         authenticationData.setServiceProvider(context.getServiceProviderName());
         authenticationData.setInboundProtocol(context.getRequestType());
         authenticationData.setRememberMe(context.isRememberMe());
@@ -130,7 +131,7 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
         authenticationData.setContextId(context.getContextIdentifier());
         authenticationData.setEventId(UUID.randomUUID().toString());
         authenticationData.setAuthnSuccess(false);
-        authenticationData.setRemoteIp(AuthnDataPublisherUtils.getClientIpAddress(request));
+        authenticationData.setRemoteIp(IdentityUtil.getClientIpAddress(request));
         authenticationData.setServiceProvider(context.getServiceProviderName());
         authenticationData.setInboundProtocol(context.getRequestType());
         authenticationData.setRememberMe(context.isRememberMe());
@@ -187,7 +188,7 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
         authenticationData.setContextId(context.getContextIdentifier());
         authenticationData.setEventId(UUID.randomUUID().toString());
         authenticationData.setAuthnSuccess(true);
-        authenticationData.setRemoteIp(AuthnDataPublisherUtils.getClientIpAddress(request));
+        authenticationData.setRemoteIp(IdentityUtil.getClientIpAddress(request));
         authenticationData.setServiceProvider(context.getServiceProviderName());
         authenticationData.setInboundProtocol(context.getRequestType());
         authenticationData.setRememberMe(context.isRememberMe());
@@ -222,7 +223,7 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
         authenticationData.setContextId(context.getContextIdentifier());
         authenticationData.setEventId(UUID.randomUUID().toString());
         authenticationData.setAuthnSuccess(false);
-        authenticationData.setRemoteIp(AuthnDataPublisherUtils.getClientIpAddress(request));
+        authenticationData.setRemoteIp(IdentityUtil.getClientIpAddress(request));
         authenticationData.setServiceProvider(context.getServiceProviderName());
         authenticationData.setInboundProtocol(context.getRequestType());
         authenticationData.setRememberMe(context.isRememberMe());
@@ -274,7 +275,7 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
         sessionData.setCreatedTimestamp(createdTime);
         sessionData.setUpdatedTimestamp(createdTime);
         sessionData.setTerminationTimestamp(terminationTime);
-        sessionData.setRemoteIP(AuthnDataPublisherUtils.getClientIpAddress(request));
+        sessionData.setRemoteIP(IdentityUtil.getClientIpAddress(request));
         sessionData.setUserAgent(request.getHeader(AuthPublisherConstants.USER_AGENT));
 
         doPublishSessionCreation(sessionData);
@@ -327,7 +328,7 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
         sessionData.setCreatedTimestamp(createdTime);
         sessionData.setUpdatedTimestamp(currentTime);
         sessionData.setTerminationTimestamp(terminationTime);
-        sessionData.setRemoteIP(AuthnDataPublisherUtils.getClientIpAddress(request));
+        sessionData.setRemoteIP(IdentityUtil.getClientIpAddress(request));
 
         doPublishSessionUpdate(sessionData);
     }
@@ -374,7 +375,7 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
         sessionData.setCreatedTimestamp(createdTime);
         sessionData.setUpdatedTimestamp(currentTime);
         sessionData.setTerminationTimestamp(currentTime);
-        sessionData.setRemoteIP(AuthnDataPublisherUtils.getClientIpAddress(request));
+        sessionData.setRemoteIP(IdentityUtil.getClientIpAddress(request));
         doPublishSessionTermination(sessionData);
     }
 

@@ -20,6 +20,9 @@ package org.wso2.carbon.identity.data.publisher.application.authentication;
 
 public class AuthPublisherConstants {
 
+    private AuthPublisherConstants() {
+
+    }
     // Stream definition names
     public static final String AUTHN_DATA_STREAM_NAME = "org.wso2.is.analytics.stream.OverallAuthentication:1.0.0";
     public static final String SESSION_DATA_STREAM_NAME = "org.wso2.is.analytics.stream.OverallSession:1.0.0";
@@ -38,25 +41,10 @@ public class AuthPublisherConstants {
     public static final String NOT_AVAILABLE = "NOT_AVAILABLE";
     public static final String SHA_256 = "SHA-256";
     public static final String USER_AGENT = "User-Agent";
-    public static final String UNKNOWN = "unknown";
 
     // Session status codes
     public static final int SESSION_CREATION_STATUS = 1;
     public static final int SESSION_TERMINATION_STATUS = 0;
     public static final int SESSION_UPDATE_STATUS = 2;
-
-    // HTTP headers which may contain IP address of the client in the order of priority
-    public static final String[] HEADERS_WITH_IP = {
-            "X-Forwarded-For",
-            "Proxy-Client-IP",
-            "WL-Proxy-Client-IP",
-            "HTTP_X_FORWARDED_FOR",
-            "HTTP_X_FORWARDED",
-            "HTTP_X_CLUSTER_CLIENT_IP",
-            "HTTP_CLIENT_IP",
-            "HTTP_FORWARDED_FOR",
-            "HTTP_FORWARDED",
-            "HTTP_VIA",
-            "REMOTE_ADDR"};
 
 }
