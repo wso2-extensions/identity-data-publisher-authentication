@@ -71,35 +71,6 @@ public class AuthnDataPublisherUtils {
     }
 
     /**
-     * Get client IP address from the http request
-     *
-     * @param request http servlet request
-     * @return IP address of the initial client
-     */
-    public static String getClientIpAddress(HttpServletRequest request) {
-        for (String header : AuthPublisherConstants.HEADERS_WITH_IP) {
-            String ip = request.getHeader(header);
-            if (ip != null && ip.length() != 0 && !AuthPublisherConstants.UNKNOWN.equalsIgnoreCase(ip)) {
-                return getFirstIP(ip);
-            }
-        }
-        return request.getRemoteAddr();
-    }
-
-    /**
-     * Get the first IP from a comma separated list of IPs
-     *
-     * @param commaSeparatedIPs String which contains comma+space separated IPs
-     * @return First IP
-     */
-    public static String getFirstIP(String commaSeparatedIPs) {
-        if (StringUtils.isNotEmpty(commaSeparatedIPs) && commaSeparatedIPs.contains(",")) {
-            return commaSeparatedIPs.split(",")[0];
-        }
-        return commaSeparatedIPs;
-    }
-
-    /**
      * Hash given string using sha-256
      *
      * @param value string to be hashed

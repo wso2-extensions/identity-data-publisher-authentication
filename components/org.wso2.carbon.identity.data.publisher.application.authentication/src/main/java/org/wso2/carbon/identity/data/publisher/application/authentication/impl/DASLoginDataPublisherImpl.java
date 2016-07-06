@@ -108,7 +108,7 @@ public class DASLoginDataPublisherImpl extends AbstractAuthenticationDataPublish
         // This method is not implemented since there is no usage of it in login publishing
     }
 
-    private void publishAuthenticationData(AuthenticationData authenticationData) {
+    protected void publishAuthenticationData(AuthenticationData authenticationData) {
 
         String roleList = null;
         if (FrameworkConstants.LOCAL_IDP_NAME.equalsIgnoreCase(authenticationData.getIdentityProviderType())) {
