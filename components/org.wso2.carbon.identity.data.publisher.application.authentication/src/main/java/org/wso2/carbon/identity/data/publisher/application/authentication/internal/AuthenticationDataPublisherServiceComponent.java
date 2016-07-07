@@ -23,7 +23,7 @@ import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.event.stream.core.EventStreamService;
 import org.wso2.carbon.identity.application.authentication.framework.AuthenticationDataPublisher;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkConstants;
-import org.wso2.carbon.identity.data.publisher.application.authentication.AuthnDataPublishHandlerManager;
+import org.wso2.carbon.identity.data.publisher.application.authentication.AuthnDataPublisherProxy;
 import org.wso2.carbon.identity.data.publisher.application.authentication.impl.DASLoginDataPublisherImpl;
 import org.wso2.carbon.identity.data.publisher.application.authentication.impl.DASSessionDataPublisherImpl;
 import org.wso2.carbon.registry.core.service.RegistryService;
@@ -57,7 +57,7 @@ public class AuthenticationDataPublisherServiceComponent {
         bundleContext
                 .registerService(AuthenticationDataPublisher.class.getName(), new DASSessionDataPublisherImpl(), null);
         bundleContext
-                .registerService(AuthenticationDataPublisher.class.getName(), new AuthnDataPublishHandlerManager(), null);
+                .registerService(AuthenticationDataPublisher.class.getName(), new AuthnDataPublisherProxy(), null);
     }
 
     protected void setEventStreamService(EventStreamService publisherService) {
@@ -91,7 +91,7 @@ public class AuthenticationDataPublisherServiceComponent {
     }
 
     protected void setAuthenticationDataPublisher(AuthenticationDataPublisher publisher) {
-        if (!FrameworkConstants.AnalyticsAttributes.AUTHN_DATA_PUBLISHER_HANDLER.equalsIgnoreCase(publisher.getName())) {
+        if (!FrameworkConstants.AnalyticsAttributes.AUTHN_DATA_PUBLISHER_PROXY.equalsIgnoreCase(publisher.getName())) {
             AuthenticationDataPublisherDataHolder.getInstance().getDataPublishers().add(publisher);
         }
     }

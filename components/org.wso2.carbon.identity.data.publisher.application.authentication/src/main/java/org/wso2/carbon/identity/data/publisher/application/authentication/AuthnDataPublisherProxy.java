@@ -31,7 +31,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-public class AuthnDataPublishHandlerManager extends AbstractIdentityMessageHandler implements
+public class AuthnDataPublisherProxy extends AbstractIdentityMessageHandler implements
         AuthenticationDataPublisher {
 
     private List<AuthenticationDataPublisher> dataPublishers = AuthenticationDataPublisherDataHolder.getInstance()
@@ -177,6 +177,6 @@ public class AuthnDataPublishHandlerManager extends AbstractIdentityMessageHandl
 
     @Override
     public String getName() {
-        return FrameworkConstants.AnalyticsAttributes.AUTHN_DATA_PUBLISHER_HANDLER;
+        return FrameworkConstants.AnalyticsAttributes.AUTHN_DATA_PUBLISHER_PROXY;
     }
 }
