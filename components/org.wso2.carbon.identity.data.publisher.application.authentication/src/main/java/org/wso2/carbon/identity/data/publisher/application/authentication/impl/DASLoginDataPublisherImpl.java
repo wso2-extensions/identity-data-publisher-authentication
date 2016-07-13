@@ -146,7 +146,7 @@ public class DASLoginDataPublisherImpl extends AbstractAuthenticationDataPublish
         payloadData[20] = System.currentTimeMillis();
 
         if (LOG.isDebugEnabled()) {
-            for (int i = 0; i < 19; i++) {
+            for (int i = 0; i < 20; i++) {
                 if (payloadData[i] != null) {
                     LOG.debug("Payload data for entry " + i + " " + payloadData[i].toString());
                 } else {
