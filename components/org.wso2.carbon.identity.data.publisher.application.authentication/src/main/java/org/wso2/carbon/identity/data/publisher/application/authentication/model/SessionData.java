@@ -27,9 +27,19 @@ public class SessionData {
     private long createdTimestamp;
     private long updatedTimestamp;
     private long terminationTimestamp;
+    private String serviceProvider;
+    private String identityProviders;
     private boolean isRememberMe;
     private String remoteIP;
     private String userAgent;
+
+    public String getServiceProvider() {
+        return serviceProvider;
+    }
+
+    public void setServiceProvider(String serviceProvider) {
+        this.serviceProvider = serviceProvider;
+    }
 
     public String getUser() {
         return user;
@@ -41,6 +51,14 @@ public class SessionData {
 
     public String getUserStoreDomain() {
         return userStoreDomain;
+    }
+
+    public String getIdentityProviders() {
+        return identityProviders;
+    }
+
+    public void setIdentityProviders(String identityProviders) {
+        this.identityProviders = identityProviders;
     }
 
     public void setUserStoreDomain(String userStoreDomain) {

@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.identity.data.publisher.application.authentication;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.identity.application.authentication.framework.AuthenticationDataPublisher;
@@ -32,6 +33,7 @@ import org.wso2.carbon.identity.data.publisher.application.authentication.model.
 import org.wso2.carbon.identity.data.publisher.application.authentication.model.SessionData;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 
@@ -275,6 +277,8 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
         sessionData.setCreatedTimestamp(createdTime);
         sessionData.setUpdatedTimestamp(createdTime);
         sessionData.setTerminationTimestamp(terminationTime);
+        sessionData.setIdentityProviders(getCommaSeparatedIDPs(sessionContext));
+        sessionData.setServiceProvider(context.getServiceProviderName());
         sessionData.setRemoteIP(IdentityUtil.getClientIpAddress(request));
         sessionData.setUserAgent(request.getHeader(AuthPublisherConstants.USER_AGENT));
 
@@ -322,6 +326,8 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
         }
 
         sessionData.setUser(userName);
+        sessionData.setIdentityProviders(getCommaSeparatedIDPs(sessionContext));
+        sessionData.setServiceProvider(context.getServiceProviderName());
         sessionData.setUserStoreDomain(userStoreDomain);
         sessionData.setTenantDomain(tenantDomain);
         sessionData.setSessionId(sessionId);
@@ -374,9 +380,36 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
         sessionData.setSessionId(sessionId);
         sessionData.setCreatedTimestamp(createdTime);
         sessionData.setUpdatedTimestamp(currentTime);
+        sessionData.setIdentityProviders(getCommaSeparatedIDPs(sessionContext));
+        sessionData.setServiceProvider(context.getServiceProviderName());
         sessionData.setTerminationTimestamp(currentTime);
         sessionData.setRemoteIP(IdentityUtil.getClientIpAddress(request));
         doPublishSessionTermination(sessionData);
+    }
+
+    protected String getCommaSeparatedIDPs(SessionContext sessionContext) {
+
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieving current IDPw for user ");
+        }
+        if (sessionContext == null || sessionContext.getAuthenticatedIdPs() == null || sessionContext
+                .getAuthenticatedIdPs().isEmpty()) {
+            return StringUtils.EMPTY;
+        }
+
+        Iterator iterator = sessionContext.getAuthenticatedIdPs().entrySet().iterator();
+        StringBuilder sb = new StringBuilder();
+        while (iterator.hasNext()) {
+            Map.Entry pair = (Map.Entry) iterator.next();
+            sb.append(",").append(pair.getKey());
+        }
+        if (sb.length() > 0) {
+            if (log.isDebugEnabled()) {
+                log.debug("Returning roles, " + sb.substring(1));
+            }
+            return sb.substring(1); //remove the first comma
+        }
+        return StringUtils.EMPTY;
     }
 
     /**
