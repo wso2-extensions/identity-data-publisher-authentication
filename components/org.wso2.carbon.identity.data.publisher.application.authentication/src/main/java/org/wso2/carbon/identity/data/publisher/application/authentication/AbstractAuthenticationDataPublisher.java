@@ -91,6 +91,12 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
         authenticationData.setAuthenticator(context.getCurrentAuthenticator());
         authenticationData.setSuccess(true);
         authenticationData.setStepNo(step);
+        if (context.getSequenceConfig().getApplicationConfig().isSaaSApp()) {
+            authenticationData.addParameter(AuthPublisherConstants.TENANT_ID, AuthnDataPublisherUtils
+                    .getTenantDomains(context.getTenantDomain(), authenticationData.getTenantDomain()));
+        } else {
+            authenticationData.addParameter(AuthPublisherConstants.TENANT_ID, new String[]{authenticationData.getTenantDomain()});
+        }
         doPublishAuthenticationStepSuccess(authenticationData);
     }
 
@@ -143,6 +149,12 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
         authenticationData.setAuthenticator(context.getCurrentAuthenticator());
         authenticationData.setSuccess(false);
         authenticationData.setStepNo(step);
+        if (context.getSequenceConfig().getApplicationConfig().isSaaSApp()) {
+            authenticationData.addParameter(AuthPublisherConstants.TENANT_ID, AuthnDataPublisherUtils
+                    .getTenantDomains(context.getTenantDomain(), authenticationData.getTenantDomain()));
+        } else {
+            authenticationData.addParameter(AuthPublisherConstants.TENANT_ID, new String[]{authenticationData.getTenantDomain()});
+        }
         doPublishAuthenticationStepFailure(authenticationData);
     }
 
@@ -197,6 +209,12 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
         authenticationData.setForcedAuthn(context.isForceAuthenticate());
         authenticationData.setPassive(context.isPassiveAuthenticate());
         authenticationData.setInitialLogin(true);
+        if (context.getSequenceConfig().getApplicationConfig().isSaaSApp()) {
+            authenticationData.addParameter(AuthPublisherConstants.TENANT_ID, AuthnDataPublisherUtils
+                    .getTenantDomains(context.getTenantDomain(), authenticationData.getTenantDomain()));
+        } else {
+            authenticationData.addParameter(AuthPublisherConstants.TENANT_ID, new String[]{authenticationData.getTenantDomain()});
+        }
         doPublishAuthenticationSuccess(authenticationData);
     }
 
@@ -232,6 +250,12 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
         authenticationData.setForcedAuthn(context.isForceAuthenticate());
         authenticationData.setPassive(context.isPassiveAuthenticate());
         authenticationData.setInitialLogin(true);
+        if (context.getSequenceConfig().getApplicationConfig().isSaaSApp()) {
+            authenticationData.addParameter(AuthPublisherConstants.TENANT_ID, AuthnDataPublisherUtils
+                    .getTenantDomains(context.getTenantDomain(), authenticationData.getTenantDomain()));
+        } else {
+            authenticationData.addParameter(AuthPublisherConstants.TENANT_ID, new String[]{authenticationData.getTenantDomain()});
+        }
         doPublishAuthenticationFailure(authenticationData);
     }
 
@@ -281,7 +305,12 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
         sessionData.setServiceProvider(context.getServiceProviderName());
         sessionData.setRemoteIP(IdentityUtil.getClientIpAddress(request));
         sessionData.setUserAgent(request.getHeader(AuthPublisherConstants.USER_AGENT));
-
+        if (context.getSequenceConfig().getApplicationConfig().isSaaSApp()) {
+            sessionData.addParameter(AuthPublisherConstants.TENANT_ID, AuthnDataPublisherUtils
+                    .getTenantDomains(context.getTenantDomain(), sessionData.getTenantDomain()));
+        } else {
+            sessionData.addParameter(AuthPublisherConstants.TENANT_ID, new String[]{sessionData.getTenantDomain()});
+        }
         doPublishSessionCreation(sessionData);
     }
 
@@ -335,7 +364,12 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
         sessionData.setUpdatedTimestamp(currentTime);
         sessionData.setTerminationTimestamp(terminationTime);
         sessionData.setRemoteIP(IdentityUtil.getClientIpAddress(request));
-
+        if (context.getSequenceConfig().getApplicationConfig().isSaaSApp()) {
+            sessionData.addParameter(AuthPublisherConstants.TENANT_ID, AuthnDataPublisherUtils
+                    .getTenantDomains(context.getTenantDomain(), sessionData.getTenantDomain()));
+        } else {
+            sessionData.addParameter(AuthPublisherConstants.TENANT_ID, new String[]{sessionData.getTenantDomain()});
+        }
         doPublishSessionUpdate(sessionData);
     }
 
@@ -384,6 +418,12 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
         sessionData.setServiceProvider(context.getServiceProviderName());
         sessionData.setTerminationTimestamp(currentTime);
         sessionData.setRemoteIP(IdentityUtil.getClientIpAddress(request));
+        if (context.getSequenceConfig().getApplicationConfig().isSaaSApp()) {
+            sessionData.addParameter(AuthPublisherConstants.TENANT_ID, AuthnDataPublisherUtils
+                    .getTenantDomains(context.getTenantDomain(), sessionData.getTenantDomain()));
+        } else {
+            sessionData.addParameter(AuthPublisherConstants.TENANT_ID, new String[]{sessionData.getTenantDomain()});
+        }
         doPublishSessionTermination(sessionData);
     }
 

@@ -20,10 +20,11 @@ package org.wso2.carbon.identity.data.publisher.application.authentication;
 
 import org.apache.axiom.om.util.Base64;
 import org.apache.commons.lang.StringUtils;
+import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.idp.mgt.util.IdPManagementUtil;
 
-import javax.servlet.http.HttpServletRequest;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.TimeUnit;
@@ -84,4 +85,30 @@ public class AuthnDataPublisherUtils {
         return value;
     }
 
+    public static Object[] getMetaDataArray(String tenantDomain) {
+        Object[] metaData = new Object[1];
+        if (StringUtils.isBlank(tenantDomain)) {
+            metaData[0] = MultitenantConstants.SUPER_TENANT_ID;
+        } else {
+            metaData[0] = IdentityTenantUtil.getTenantId(tenantDomain);
+        }
+        return metaData;
+    }
+
+    public static String[] getTenantDomains(String spTenantDomain, String userTenantDomain) {
+
+        if (StringUtils.isBlank(userTenantDomain) || userTenantDomain.equalsIgnoreCase(AuthPublisherConstants
+                .NOT_AVAILABLE)) {
+            return new String[]{spTenantDomain};
+        }
+        if (StringUtils.isBlank(spTenantDomain) || userTenantDomain.equalsIgnoreCase(AuthPublisherConstants
+                .NOT_AVAILABLE)) {
+            return new String[]{userTenantDomain};
+        }
+        if (spTenantDomain.equalsIgnoreCase(userTenantDomain)) {
+            return new String[]{userTenantDomain};
+        } else {
+            return new String[]{userTenantDomain, spTenantDomain};
+        }
+    }
 }
