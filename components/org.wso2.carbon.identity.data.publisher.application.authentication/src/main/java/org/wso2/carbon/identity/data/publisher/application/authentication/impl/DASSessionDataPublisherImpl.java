@@ -38,22 +38,26 @@ public class DASSessionDataPublisherImpl extends AbstractAuthenticationDataPubli
     public static final Log LOG = LogFactory.getLog(DASSessionDataPublisherImpl.class);
 
     @Override
-    public void publishAuthenticationStepSuccess(HttpServletRequest request, AuthenticationContext context, Map<String, Object> params) {
+    public void publishAuthenticationStepSuccess(HttpServletRequest request, AuthenticationContext context,
+                                                 Map<String, Object> params) {
         // This method is overridden to do nothing since this is a session data publisher.
     }
 
     @Override
-    public void publishAuthenticationStepFailure(HttpServletRequest request, AuthenticationContext context, Map<String, Object> params) {
+    public void publishAuthenticationStepFailure(HttpServletRequest request, AuthenticationContext context,
+                                                 Map<String, Object> params) {
         // This method is overridden to do nothing since this is a session data publisher.
     }
 
     @Override
-    public void publishAuthenticationSuccess(HttpServletRequest request, AuthenticationContext context, Map<String, Object> params) {
+    public void publishAuthenticationSuccess(HttpServletRequest request, AuthenticationContext context, Map<String,
+            Object> params) {
         // This method is overridden to do nothing since this is a session data publisher.
     }
 
     @Override
-    public void publishAuthenticationFailure(HttpServletRequest request, AuthenticationContext context, Map<String, Object> params) {
+    public void publishAuthenticationFailure(HttpServletRequest request, AuthenticationContext context, Map<String,
+            Object> params) {
         // This method is overridden to do nothing since this is a session data publisher.
     }
 
@@ -140,9 +144,17 @@ public class DASSessionDataPublisherImpl extends AbstractAuthenticationDataPubli
                         }
                     }
                 }
-                Event event = new Event(AuthPublisherConstants.SESSION_DATA_STREAM_NAME, System.currentTimeMillis(), null, null,
-                        payloadData);
-                AuthenticationDataPublisherDataHolder.getInstance().getPublisherService().publish(event);
+
+                String[] publishingDomains = (String[]) sessionData.getParameter(AuthPublisherConstants.TENANT_ID);
+                if (publishingDomains != null && publishingDomains.length > 0) {
+                    for (String publishingDomain : publishingDomains) {
+                        Event event = new Event(AuthPublisherConstants.SESSION_DATA_STREAM_NAME, System
+                                .currentTimeMillis(), AuthnDataPublisherUtils.getMetaDataArray(publishingDomain), null,
+                                payloadData);
+                        AuthenticationDataPublisherDataHolder.getInstance().getPublisherService().publish(event);
+                    }
+                }
+
             } catch (NoSuchAlgorithmException e) {
                 LOG.error("Error while hashing session id.", e);
             }

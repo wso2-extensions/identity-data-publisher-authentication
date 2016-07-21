@@ -47,17 +47,20 @@ public class DASLoginDataPublisherImpl extends AbstractAuthenticationDataPublish
     public static final Log LOG = LogFactory.getLog(DASLoginDataPublisherImpl.class);
 
     @Override
-    public void publishSessionCreation(HttpServletRequest request, AuthenticationContext context, SessionContext sessionContext, Map<String, Object> params) {
+    public void publishSessionCreation(HttpServletRequest request, AuthenticationContext context, SessionContext
+            sessionContext, Map<String, Object> params) {
         // This method is overridden to do nothing since this is a login data publisher.
     }
 
     @Override
-    public void publishSessionUpdate(HttpServletRequest request, AuthenticationContext context, SessionContext sessionContext, Map<String, Object> params) {
+    public void publishSessionUpdate(HttpServletRequest request, AuthenticationContext context, SessionContext
+            sessionContext, Map<String, Object> params) {
         // This method is overridden to do nothing since this is a session data publisher.
     }
 
     @Override
-    public void publishSessionTermination(HttpServletRequest request, AuthenticationContext context, SessionContext sessionContext, Map<String, Object> params) {
+    public void publishSessionTermination(HttpServletRequest request, AuthenticationContext context, SessionContext
+            sessionContext, Map<String, Object> params) {
         // This method is overridden to do nothing since this is a session data publisher.
     }
 
@@ -155,9 +158,15 @@ public class DASLoginDataPublisherImpl extends AbstractAuthenticationDataPublish
 
             }
         }
-        Event event = new Event(AuthPublisherConstants.AUTHN_DATA_STREAM_NAME, System.currentTimeMillis(), null, null,
-                payloadData);
-        AuthenticationDataPublisherDataHolder.getInstance().getPublisherService().publish(event);
+        String[] publishingDomains = (String[]) authenticationData.getParameter(AuthPublisherConstants.TENANT_ID);
+        if (publishingDomains != null && publishingDomains.length > 0) {
+            for (String publishingDomain : publishingDomains) {
+                Event event = new Event(AuthPublisherConstants.AUTHN_DATA_STREAM_NAME, System.currentTimeMillis(),
+                        AuthnDataPublisherUtils.getMetaDataArray(publishingDomain), null, payloadData);
+                AuthenticationDataPublisherDataHolder.getInstance().getPublisherService().publish(event);
+            }
+        }
+
     }
 
     @Override

@@ -18,7 +18,13 @@
 
 package org.wso2.carbon.identity.data.publisher.application.authentication.model;
 
-public class AuthenticationData {
+import org.wso2.carbon.identity.base.IdentityRuntimeException;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
+public class AuthenticationData<T1 extends Object, T2 extends Object> {
 
     private String eventId;
     private String contextId;
@@ -34,12 +40,11 @@ public class AuthenticationData {
     private boolean forcedAuthn;
     private boolean passive;
     private boolean initialLogin;
-
     private int stepNo;
     private String identityProvider;
     private String authenticator;
     private boolean success;
-
+    protected Map<T1, T2> parameters = new HashMap<>();
 
     public String getEventId() {
 
@@ -220,4 +225,30 @@ public class AuthenticationData {
 
         this.authenticator = authenticator;
     }
+
+    public void addParameter(T1 key, T2 value) {
+        if (this.parameters.containsKey(key)) {
+            throw IdentityRuntimeException.error("Parameters map trying to override existing key " +
+                    key);
+        }
+        parameters.put(key, value);
+    }
+
+    public void addParameters(Map<T1, T2> parameters) {
+        for (Map.Entry<T1, T2> parameter : parameters.entrySet()) {
+            if (this.parameters.containsKey(parameter.getKey())) {
+                throw IdentityRuntimeException.error("Parameters map trying to override existing key " + parameter.getKey());
+            }
+            parameters.put(parameter.getKey(), parameter.getValue());
+        }
+    }
+
+    public Map<T1, T2> getParameters() {
+        return Collections.unmodifiableMap(parameters);
+    }
+
+    public T2 getParameter(T1 key) {
+        return parameters.get(key);
+    }
+
 }
