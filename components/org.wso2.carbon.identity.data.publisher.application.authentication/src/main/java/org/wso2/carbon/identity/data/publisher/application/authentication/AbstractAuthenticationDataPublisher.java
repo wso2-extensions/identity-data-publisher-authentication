@@ -87,7 +87,7 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
         authenticationData.setRememberMe(context.isRememberMe());
         authenticationData.setForcedAuthn(context.isForceAuthenticate());
         authenticationData.setPassive(context.isPassiveAuthenticate());
-        authenticationData.setInitialLogin(true);
+        authenticationData.setInitialLogin(false);
         authenticationData.setAuthenticator(context.getCurrentAuthenticator());
         authenticationData.setSuccess(true);
         authenticationData.setStepNo(step);
@@ -182,10 +182,15 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
 
         Object hasFederatedStepObj = context.getProperty(FrameworkConstants.AnalyticsAttributes.HAS_FEDERATED_STEP);
         Object hasLocalStepObj = context.getProperty(FrameworkConstants.AnalyticsAttributes.HAS_LOCAL_STEP);
+        Object isInitialLoginObj = context.getProperty(FrameworkConstants.AnalyticsAttributes.IS_INITIAL_LOGIN);
         boolean hasFederated = false;
         boolean hasLocal = false;
+        boolean isInitialLogin = false;
         if (hasFederatedStepObj != null) {
             hasFederated = (Boolean) hasFederatedStepObj;
+        }
+        if (isInitialLoginObj != null) {
+            isInitialLogin = (Boolean) isInitialLoginObj;
         }
         if (hasLocalStepObj != null) {
             hasLocal = (Boolean) hasLocalStepObj;
@@ -208,7 +213,7 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
         authenticationData.setRememberMe(context.isRememberMe());
         authenticationData.setForcedAuthn(context.isForceAuthenticate());
         authenticationData.setPassive(context.isPassiveAuthenticate());
-        authenticationData.setInitialLogin(true);
+        authenticationData.setInitialLogin(isInitialLogin);
         if (context.getSequenceConfig().getApplicationConfig().isSaaSApp()) {
             authenticationData.addParameter(AuthPublisherConstants.TENANT_ID, AuthnDataPublisherUtils
                     .getTenantDomains(context.getTenantDomain(), authenticationData.getTenantDomain()));
@@ -249,7 +254,7 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
         authenticationData.setRememberMe(context.isRememberMe());
         authenticationData.setForcedAuthn(context.isForceAuthenticate());
         authenticationData.setPassive(context.isPassiveAuthenticate());
-        authenticationData.setInitialLogin(true);
+        authenticationData.setInitialLogin(false);
         if (context.getSequenceConfig().getApplicationConfig().isSaaSApp()) {
             authenticationData.addParameter(AuthPublisherConstants.TENANT_ID, AuthnDataPublisherUtils
                     .getTenantDomains(context.getTenantDomain(), authenticationData.getTenantDomain()));
