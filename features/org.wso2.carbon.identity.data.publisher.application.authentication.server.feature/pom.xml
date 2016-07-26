@@ -84,12 +84,6 @@
                         <configuration>
                             <id>org.wso2.carbon.identity.data.publisher.application.authentication.server</id>
                             <propertiesFile>../etc/feature.properties</propertiesFile>
-                            <adviceFile>
-                                <properties>
-                                    <propertyDef>org.wso2.carbon.p2.category.type:server</propertyDef>
-                                    <propertyDef>org.eclipse.equinox.p2.type.group:false</propertyDef>
-                                </properties>
-                            </adviceFile>
                             <bundles>
                                 <bundleDef>org.wso2.carbon.identity:org.wso2.carbon.identity.data.publisher.application.authentication</bundleDef>
                             </bundles>
