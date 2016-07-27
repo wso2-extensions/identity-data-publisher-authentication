@@ -41,6 +41,7 @@ import org.wso2.carbon.user.core.service.RealmService;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
+import java.util.UUID;
 
 public class DASLoginDataPublisherImpl extends AbstractAuthenticationDataPublisher {
 
@@ -161,9 +162,11 @@ public class DASLoginDataPublisherImpl extends AbstractAuthenticationDataPublish
         String[] publishingDomains = (String[]) authenticationData.getParameter(AuthPublisherConstants.TENANT_ID);
         if (publishingDomains != null && publishingDomains.length > 0) {
             for (String publishingDomain : publishingDomains) {
+
                 Event event = new Event(AuthPublisherConstants.AUTHN_DATA_STREAM_NAME, System.currentTimeMillis(),
                         AuthnDataPublisherUtils.getMetaDataArray(publishingDomain), null, payloadData);
                 AuthenticationDataPublisherDataHolder.getInstance().getPublisherService().publish(event);
+                payloadData[1] = UUID.randomUUID().toString();
             }
         }
 
