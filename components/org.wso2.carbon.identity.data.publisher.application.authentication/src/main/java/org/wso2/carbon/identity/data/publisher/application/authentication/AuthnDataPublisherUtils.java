@@ -20,7 +20,10 @@ package org.wso2.carbon.identity.data.publisher.application.authentication;
 
 import org.apache.axiom.om.util.Base64;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.identity.base.IdentityRuntimeException;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.idp.mgt.util.IdPManagementUtil;
@@ -30,6 +33,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.TimeUnit;
 
 public class AuthnDataPublisherUtils {
+
+    public static final Log LOG = LogFactory.getLog(AuthnDataPublisherUtils.class);
 
     /**
      * Add default values if the values coming in are null or empty
@@ -85,12 +90,27 @@ public class AuthnDataPublisherUtils {
         return value;
     }
 
+    /**
+     * Get metadata array for different tenants with tenant domain
+     * @param tenantDomain
+     * @return
+     */
     public static Object[] getMetaDataArray(String tenantDomain) {
         Object[] metaData = new Object[1];
         if (StringUtils.isBlank(tenantDomain)) {
+            metaData = new Object[1];
             metaData[0] = MultitenantConstants.SUPER_TENANT_ID;
         } else {
-            metaData[0] = IdentityTenantUtil.getTenantId(tenantDomain);
+            try {
+                metaData = new Object[1];
+                metaData[0] = IdentityTenantUtil.getTenantId(tenantDomain);
+            } catch (IdentityRuntimeException e) {
+                // Catching runtime exception to handle avoid going to error page
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("No tenant id found with given tenant domain", e);
+                }
+            }
+
         }
         return metaData;
     }
