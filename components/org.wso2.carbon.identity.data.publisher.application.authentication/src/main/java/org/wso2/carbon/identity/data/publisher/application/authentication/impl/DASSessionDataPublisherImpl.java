@@ -148,10 +148,12 @@ public class DASSessionDataPublisherImpl extends AbstractAuthenticationDataPubli
                 String[] publishingDomains = (String[]) sessionData.getParameter(AuthPublisherConstants.TENANT_ID);
                 if (publishingDomains != null && publishingDomains.length > 0) {
                     for (String publishingDomain : publishingDomains) {
-                        Event event = new Event(AuthPublisherConstants.SESSION_DATA_STREAM_NAME, System
-                                .currentTimeMillis(), AuthnDataPublisherUtils.getMetaDataArray(publishingDomain), null,
-                                payloadData);
-                        AuthenticationDataPublisherDataHolder.getInstance().getPublisherService().publish(event);
+                        Object[] metadataArray = AuthnDataPublisherUtils.getMetaDataArray(publishingDomain);
+                        if (metadataArray != null) {
+                            Event event = new Event(AuthPublisherConstants.SESSION_DATA_STREAM_NAME, System
+                                    .currentTimeMillis(), metadataArray, null, payloadData);
+                            AuthenticationDataPublisherDataHolder.getInstance().getPublisherService().publish(event);
+                        }
                     }
                 }
 

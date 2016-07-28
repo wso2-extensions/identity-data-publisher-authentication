@@ -162,11 +162,13 @@ public class DASLoginDataPublisherImpl extends AbstractAuthenticationDataPublish
         String[] publishingDomains = (String[]) authenticationData.getParameter(AuthPublisherConstants.TENANT_ID);
         if (publishingDomains != null && publishingDomains.length > 0) {
             for (String publishingDomain : publishingDomains) {
-
-                Event event = new Event(AuthPublisherConstants.AUTHN_DATA_STREAM_NAME, System.currentTimeMillis(),
-                        AuthnDataPublisherUtils.getMetaDataArray(publishingDomain), null, payloadData);
-                AuthenticationDataPublisherDataHolder.getInstance().getPublisherService().publish(event);
-                payloadData[1] = UUID.randomUUID().toString();
+                Object[] metadataArray = AuthnDataPublisherUtils.getMetaDataArray(publishingDomain);
+                if (metadataArray != null) {
+                    Event event = new Event(AuthPublisherConstants.AUTHN_DATA_STREAM_NAME, System.currentTimeMillis(),
+                            metadataArray, null, payloadData);
+                    AuthenticationDataPublisherDataHolder.getInstance().getPublisherService().publish(event);
+                    payloadData[1] = UUID.randomUUID().toString();
+                }
             }
         }
 
@@ -195,20 +197,26 @@ public class DASLoginDataPublisherImpl extends AbstractAuthenticationDataPublish
         try {
             realm = AnonymousSessionUtil.getRealmByTenantDomain(registryService,
                     realmService, tenantDomain);
-            userstore = realm.getUserStoreManager();
-            if (userstore.isExistingUser(userName)) {
-                String[] newRoles = userstore.getRoleListOfUser(userName);
-                StringBuilder sb = new StringBuilder();
-                for (String role : newRoles) {
-                    sb.append(",").append(role);
-                }
-                if (sb.length() > 0) {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("Returning roles, " + sb.substring(1));
+            if (realm != null) {
+                userstore = realm.getUserStoreManager();
+                if (userstore.isExistingUser(userName)) {
+                    String[] newRoles = userstore.getRoleListOfUser(userName);
+                    StringBuilder sb = new StringBuilder();
+                    for (String role : newRoles) {
+                        sb.append(",").append(role);
                     }
-                    return sb.substring(1); //remove the first comma
-                }
+                    if (sb.length() > 0) {
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("Returning roles, " + sb.substring(1));
+                        }
+                        return sb.substring(1); //remove the first comma
+                    }
 
+                }
+            } else {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("No realm found. for tenant domain : " + tenantDomain + ". Hence no roles added");
+                }
             }
         } catch (CarbonException e) {
             LOG.error("Error when getting realm for " + userName + "@" + tenantDomain, e);
