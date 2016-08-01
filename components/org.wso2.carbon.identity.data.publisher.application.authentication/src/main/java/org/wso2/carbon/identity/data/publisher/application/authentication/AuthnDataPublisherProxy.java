@@ -46,7 +46,6 @@ public class AuthnDataPublisherProxy extends AbstractIdentityMessageHandler impl
      */
     public void publishAuthenticationStepSuccess(HttpServletRequest request, AuthenticationContext context,
                                                  Map<String, Object> params) {
-        sortDataPublishers(dataPublishers, context);
         for (AuthenticationDataPublisher publisher : dataPublishers) {
             if (publisher.isEnabled(context) && publisher.canHandle(context)) {
                 publisher.publishAuthenticationStepSuccess(request, context, params);
@@ -63,7 +62,6 @@ public class AuthnDataPublisherProxy extends AbstractIdentityMessageHandler impl
      */
     public void publishAuthenticationStepFailure(HttpServletRequest request, AuthenticationContext context,
                                                  Map<String, Object> unmodifiableMap) {
-        sortDataPublishers(dataPublishers, context);
         for (AuthenticationDataPublisher publisher : dataPublishers) {
             if (publisher.isEnabled(context) && publisher.canHandle(context)) {
                 publisher.publishAuthenticationStepFailure(request, context, unmodifiableMap);
@@ -81,7 +79,6 @@ public class AuthnDataPublisherProxy extends AbstractIdentityMessageHandler impl
      */
     public void publishAuthenticationSuccess(HttpServletRequest request, AuthenticationContext context,
                                              Map<String, Object> unmodifiableMap) {
-        sortDataPublishers(dataPublishers, context);
         for (AuthenticationDataPublisher publisher : dataPublishers) {
             if (publisher != null && publisher.isEnabled(context) && publisher.canHandle(context)) {
                 publisher.publishAuthenticationSuccess(request, context, unmodifiableMap);
@@ -99,7 +96,6 @@ public class AuthnDataPublisherProxy extends AbstractIdentityMessageHandler impl
      */
     public void publishAuthenticationFailure(HttpServletRequest request, AuthenticationContext context,
                                              Map<String, Object> unmodifiableMap) {
-        sortDataPublishers(dataPublishers, context);
         for (AuthenticationDataPublisher publisher : dataPublishers) {
             if (publisher != null && publisher.isEnabled(context) && publisher.canHandle(context)) {
                 publisher.publishAuthenticationFailure(request, context, unmodifiableMap);
@@ -117,7 +113,6 @@ public class AuthnDataPublisherProxy extends AbstractIdentityMessageHandler impl
      */
     public void publishSessionCreation(HttpServletRequest request, AuthenticationContext context, SessionContext
             sessionContext, Map<String, Object> unmodifiableMap) {
-        sortDataPublishers(dataPublishers, context);
         for (AuthenticationDataPublisher publisher : dataPublishers) {
             if (publisher != null && publisher.isEnabled(context) && publisher.canHandle(context)) {
                 publisher.publishSessionCreation(request, context, sessionContext, unmodifiableMap);
@@ -136,7 +131,6 @@ public class AuthnDataPublisherProxy extends AbstractIdentityMessageHandler impl
 
     public void publishSessionUpdate(HttpServletRequest request, AuthenticationContext context, SessionContext
             sessionContext, Map<String, Object> unmodifiableMap) {
-        sortDataPublishers(dataPublishers, context);
         for (AuthenticationDataPublisher publisher : dataPublishers) {
             if (publisher != null && publisher.isEnabled(context) && publisher.canHandle(context)) {
                 publisher.publishSessionUpdate(request, context, sessionContext, unmodifiableMap);
@@ -156,23 +150,11 @@ public class AuthnDataPublisherProxy extends AbstractIdentityMessageHandler impl
 
     public void publishSessionTermination(HttpServletRequest request, AuthenticationContext context,
                                           SessionContext sessionContext, Map<String, Object> unmodifiableMap) {
-        sortDataPublishers(dataPublishers, context);
         for (AuthenticationDataPublisher publisher : dataPublishers) {
             if (publisher != null && publisher.isEnabled(context) && publisher.canHandle(context)) {
                 publisher.publishSessionTermination(request, context, sessionContext, unmodifiableMap);
             }
         }
-    }
-
-    /**
-     * Sort publishers based on context information. Here it only uses order configured in identity.xml
-     *
-     * @param authenticationDataPublishers
-     * @param context
-     */
-    protected void sortDataPublishers(List<AuthenticationDataPublisher> authenticationDataPublishers,
-                                      final AuthenticationContext context) {
-        Collections.sort(authenticationDataPublishers, new MessageHandlerComparator(context));
     }
 
     @Override
