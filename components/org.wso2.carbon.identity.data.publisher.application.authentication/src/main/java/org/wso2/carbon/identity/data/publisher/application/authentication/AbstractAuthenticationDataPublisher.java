@@ -145,7 +145,7 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
         authenticationData.setRememberMe(context.isRememberMe());
         authenticationData.setForcedAuthn(context.isForceAuthenticate());
         authenticationData.setPassive(context.isPassiveAuthenticate());
-        authenticationData.setInitialLogin(true);
+        authenticationData.setInitialLogin(false);
         authenticationData.setAuthenticator(context.getCurrentAuthenticator());
         authenticationData.setSuccess(false);
         authenticationData.setStepNo(step);
