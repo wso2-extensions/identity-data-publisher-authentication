@@ -28,6 +28,7 @@ import org.wso2.carbon.identity.application.authentication.framework.model.Authe
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkConstants;
 import org.wso2.carbon.identity.core.bean.context.MessageContext;
 import org.wso2.carbon.identity.core.handler.AbstractIdentityMessageHandler;
+import org.wso2.carbon.identity.core.model.IdentityEventListenerConfig;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.data.publisher.application.authentication.model.AuthenticationData;
 import org.wso2.carbon.identity.data.publisher.application.authentication.model.SessionData;
@@ -507,5 +508,17 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
     @Override
     public boolean canHandle(MessageContext messageContext) {
         return true;
+    }
+
+    @Override
+    public boolean isEnabled(MessageContext messageContext) {
+        IdentityEventListenerConfig identityEventListenerConfig = IdentityUtil.readEventListenerProperty
+                (AbstractIdentityMessageHandler.class.getName(), this.getClass().getName());
+
+        if (identityEventListenerConfig == null) {
+            return false;
+        }
+
+        return Boolean.parseBoolean(identityEventListenerConfig.getEnable());
     }
 }
