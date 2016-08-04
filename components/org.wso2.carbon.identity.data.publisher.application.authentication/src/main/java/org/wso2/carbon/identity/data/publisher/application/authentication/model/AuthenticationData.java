@@ -28,9 +28,11 @@ public class AuthenticationData<T1 extends Object, T2 extends Object> {
 
     private String eventId;
     private String contextId;
+    private String eventType;
     private String identityProviderType;
     private boolean authnSuccess;
     private String username;
+    private String localUsername;
     private String userStoreDomain;
     private String tenantDomain;
     private String remoteIp;
@@ -64,6 +66,22 @@ public class AuthenticationData<T1 extends Object, T2 extends Object> {
     public void setContextId(String contextId) {
 
         this.contextId = contextId;
+    }
+
+    public String getEventType() {
+        return eventType;
+    }
+
+    public void setEventType(String eventType) {
+        this.eventType = eventType;
+    }
+
+    public String getLocalUsername() {
+        return localUsername;
+    }
+
+    public void setLocalUsername(String localUsername) {
+        this.localUsername = localUsername;
     }
 
     public String getIdentityProviderType() {

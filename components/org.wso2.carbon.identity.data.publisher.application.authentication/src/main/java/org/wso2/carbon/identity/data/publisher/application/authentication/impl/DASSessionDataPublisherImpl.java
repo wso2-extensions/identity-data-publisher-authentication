@@ -22,6 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.databridge.commons.Event;
 import org.wso2.carbon.identity.application.authentication.framework.context.AuthenticationContext;
+import org.wso2.carbon.identity.base.IdentityRuntimeException;
 import org.wso2.carbon.identity.data.publisher.application.authentication.AbstractAuthenticationDataPublisher;
 import org.wso2.carbon.identity.data.publisher.application.authentication.AuthPublisherConstants;
 import org.wso2.carbon.identity.data.publisher.application.authentication.AuthnDataPublisherUtils;
@@ -149,16 +150,18 @@ public class DASSessionDataPublisherImpl extends AbstractAuthenticationDataPubli
                 if (publishingDomains != null && publishingDomains.length > 0) {
                     for (String publishingDomain : publishingDomains) {
                         Object[] metadataArray = AuthnDataPublisherUtils.getMetaDataArray(publishingDomain);
-                        if (metadataArray != null) {
-                            Event event = new Event(AuthPublisherConstants.SESSION_DATA_STREAM_NAME, System
-                                    .currentTimeMillis(), metadataArray, null, payloadData);
-                            AuthenticationDataPublisherDataHolder.getInstance().getPublisherService().publish(event);
-                        }
+                        Event event = new Event(AuthPublisherConstants.SESSION_DATA_STREAM_NAME, System
+                                .currentTimeMillis(), metadataArray, null, payloadData);
+                        AuthenticationDataPublisherDataHolder.getInstance().getPublisherService().publish(event);
                     }
                 }
 
             } catch (NoSuchAlgorithmException e) {
                 LOG.error("Error while hashing session id.", e);
+            } catch (IdentityRuntimeException e) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.error("Error while publishing session information", e);
+                }
             }
         }
     }

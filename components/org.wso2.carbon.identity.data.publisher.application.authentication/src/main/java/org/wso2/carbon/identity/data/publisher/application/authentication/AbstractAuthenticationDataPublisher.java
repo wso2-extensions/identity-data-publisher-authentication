@@ -22,8 +22,10 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.identity.application.authentication.framework.AuthenticationDataPublisher;
+import org.wso2.carbon.identity.application.authentication.framework.config.model.StepConfig;
 import org.wso2.carbon.identity.application.authentication.framework.context.AuthenticationContext;
 import org.wso2.carbon.identity.application.authentication.framework.context.SessionContext;
+import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedIdPData;
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkConstants;
 import org.wso2.carbon.identity.core.bean.context.MessageContext;
@@ -67,7 +69,7 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
             AuthenticatedUser user = (AuthenticatedUser) userObj;
             authenticationData.setTenantDomain(user.getTenantDomain());
             authenticationData.setUserStoreDomain(user.getUserStoreDomain());
-            authenticationData.setUsername(user.getUserName());
+            authenticationData.setUsername(user.getAuthenticatedSubjectIdentifier());
         }
         Object isFederatedObj = params.get(FrameworkConstants.AnalyticsAttributes.IS_FEDERATED);
         if (isFederatedObj != null) {
@@ -76,10 +78,12 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
                 authenticationData.setIdentityProviderType(FrameworkConstants.FEDERATED_IDP_NAME);
             } else {
                 authenticationData.setIdentityProviderType(FrameworkConstants.LOCAL_IDP_NAME);
+                authenticationData.setLocalUsername(authenticationData.getUsername());
             }
         }
         authenticationData.setContextId(context.getContextIdentifier());
         authenticationData.setEventId(UUID.randomUUID().toString());
+        authenticationData.setEventType(AuthPublisherConstants.STEP_EVENT);
         authenticationData.setAuthnSuccess(false);
         authenticationData.setRemoteIp(IdentityUtil.getClientIpAddress(request));
         authenticationData.setServiceProvider(context.getServiceProviderName());
@@ -91,12 +95,9 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
         authenticationData.setAuthenticator(context.getCurrentAuthenticator());
         authenticationData.setSuccess(true);
         authenticationData.setStepNo(step);
-        if (context.getSequenceConfig().getApplicationConfig().isSaaSApp()) {
-            authenticationData.addParameter(AuthPublisherConstants.TENANT_ID, AuthnDataPublisherUtils
-                    .getTenantDomains(context.getTenantDomain(), authenticationData.getTenantDomain()));
-        } else {
-            authenticationData.addParameter(AuthPublisherConstants.TENANT_ID, new String[]{authenticationData.getTenantDomain()});
-        }
+        authenticationData.addParameter(AuthPublisherConstants.TENANT_ID, AuthnDataPublisherUtils
+                .getTenantDomains(context.getTenantDomain(), authenticationData.getTenantDomain()));
+
         doPublishAuthenticationStepSuccess(authenticationData);
     }
 
@@ -134,10 +135,12 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
                 authenticationData.setIdentityProviderType(FrameworkConstants.FEDERATED_IDP_NAME);
             } else {
                 authenticationData.setIdentityProviderType(FrameworkConstants.LOCAL_IDP_NAME);
+                authenticationData.setLocalUsername(authenticationData.getUsername());
             }
         }
         authenticationData.setContextId(context.getContextIdentifier());
         authenticationData.setEventId(UUID.randomUUID().toString());
+        authenticationData.setEventType(AuthPublisherConstants.STEP_EVENT);
         authenticationData.setAuthnSuccess(false);
         authenticationData.setRemoteIp(IdentityUtil.getClientIpAddress(request));
         authenticationData.setServiceProvider(context.getServiceProviderName());
@@ -174,8 +177,6 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
         Object userObj = params.get(FrameworkConstants.AnalyticsAttributes.USER);
         if (userObj != null && userObj instanceof AuthenticatedUser) {
             AuthenticatedUser user = (AuthenticatedUser) userObj;
-            authenticationData.setTenantDomain(user.getTenantDomain());
-            authenticationData.setUserStoreDomain(user.getUserStoreDomain());
             authenticationData.setUsername(user.getUserName());
         }
 
@@ -185,6 +186,7 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
         boolean hasFederated = false;
         boolean hasLocal = false;
         boolean isInitialLogin = false;
+        boolean hasPreviousLocalStep = hasPreviousLocalEvent(context);
         if (hasFederatedStepObj != null) {
             hasFederated = (Boolean) hasFederatedStepObj;
         }
@@ -194,14 +196,18 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
         if (hasLocalStepObj != null) {
             hasLocal = (Boolean) hasLocalStepObj;
         }
-        if (hasFederated && hasLocal) {
+        // If a previous successful local step is there, we need to skip this event from local events
+        if (!hasPreviousLocalStep && hasFederated && hasLocal) {
             authenticationData.setIdentityProviderType(FrameworkConstants.FEDERATED_IDP_NAME + "," +
                     FrameworkConstants.LOCAL_IDP_NAME);
-        } else if (hasLocal) {
+            authenticationData.setStepNo(getLocalStepNo(context));
+        } else if (!hasPreviousLocalStep && hasLocal) {
             authenticationData.setIdentityProviderType(FrameworkConstants.LOCAL_IDP_NAME);
+            authenticationData.setStepNo(getLocalStepNo(context));
         } else if (hasFederated) {
             authenticationData.setIdentityProviderType(FrameworkConstants.FEDERATED_IDP_NAME);
         }
+        authenticationData.setEventType(AuthPublisherConstants.OVERALL_EVENT);
         authenticationData.setSuccess(true);
         authenticationData.setContextId(context.getContextIdentifier());
         authenticationData.setEventId(UUID.randomUUID().toString());
@@ -213,12 +219,10 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
         authenticationData.setForcedAuthn(context.isForceAuthenticate());
         authenticationData.setPassive(context.isPassiveAuthenticate());
         authenticationData.setInitialLogin(isInitialLogin);
-        if (context.getSequenceConfig().getApplicationConfig().isSaaSApp()) {
-            authenticationData.addParameter(AuthPublisherConstants.TENANT_ID, AuthnDataPublisherUtils
-                    .getTenantDomains(context.getTenantDomain(), authenticationData.getTenantDomain()));
-        } else {
-            authenticationData.addParameter(AuthPublisherConstants.TENANT_ID, new String[]{authenticationData.getTenantDomain()});
-        }
+        authenticationData = fillLocalEvent(authenticationData, context);
+        authenticationData.addParameter(AuthPublisherConstants.TENANT_ID, AuthnDataPublisherUtils
+                .getTenantDomains(context.getTenantDomain(), authenticationData.getTenantDomain()));
+
         doPublishAuthenticationSuccess(authenticationData);
     }
 
@@ -246,6 +250,7 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
 
         authenticationData.setContextId(context.getContextIdentifier());
         authenticationData.setEventId(UUID.randomUUID().toString());
+        authenticationData.setEventType(AuthPublisherConstants.OVERALL_EVENT);
         authenticationData.setAuthnSuccess(false);
         authenticationData.setRemoteIp(IdentityUtil.getClientIpAddress(request));
         authenticationData.setServiceProvider(context.getServiceProviderName());
@@ -453,6 +458,49 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
             return sb.substring(1); //remove the first comma
         }
         return StringUtils.EMPTY;
+    }
+
+    protected AuthenticationData fillLocalEvent(AuthenticationData authenticationData, AuthenticationContext context) {
+        AuthenticatedIdPData localIDPData = null;
+        Map<String, AuthenticatedIdPData> previousAuthenticatedIDPs = context.getPreviousAuthenticatedIdPs();
+        Map<String, AuthenticatedIdPData> currentAuthenticatedIDPs = context.getCurrentAuthenticatedIdPs();
+        if (currentAuthenticatedIDPs != null && currentAuthenticatedIDPs.size() > 0) {
+            localIDPData = currentAuthenticatedIDPs.get(FrameworkConstants.LOCAL_IDP_NAME);
+        }
+        if (localIDPData == null && previousAuthenticatedIDPs != null && previousAuthenticatedIDPs.size() > 0) {
+            localIDPData = previousAuthenticatedIDPs.get(FrameworkConstants.LOCAL_IDP_NAME);
+        }
+
+        if (localIDPData != null) {
+            authenticationData.setLocalUsername(localIDPData.getUser().getAuthenticatedSubjectIdentifier());
+            authenticationData.setUserStoreDomain(localIDPData.getUser().getUserStoreDomain());
+            authenticationData.setTenantDomain(localIDPData.getUser().getTenantDomain());
+            authenticationData.setAuthenticator(localIDPData.getAuthenticator().getName());
+        }
+        return authenticationData;
+    }
+
+    protected int getLocalStepNo(AuthenticationContext context) {
+        int stepNo = 0;
+        Map<Integer, StepConfig> map = context.getSequenceConfig().getStepMap();
+        for (Map.Entry<Integer, StepConfig> entry : map.entrySet())
+        {
+            StepConfig stepConfig= entry.getValue();
+            if(stepConfig != null && FrameworkConstants.LOCAL_IDP_NAME.equalsIgnoreCase(stepConfig
+                    .getAuthenticatedIdP())) {
+                stepNo = entry.getKey();
+                return stepNo;
+            }
+        }
+        return stepNo;
+    }
+
+    public boolean hasPreviousLocalEvent(AuthenticationContext context) {
+        Map<String, AuthenticatedIdPData> previousAuthenticatedIDPs = context.getPreviousAuthenticatedIdPs();
+        if (previousAuthenticatedIDPs.get(FrameworkConstants.LOCAL_IDP_NAME) != null) {
+            return true;
+        }
+        return false;
     }
 
     /**

@@ -27,6 +27,7 @@ import org.wso2.carbon.databridge.commons.Event;
 import org.wso2.carbon.identity.application.authentication.framework.context.AuthenticationContext;
 import org.wso2.carbon.identity.application.authentication.framework.context.SessionContext;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkConstants;
+import org.wso2.carbon.identity.base.IdentityRuntimeException;
 import org.wso2.carbon.identity.data.publisher.application.authentication.AbstractAuthenticationDataPublisher;
 import org.wso2.carbon.identity.data.publisher.application.authentication.AuthPublisherConstants;
 import org.wso2.carbon.identity.data.publisher.application.authentication.AuthnDataPublisherUtils;
@@ -114,61 +115,73 @@ public class DASLoginDataPublisherImpl extends AbstractAuthenticationDataPublish
 
     protected void publishAuthenticationData(AuthenticationData authenticationData) {
 
-        String roleList = null;
-        if (FrameworkConstants.LOCAL_IDP_NAME.equalsIgnoreCase(authenticationData.getIdentityProviderType())) {
-            roleList = getCommaSeparatedUserRoles(authenticationData.getUserStoreDomain() + "/" + authenticationData
-                    .getUsername(), authenticationData.getTenantDomain());
-        }
-
-        Object[] payloadData = new Object[21];
-        payloadData[0] = authenticationData.getContextId();
-        payloadData[1] = authenticationData.getEventId();
-        payloadData[2] = authenticationData.isAuthnSuccess();
-        payloadData[3] = AuthnDataPublisherUtils.replaceIfNotAvailable(AuthPublisherConstants.CONFIG_PREFIX +
-                AuthPublisherConstants.USERNAME, authenticationData.getUsername());
-        payloadData[4] = AuthnDataPublisherUtils.replaceIfNotAvailable(AuthPublisherConstants.CONFIG_PREFIX +
-                AuthPublisherConstants.USER_STORE_DOMAIN, authenticationData.getUserStoreDomain());
-        payloadData[5] = authenticationData.getTenantDomain();
-        payloadData[6] = authenticationData.getRemoteIp();
-        payloadData[7] = AuthPublisherConstants.NOT_AVAILABLE;
-        payloadData[8] = authenticationData.getInboundProtocol();
-        payloadData[9] = AuthnDataPublisherUtils.replaceIfNotAvailable(AuthPublisherConstants.CONFIG_PREFIX +
-                AuthPublisherConstants.SERVICE_PROVIDER, authenticationData
-                .getServiceProvider());
-        payloadData[10] = authenticationData.isRememberMe();
-        payloadData[11] = authenticationData.isForcedAuthn();
-        payloadData[12] = authenticationData.isPassive();
-        payloadData[13] = AuthnDataPublisherUtils.replaceIfNotAvailable(AuthPublisherConstants.CONFIG_PREFIX +
-                AuthPublisherConstants.ROLES, roleList);
-        payloadData[14] = String.valueOf(authenticationData.getStepNo());
-        payloadData[15] = AuthnDataPublisherUtils.replaceIfNotAvailable(AuthPublisherConstants.CONFIG_PREFIX +
-                AuthPublisherConstants.IDENTITY_PROVIDER, authenticationData.getIdentityProvider());
-        payloadData[16] = authenticationData.isSuccess();
-        payloadData[17] = authenticationData.getAuthenticator();
-        payloadData[18] = authenticationData.isInitialLogin();
-        payloadData[19] = authenticationData.getIdentityProviderType();
-        payloadData[20] = System.currentTimeMillis();
-
-        if (LOG.isDebugEnabled()) {
-            for (int i = 0; i < 20; i++) {
-                if (payloadData[i] != null) {
-                    LOG.debug("Payload data for entry " + i + " " + payloadData[i].toString());
-                } else {
-                    LOG.debug("Payload data for entry " + i + " is null");
-                }
-
+        try {
+            String roleList = null;
+            if (FrameworkConstants.LOCAL_IDP_NAME.equalsIgnoreCase(authenticationData.getIdentityProviderType())) {
+                roleList = getCommaSeparatedUserRoles(authenticationData.getUserStoreDomain() + "/" + authenticationData
+                        .getUsername(), authenticationData.getTenantDomain());
+            } else if (StringUtils.isNotEmpty(authenticationData.getLocalUsername())) {
+                roleList = getCommaSeparatedUserRoles(authenticationData.getUserStoreDomain() + "/" + authenticationData
+                        .getLocalUsername(), authenticationData.getTenantDomain());
             }
-        }
-        String[] publishingDomains = (String[]) authenticationData.getParameter(AuthPublisherConstants.TENANT_ID);
-        if (publishingDomains != null && publishingDomains.length > 0) {
-            for (String publishingDomain : publishingDomains) {
-                Object[] metadataArray = AuthnDataPublisherUtils.getMetaDataArray(publishingDomain);
-                if (metadataArray != null) {
+
+            Object[] payloadData = new Object[23];
+            payloadData[0] = authenticationData.getContextId();
+            payloadData[1] = authenticationData.getEventId();
+            payloadData[2] = authenticationData.getEventType();
+            payloadData[3] = authenticationData.isAuthnSuccess();
+            payloadData[4] = AuthnDataPublisherUtils.replaceIfNotAvailable(AuthPublisherConstants.CONFIG_PREFIX +
+                    AuthPublisherConstants.USERNAME, authenticationData.getUsername());
+            payloadData[5] = AuthnDataPublisherUtils.replaceIfNotAvailable(AuthPublisherConstants.CONFIG_PREFIX +
+                    AuthPublisherConstants.USERNAME, authenticationData.getLocalUsername());
+            payloadData[6] = AuthnDataPublisherUtils.replaceIfNotAvailable(AuthPublisherConstants.CONFIG_PREFIX +
+                    AuthPublisherConstants.USER_STORE_DOMAIN, authenticationData.getUserStoreDomain());
+            payloadData[7] = authenticationData.getTenantDomain();
+            payloadData[8] = authenticationData.getRemoteIp();
+            payloadData[9] = AuthPublisherConstants.NOT_AVAILABLE;
+            payloadData[10] = authenticationData.getInboundProtocol();
+            payloadData[11] = AuthnDataPublisherUtils.replaceIfNotAvailable(AuthPublisherConstants.CONFIG_PREFIX +
+                    AuthPublisherConstants.SERVICE_PROVIDER, authenticationData
+                    .getServiceProvider());
+            payloadData[12] = authenticationData.isRememberMe();
+            payloadData[13] = authenticationData.isForcedAuthn();
+            payloadData[14] = authenticationData.isPassive();
+            payloadData[15] = AuthnDataPublisherUtils.replaceIfNotAvailable(AuthPublisherConstants.CONFIG_PREFIX +
+                    AuthPublisherConstants.ROLES, roleList);
+            payloadData[16] = String.valueOf(authenticationData.getStepNo());
+            payloadData[17] = AuthnDataPublisherUtils.replaceIfNotAvailable(AuthPublisherConstants.CONFIG_PREFIX +
+                    AuthPublisherConstants.IDENTITY_PROVIDER, authenticationData.getIdentityProvider());
+            payloadData[18] = authenticationData.isSuccess();
+            payloadData[19] = authenticationData.getAuthenticator();
+            payloadData[20] = authenticationData.isInitialLogin();
+            payloadData[21] = authenticationData.getIdentityProviderType();
+            payloadData[22] = System.currentTimeMillis();
+
+            if (LOG.isDebugEnabled()) {
+                for (int i = 0; i < 23; i++) {
+                    if (payloadData[i] != null) {
+                        LOG.debug("Payload data for entry " + i + " " + payloadData[i].toString());
+                    } else {
+                        LOG.debug("Payload data for entry " + i + " is null");
+                    }
+
+                }
+            }
+            String[] publishingDomains = (String[]) authenticationData.getParameter(AuthPublisherConstants.TENANT_ID);
+            if (publishingDomains != null && publishingDomains.length > 0) {
+                for (String publishingDomain : publishingDomains) {
+                    Object[] metadataArray = AuthnDataPublisherUtils.getMetaDataArray(publishingDomain);
+
                     Event event = new Event(AuthPublisherConstants.AUTHN_DATA_STREAM_NAME, System.currentTimeMillis(),
                             metadataArray, null, payloadData);
                     AuthenticationDataPublisherDataHolder.getInstance().getPublisherService().publish(event);
                     payloadData[1] = UUID.randomUUID().toString();
+
                 }
+            }
+        } catch (IdentityRuntimeException e) {
+            if (LOG.isDebugEnabled()) {
+                LOG.error("Error while publishing authentication data", e);
             }
         }
 
