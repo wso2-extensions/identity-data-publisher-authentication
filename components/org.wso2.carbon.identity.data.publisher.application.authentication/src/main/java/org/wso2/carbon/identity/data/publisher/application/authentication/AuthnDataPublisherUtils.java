@@ -23,7 +23,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.base.MultitenantConstants;
-import org.wso2.carbon.identity.base.IdentityRuntimeException;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.idp.mgt.util.IdPManagementUtil;
@@ -98,19 +97,9 @@ public class AuthnDataPublisherUtils {
     public static Object[] getMetaDataArray(String tenantDomain) {
         Object[] metaData = new Object[1];
         if (StringUtils.isBlank(tenantDomain)) {
-            metaData = new Object[1];
             metaData[0] = MultitenantConstants.SUPER_TENANT_ID;
         } else {
-            try {
-                metaData = new Object[1];
-                metaData[0] = IdentityTenantUtil.getTenantId(tenantDomain);
-            } catch (IdentityRuntimeException e) {
-                // Catching runtime exception to handle avoid going to error page
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("No tenant id found with given tenant domain", e);
-                }
-            }
-
+            metaData[0] = IdentityTenantUtil.getTenantId(tenantDomain);
         }
         return metaData;
     }
