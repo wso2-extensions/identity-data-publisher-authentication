@@ -22,18 +22,26 @@ import org.apache.axiom.om.util.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.idp.mgt.util.IdPManagementUtil;
+import org.wso2.carbon.user.core.UserCoreConstants;
+import org.wso2.carbon.user.core.util.UserCoreUtil;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class AuthnDataPublisherUtils {
 
     public static final Log LOG = LogFactory.getLog(AuthnDataPublisherUtils.class);
+    private static final String APPLICATION_DOMAIN = "Application";
+    private static final String WORKFLOW_DOMAIN = "Workflow";
+    private static final String INTERNAL_EVERYONE_ROLE = "Internal/everyone";
 
     /**
      * Add default values if the values coming in are null or empty
@@ -119,5 +127,37 @@ public class AuthnDataPublisherUtils {
         } else {
             return new String[]{userTenantDomain, spTenantDomain};
         }
+    }
+
+    /**
+     * Filter roles so that they don't have Internal roles except Internal/Everyone and all application roles
+     *
+     * @param roleList All roles
+     * @return All external roles and Internal roles except internal everyone and application roles.
+     */
+    public static List<String> filterRoles(String[] roleList) {
+        List<String> externalRoles = new ArrayList<String>();
+        if (roleList != null) {
+            int index;
+            if (roleList != null) {
+                for (String role : roleList) {
+                    if (role != null && role.trim().length() > 0) {
+                        index = role.indexOf(CarbonConstants.DOMAIN_SEPARATOR);
+                        if (index > 0) {
+                            String domain = role.substring(0, index);
+                            if (UserCoreConstants.INTERNAL_DOMAIN.equalsIgnoreCase(domain)) {
+                                if (INTERNAL_EVERYONE_ROLE.equalsIgnoreCase(role.trim()))
+                                    continue;
+                            } else if (APPLICATION_DOMAIN.equalsIgnoreCase(domain) ||
+                                    WORKFLOW_DOMAIN.equalsIgnoreCase(domain)) {
+                                continue;
+                            }
+                        }
+                        externalRoles.add(UserCoreUtil.removeDomainFromName(role));
+                    }
+                }
+            }
+        }
+        return externalRoles;
     }
 }
