@@ -41,6 +41,7 @@ import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -215,7 +216,8 @@ public class DASLoginDataPublisherImpl extends AbstractAuthenticationDataPublish
                 if (userstore.isExistingUser(userName)) {
                     String[] newRoles = userstore.getRoleListOfUser(userName);
                     StringBuilder sb = new StringBuilder();
-                    for (String role : newRoles) {
+                    List<String> externalRoles = AuthnDataPublisherUtils.filterRoles(newRoles);
+                    for (String role : externalRoles) {
                         sb.append(",").append(role);
                     }
                     if (sb.length() > 0) {
