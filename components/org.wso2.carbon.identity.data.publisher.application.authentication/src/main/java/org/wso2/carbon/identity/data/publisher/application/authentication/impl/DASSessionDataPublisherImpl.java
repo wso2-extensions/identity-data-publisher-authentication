@@ -22,6 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.databridge.commons.Event;
 import org.wso2.carbon.identity.application.authentication.framework.context.AuthenticationContext;
+import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkUtils;
 import org.wso2.carbon.identity.base.IdentityRuntimeException;
 import org.wso2.carbon.identity.data.publisher.application.authentication.AbstractAuthenticationDataPublisher;
 import org.wso2.carbon.identity.data.publisher.application.authentication.AuthPublisherConstants;
@@ -29,6 +30,7 @@ import org.wso2.carbon.identity.data.publisher.application.authentication.AuthnD
 import org.wso2.carbon.identity.data.publisher.application.authentication.internal.AuthenticationDataPublisherDataHolder;
 import org.wso2.carbon.identity.data.publisher.application.authentication.model.AuthenticationData;
 import org.wso2.carbon.identity.data.publisher.application.authentication.model.SessionData;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.servlet.http.HttpServletRequest;
 import java.security.NoSuchAlgorithmException;
@@ -148,11 +150,16 @@ public class DASSessionDataPublisherImpl extends AbstractAuthenticationDataPubli
 
                 String[] publishingDomains = (String[]) sessionData.getParameter(AuthPublisherConstants.TENANT_ID);
                 if (publishingDomains != null && publishingDomains.length > 0) {
-                    for (String publishingDomain : publishingDomains) {
-                        Object[] metadataArray = AuthnDataPublisherUtils.getMetaDataArray(publishingDomain);
-                        Event event = new Event(AuthPublisherConstants.SESSION_DATA_STREAM_NAME, System
-                                .currentTimeMillis(), metadataArray, null, payloadData);
-                        AuthenticationDataPublisherDataHolder.getInstance().getPublisherService().publish(event);
+                    try {
+                        FrameworkUtils.startTenantFlow(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+                        for (String publishingDomain : publishingDomains) {
+                            Object[] metadataArray = AuthnDataPublisherUtils.getMetaDataArray(publishingDomain);
+                            Event event = new Event(AuthPublisherConstants.SESSION_DATA_STREAM_NAME, System
+                                    .currentTimeMillis(), metadataArray, null, payloadData);
+                            AuthenticationDataPublisherDataHolder.getInstance().getPublisherService().publish(event);
+                        }
+                    } finally {
+                        FrameworkUtils.endTenantFlow();
                     }
                 }
 

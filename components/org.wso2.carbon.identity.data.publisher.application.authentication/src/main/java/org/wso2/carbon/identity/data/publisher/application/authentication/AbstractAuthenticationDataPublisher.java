@@ -300,7 +300,7 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
             Object createdTimeObj = sessionContext.getProperty(FrameworkConstants.CREATED_TIMESTAMP);
             createdTime = (Long) createdTimeObj;
             terminationTime = AuthnDataPublisherUtils.getSessionExpirationTime(createdTime, createdTime,
-                    tenantDomain, sessionContext.isRememberMe());
+                    context.getTenantDomain(), sessionContext.isRememberMe());
             sessionData.setIsRememberMe(sessionContext.isRememberMe());
         }
         sessionData.setUser(userName);
@@ -359,7 +359,7 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
             Object createdTimeObj = sessionContext.getProperty(FrameworkConstants.CREATED_TIMESTAMP);
             createdTime = (Long) createdTimeObj;
             terminationTime = AuthnDataPublisherUtils.getSessionExpirationTime(createdTime, currentTime,
-                    tenantDomain, sessionContext.isRememberMe());
+                    context.getTenantDomain(), sessionContext.isRememberMe());
             sessionData.setIsRememberMe(sessionContext.isRememberMe());
         }
 
