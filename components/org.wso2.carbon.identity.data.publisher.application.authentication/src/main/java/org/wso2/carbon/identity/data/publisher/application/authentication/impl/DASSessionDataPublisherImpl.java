@@ -157,6 +157,9 @@ public class DASSessionDataPublisherImpl extends AbstractAuthenticationDataPubli
                             Event event = new Event(AuthPublisherConstants.SESSION_DATA_STREAM_NAME, System
                                     .currentTimeMillis(), metadataArray, null, payloadData);
                             AuthenticationDataPublisherDataHolder.getInstance().getPublisherService().publish(event);
+                            if (LOG.isDebugEnabled() && event != null) {
+                                LOG.debug("Sending out event : " + event.toString());
+                            }
                         }
                     } finally {
                         FrameworkUtils.endTenantFlow();

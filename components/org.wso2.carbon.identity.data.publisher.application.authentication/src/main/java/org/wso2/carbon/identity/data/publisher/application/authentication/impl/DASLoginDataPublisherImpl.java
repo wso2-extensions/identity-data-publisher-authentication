@@ -181,6 +181,9 @@ public class DASLoginDataPublisherImpl extends AbstractAuthenticationDataPublish
                         Event event = new Event(AuthPublisherConstants.AUTHN_DATA_STREAM_NAME, System.currentTimeMillis(),
                                 metadataArray, null, payloadData);
                         AuthenticationDataPublisherDataHolder.getInstance().getPublisherService().publish(event);
+                        if (LOG.isDebugEnabled() && event != null) {
+                            LOG.debug("Sending out event : " + event.toString());
+                        }
                         payloadData[1] = UUID.randomUUID().toString();
 
                     }
