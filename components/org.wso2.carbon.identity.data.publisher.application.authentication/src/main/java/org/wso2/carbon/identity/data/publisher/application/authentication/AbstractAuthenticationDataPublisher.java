@@ -208,6 +208,7 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
         } else if (hasFederated) {
             authenticationData.setIdentityProviderType(FrameworkConstants.FEDERATED_IDP_NAME);
         }
+        authenticationData.setIdentityProvider(AuthnDataPublisherUtils.getSubjectStepIDP(context));
         authenticationData.setEventType(AuthPublisherConstants.OVERALL_EVENT);
         authenticationData.setSuccess(true);
         authenticationData.setContextId(context.getContextIdentifier());
