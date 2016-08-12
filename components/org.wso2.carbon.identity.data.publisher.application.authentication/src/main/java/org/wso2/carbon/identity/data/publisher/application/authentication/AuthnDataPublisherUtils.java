@@ -24,6 +24,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.identity.application.authentication.framework.config.model.SequenceConfig;
+import org.wso2.carbon.identity.application.authentication.framework.config.model.StepConfig;
+import org.wso2.carbon.identity.application.authentication.framework.context.AuthenticationContext;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.idp.mgt.util.IdPManagementUtil;
@@ -34,6 +37,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class AuthnDataPublisherUtils {
@@ -159,5 +163,22 @@ public class AuthnDataPublisherUtils {
             }
         }
         return externalRoles;
+    }
+
+    /**
+     * Returns the IDP name of IDP which is used to get the subject identifier.
+     *
+     * @param context Authentication context.
+     * @return Name of the identity provider.
+     */
+    public static String getSubjectStepIDP(AuthenticationContext context) {
+        SequenceConfig sequenceConfig = context.getSequenceConfig();
+        for (Map.Entry<Integer, StepConfig> entry : sequenceConfig.getStepMap().entrySet()) {
+            StepConfig stepConfig = entry.getValue();
+            if (stepConfig.isSubjectIdentifierStep() && StringUtils.isNotEmpty(stepConfig.getAuthenticatedIdP())) {
+                return stepConfig.getAuthenticatedIdP();
+            }
+        }
+        return AuthPublisherConstants.NOT_AVAILABLE;
     }
 }
