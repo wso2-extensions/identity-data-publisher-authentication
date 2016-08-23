@@ -28,6 +28,7 @@ import org.wso2.carbon.identity.application.authentication.framework.context.Ses
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedIdPData;
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkConstants;
+import org.wso2.carbon.identity.application.common.model.User;
 import org.wso2.carbon.identity.core.bean.context.MessageContext;
 import org.wso2.carbon.identity.core.handler.AbstractIdentityMessageHandler;
 import org.wso2.carbon.identity.core.model.IdentityEventListenerConfig;
@@ -70,7 +71,11 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
             AuthenticatedUser user = (AuthenticatedUser) userObj;
             authenticationData.setTenantDomain(user.getTenantDomain());
             authenticationData.setUserStoreDomain(user.getUserStoreDomain());
-            authenticationData.setUsername(user.getAuthenticatedSubjectIdentifier());
+            if (StringUtils.isNotBlank(user.getUserName())) {
+                authenticationData.setUsername(user.getUserName());
+            } else {
+                authenticationData.setUsername(user.getAuthenticatedSubjectIdentifier());
+            }
         }
         Object isFederatedObj = params.get(FrameworkConstants.AnalyticsAttributes.IS_FEDERATED);
         if (isFederatedObj != null) {
@@ -123,12 +128,22 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
             authenticationData.setIdentityProvider(context.getExternalIdP().getIdPName());
         }
         Object userObj = params.get(FrameworkConstants.AnalyticsAttributes.USER);
-        if (userObj != null && userObj instanceof AuthenticatedUser) {
-            AuthenticatedUser user = (AuthenticatedUser) userObj;
+        if (userObj != null && userObj instanceof User) {
+            User user = (User) userObj;
             authenticationData.setTenantDomain(user.getTenantDomain());
             authenticationData.setUserStoreDomain(user.getUserStoreDomain());
             authenticationData.setUsername(user.getUserName());
+        } else if (userObj != null && userObj instanceof AuthenticatedUser) {
+            AuthenticatedUser user = (AuthenticatedUser) userObj;
+            authenticationData.setTenantDomain(user.getTenantDomain());
+            authenticationData.setUserStoreDomain(user.getUserStoreDomain());
+            if(StringUtils.isNotEmpty(user.getUserName())) {
+                authenticationData.setUsername(user.getUserName());
+            } else {
+                authenticationData.setUsername(user.getAuthenticatedSubjectIdentifier());
+            }
         }
+
         Object isFederatedObj = params.get(FrameworkConstants.AnalyticsAttributes.IS_FEDERATED);
         if (isFederatedObj != null) {
             boolean isFederated = (Boolean) isFederatedObj;
