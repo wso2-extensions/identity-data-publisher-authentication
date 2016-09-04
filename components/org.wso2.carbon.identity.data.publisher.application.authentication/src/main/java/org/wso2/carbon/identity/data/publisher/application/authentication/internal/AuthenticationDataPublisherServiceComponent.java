@@ -25,6 +25,7 @@ import org.wso2.carbon.identity.application.authentication.framework.Authenticat
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkConstants;
 import org.wso2.carbon.identity.core.handler.MessageHandlerComparator;
 import org.wso2.carbon.identity.data.publisher.application.authentication.AuthnDataPublisherProxy;
+import org.wso2.carbon.identity.data.publisher.application.authentication.impl.AuthenticationAuditLogger;
 import org.wso2.carbon.identity.data.publisher.application.authentication.impl.DASLoginDataPublisherImpl;
 import org.wso2.carbon.identity.data.publisher.application.authentication.impl.DASSessionDataPublisherImpl;
 import org.wso2.carbon.registry.core.service.RegistryService;
@@ -60,7 +61,10 @@ public class AuthenticationDataPublisherServiceComponent {
         bundleContext
                 .registerService(AuthenticationDataPublisher.class.getName(), new DASSessionDataPublisherImpl(), null);
         bundleContext
+                .registerService(AuthenticationDataPublisher.class.getName(), new AuthenticationAuditLogger(), null);
+        bundleContext
                 .registerService(AuthenticationDataPublisher.class.getName(), new AuthnDataPublisherProxy(), null);
+
     }
 
     protected void setEventStreamService(EventStreamService publisherService) {
