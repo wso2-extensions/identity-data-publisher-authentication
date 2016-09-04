@@ -103,6 +103,7 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
         authenticationData.setStepNo(step);
         authenticationData.addParameter(AuthPublisherConstants.TENANT_ID, AuthnDataPublisherUtils
                 .getTenantDomains(context.getTenantDomain(), authenticationData.getTenantDomain()));
+        authenticationData.addParameter(AuthPublisherConstants.RELYING_PARTY, context.getRelyingParty());
 
         doPublishAuthenticationStepSuccess(authenticationData);
     }
@@ -172,6 +173,7 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
         // attempt
         authenticationData.addParameter(AuthPublisherConstants.TENANT_ID, AuthnDataPublisherUtils
                 .getTenantDomains(context.getTenantDomain(), authenticationData.getTenantDomain()));
+        authenticationData.addParameter(AuthPublisherConstants.RELYING_PARTY, context.getRelyingParty());
 
         doPublishAuthenticationStepFailure(authenticationData);
     }
@@ -239,6 +241,11 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
         authenticationData = fillLocalEvent(authenticationData, context);
         authenticationData.addParameter(AuthPublisherConstants.TENANT_ID, AuthnDataPublisherUtils
                 .getTenantDomains(context.getTenantDomain(), authenticationData.getTenantDomain()));
+        authenticationData.addParameter(AuthPublisherConstants.SUBJECT_IDENTIFIER, context.getSequenceConfig()
+                .getAuthenticatedUser().getAuthenticatedSubjectIdentifier());
+        authenticationData.addParameter(AuthPublisherConstants.RELYING_PARTY, context.getRelyingParty());
+        authenticationData.addParameter(AuthPublisherConstants.AUTHENTICATED_IDPS, context.getSequenceConfig()
+                .getAuthenticatedIdPs());
 
         doPublishAuthenticationSuccess(authenticationData);
     }
@@ -280,6 +287,7 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
         // attempt
         authenticationData.addParameter(AuthPublisherConstants.TENANT_ID, AuthnDataPublisherUtils
                 .getTenantDomains(context.getTenantDomain(), authenticationData.getTenantDomain()));
+        authenticationData.addParameter(AuthPublisherConstants.RELYING_PARTY, context.getRelyingParty());
 
         doPublishAuthenticationFailure(authenticationData);
     }

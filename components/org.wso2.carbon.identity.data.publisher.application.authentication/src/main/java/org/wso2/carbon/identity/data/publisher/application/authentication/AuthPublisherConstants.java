@@ -39,6 +39,9 @@ public class AuthPublisherConstants {
     public static final String USERNAME = "userName";
     public static final String SESSION_ID = "sessionId";
     public static final String TENANT_ID = "tenantId";
+    public static final String RELYING_PARTY = "relyingParty";
+    public static final String AUTHENTICATED_IDPS = "authenticatedIDPs";
+    public static final String SUBJECT_IDENTIFIER = "subjectIdentifier";
     public static final String USER_STORE_DOMAIN = "userStoreDomain";
     public static final String ROLES = "rolesCommaSeperated";
     public static final String SERVICE_PROVIDER = "serviceprovider";
