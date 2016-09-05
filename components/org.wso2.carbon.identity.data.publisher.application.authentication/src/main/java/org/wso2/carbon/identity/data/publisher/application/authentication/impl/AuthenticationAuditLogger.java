@@ -6,6 +6,9 @@ import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticationResult;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkConstants;
 import org.wso2.carbon.identity.core.bean.context.MessageContext;
+import org.wso2.carbon.identity.core.handler.AbstractIdentityMessageHandler;
+import org.wso2.carbon.identity.core.model.IdentityEventListenerConfig;
+import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.data.publisher.application.authentication.AbstractAuthenticationDataPublisher;
 import org.wso2.carbon.identity.data.publisher.application.authentication.AuthPublisherConstants;
 import org.wso2.carbon.identity.data.publisher.application.authentication.AuthnDataPublisherUtils;
@@ -140,7 +143,14 @@ public class AuthenticationAuditLogger extends AbstractAuthenticationDataPublish
 
     @Override
     public boolean isEnabled(MessageContext messageContext) {
-        return true;
+        IdentityEventListenerConfig identityEventListenerConfig = IdentityUtil.readEventListenerProperty
+                (AbstractIdentityMessageHandler.class.getName(), this.getClass().getName());
+
+        if (identityEventListenerConfig == null) {
+            return true;
+        }
+
+        return Boolean.parseBoolean(identityEventListenerConfig.getEnable());
     }
 
     @Override
