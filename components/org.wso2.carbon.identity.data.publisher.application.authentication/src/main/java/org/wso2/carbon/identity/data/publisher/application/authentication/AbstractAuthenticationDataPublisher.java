@@ -451,12 +451,9 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
         sessionData.setServiceProvider(context.getServiceProviderName());
         sessionData.setTerminationTimestamp(currentTime);
         sessionData.setRemoteIP(IdentityUtil.getClientIpAddress(request));
-        if (context.getSequenceConfig().getApplicationConfig().isSaaSApp()) {
-            sessionData.addParameter(AuthPublisherConstants.TENANT_ID, AuthnDataPublisherUtils
-                    .getTenantDomains(context.getTenantDomain(), sessionData.getTenantDomain()));
-        } else {
-            sessionData.addParameter(AuthPublisherConstants.TENANT_ID, new String[]{sessionData.getTenantDomain()});
-        }
+        sessionData.addParameter(AuthPublisherConstants.TENANT_ID, AuthnDataPublisherUtils
+                .getTenantDomains(context.getTenantDomain(), sessionData.getTenantDomain()));
+
         doPublishSessionTermination(sessionData);
     }
 
