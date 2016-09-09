@@ -171,8 +171,15 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
         authenticationData.setStepNo(step);
         // Should publish the event to both SP tenant domain and the tenant domain of the user who did the login
         // attempt
-        authenticationData.addParameter(AuthPublisherConstants.TENANT_ID, AuthnDataPublisherUtils
-                .getTenantDomains(context.getTenantDomain(), authenticationData.getTenantDomain()));
+        if (context.getSequenceConfig() != null && context.getSequenceConfig().getApplicationConfig() != null && context
+                .getSequenceConfig().getApplicationConfig().isSaaSApp()) {
+            authenticationData.addParameter(AuthPublisherConstants.TENANT_ID, AuthnDataPublisherUtils
+                    .getTenantDomains(context.getTenantDomain(), authenticationData.getTenantDomain()));
+        } else {
+            authenticationData.addParameter(AuthPublisherConstants.TENANT_ID, AuthnDataPublisherUtils
+                    .getTenantDomains(context.getTenantDomain(), null));
+        }
+
         authenticationData.addParameter(AuthPublisherConstants.RELYING_PARTY, context.getRelyingParty());
 
         doPublishAuthenticationStepFailure(authenticationData);
@@ -285,8 +292,15 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
         authenticationData.setInitialLogin(false);
         // Should publish the event to both SP tenant domain and the tenant domain of the user who did the login
         // attempt
-        authenticationData.addParameter(AuthPublisherConstants.TENANT_ID, AuthnDataPublisherUtils
-                .getTenantDomains(context.getTenantDomain(), authenticationData.getTenantDomain()));
+        if (context.getSequenceConfig() != null && context.getSequenceConfig().getApplicationConfig
+                () != null && context.getSequenceConfig().getApplicationConfig().isSaaSApp()) {
+            authenticationData.addParameter(AuthPublisherConstants.TENANT_ID, AuthnDataPublisherUtils
+                    .getTenantDomains(context.getTenantDomain(), authenticationData.getTenantDomain()));
+        } else {
+            authenticationData.addParameter(AuthPublisherConstants.TENANT_ID, AuthnDataPublisherUtils
+                    .getTenantDomains(context.getTenantDomain(), null));
+        }
+
         authenticationData.addParameter(AuthPublisherConstants.RELYING_PARTY, context.getRelyingParty());
 
         doPublishAuthenticationFailure(authenticationData);
