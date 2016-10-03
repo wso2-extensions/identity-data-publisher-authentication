@@ -33,7 +33,6 @@ import org.wso2.carbon.identity.data.publisher.application.authentication.model.
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.servlet.http.HttpServletRequest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 
 public class DASSessionDataPublisherImpl extends AbstractAuthenticationDataPublisher {
@@ -120,7 +119,7 @@ public class DASSessionDataPublisherImpl extends AbstractAuthenticationDataPubli
             Object[] payloadData = new Object[15];
             try {
                 payloadData[0] = AuthnDataPublisherUtils.replaceIfNotAvailable(AuthPublisherConstants.CONFIG_PREFIX +
-                        AuthPublisherConstants.SESSION_ID, AuthnDataPublisherUtils.hashString(sessionData.getSessionId()));
+                        AuthPublisherConstants.SESSION_ID, sessionData.getSessionId());
                 payloadData[1] = sessionData.getCreatedTimestamp();
                 payloadData[2] = sessionData.getUpdatedTimestamp();
                 payloadData[3] = sessionData.getTerminationTimestamp();
@@ -166,8 +165,6 @@ public class DASSessionDataPublisherImpl extends AbstractAuthenticationDataPubli
                     }
                 }
 
-            } catch (NoSuchAlgorithmException e) {
-                LOG.error("Error while hashing session id.", e);
             } catch (IdentityRuntimeException e) {
                 if (LOG.isDebugEnabled()) {
                     LOG.error("Error while publishing session information", e);
