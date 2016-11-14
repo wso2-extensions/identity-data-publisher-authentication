@@ -462,9 +462,17 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
         sessionData.setCreatedTimestamp(createdTime);
         sessionData.setUpdatedTimestamp(currentTime);
         sessionData.setIdentityProviders(getCommaSeparatedIDPs(sessionContext));
-        sessionData.setServiceProvider(context.getServiceProviderName());
         sessionData.setTerminationTimestamp(currentTime);
-        sessionData.setRemoteIP(IdentityUtil.getClientIpAddress(request));
+        if (context != null) {
+            sessionData.setServiceProvider(context.getServiceProviderName());
+            sessionData.addParameter(AuthPublisherConstants.TENANT_ID, AuthnDataPublisherUtils
+                    .getTenantDomains(context.getTenantDomain(), sessionData.getTenantDomain()));
+        } else {
+            sessionData.addParameter(AuthPublisherConstants.TENANT_ID, new String[]{sessionData.getTenantDomain()});
+        }
+        if (request != null) {
+            sessionData.setRemoteIP(IdentityUtil.getClientIpAddress(request));
+        }
         sessionData.addParameter(AuthPublisherConstants.TENANT_ID, AuthnDataPublisherUtils
                 .getTenantDomains(context.getTenantDomain(), sessionData.getTenantDomain()));
 

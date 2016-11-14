@@ -136,6 +136,12 @@ public class AuthenticationAuditLogger extends AbstractAuthenticationDataPublish
 
     public void publishSessionTermination(HttpServletRequest request, AuthenticationContext context,
                                           SessionContext sessionContext, Map<String, Object> unmodifiableMap) {
+
+        if (context == null) {
+            //todo:need to put audit log when context is null
+            return;
+        }
+
         SequenceConfig sequenceConfig = context.getSequenceConfig();
         AuthenticatedUser authenticatedUser = null;
         String username = "";
