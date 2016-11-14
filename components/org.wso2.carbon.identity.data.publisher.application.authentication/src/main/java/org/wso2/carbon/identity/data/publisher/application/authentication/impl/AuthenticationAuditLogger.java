@@ -137,7 +137,7 @@ public class AuthenticationAuditLogger extends AbstractAuthenticationDataPublish
     public void publishSessionTermination(HttpServletRequest request, AuthenticationContext context,
                                           SessionContext sessionContext, Map<String, Object> unmodifiableMap) {
 
-        if(context == null) {
+        if (context == null) {
             //todo:need to put audit log when context is null
             return;
         }
