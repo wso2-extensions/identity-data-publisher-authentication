@@ -143,22 +143,20 @@ public class AuthnDataPublisherUtils {
         List<String> externalRoles = new ArrayList<String>();
         if (roleList != null) {
             int index;
-            if (roleList != null) {
-                for (String role : roleList) {
-                    if (role != null && role.trim().length() > 0) {
-                        index = role.indexOf(CarbonConstants.DOMAIN_SEPARATOR);
-                        if (index > 0) {
-                            String domain = role.substring(0, index);
-                            if (UserCoreConstants.INTERNAL_DOMAIN.equalsIgnoreCase(domain)) {
-                                if (INTERNAL_EVERYONE_ROLE.equalsIgnoreCase(role.trim()))
-                                    continue;
-                            } else if (APPLICATION_DOMAIN.equalsIgnoreCase(domain) ||
-                                    WORKFLOW_DOMAIN.equalsIgnoreCase(domain)) {
+            for (String role : roleList) {
+                if (StringUtils.isNotBlank(role)) {
+                    index = role.indexOf(CarbonConstants.DOMAIN_SEPARATOR);
+                    if (index > 0) {
+                        String domain = role.substring(0, index);
+                        if (UserCoreConstants.INTERNAL_DOMAIN.equalsIgnoreCase(domain)
+                                && INTERNAL_EVERYONE_ROLE.equalsIgnoreCase(role.trim())) {
                                 continue;
-                            }
+                        } else if (APPLICATION_DOMAIN.equalsIgnoreCase(domain)
+                                || WORKFLOW_DOMAIN.equalsIgnoreCase(domain)) {
+                            continue;
                         }
-                        externalRoles.add(UserCoreUtil.removeDomainFromName(role));
                     }
+                    externalRoles.add(UserCoreUtil.removeDomainFromName(role));
                 }
             }
         }
