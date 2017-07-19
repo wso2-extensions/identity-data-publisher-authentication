@@ -149,7 +149,7 @@ public class AuthenticationAuditLogger extends AbstractAuthenticationDataPublish
         if (sequenceConfig != null && sequenceConfig.getAuthenticatedUser() != null) {
             authenticatedUser = sequenceConfig.getAuthenticatedUser();
             authenticatedIDPs = sequenceConfig.getAuthenticatedIdPs();
-        } else if (context != null) {
+        } else {
             Object authenticatedUserObj = sessionContext.getProperty(FrameworkConstants.AUTHENTICATED_USER);
             if (authenticatedUserObj != null) {
                 authenticatedUser = (AuthenticatedUser) authenticatedUserObj;
@@ -161,27 +161,24 @@ public class AuthenticationAuditLogger extends AbstractAuthenticationDataPublish
             tenantDomain = authenticatedUser.getTenantDomain();
         }
 
-        if (context != null) {
-            String auditData = "\"" + "ContextIdentifier" + "\" : \"" + context.getContextIdentifier()
-                    + "\",\"" + "LoggedOutUser" + "\" : \"" + username
-                    + "\",\"" + "LoggedOutUserTenantDomain" + "\" : \"" + tenantDomain
-                    + "\",\"" + "ServiceProviderName" + "\" : \"" + context.getServiceProviderName()
-                    + "\",\"" + "RequestType" + "\" : \"" + context.getRequestType()
-                    + "\",\"" + "RelyingParty" + "\" : \"" + context.getRelyingParty()
-                    + "\",\"" + "AuthenticatedIdPs" + "\" : \"" + authenticatedIDPs
-                    + "\"";
+        String auditData = "\"" + "ContextIdentifier" + "\" : \"" + context.getContextIdentifier()
+                + "\",\"" + "LoggedOutUser" + "\" : \"" + username
+                + "\",\"" + "LoggedOutUserTenantDomain" + "\" : \"" + tenantDomain
+                + "\",\"" + "ServiceProviderName" + "\" : \"" + context.getServiceProviderName()
+                + "\",\"" + "RequestType" + "\" : \"" + context.getRequestType()
+                + "\",\"" + "RelyingParty" + "\" : \"" + context.getRelyingParty()
+                + "\",\"" + "AuthenticatedIdPs" + "\" : \"" + authenticatedIDPs
+                + "\"";
 
-            String idpName = null;
-            ExternalIdPConfig externalIdPConfig = context.getExternalIdP();
-            if (externalIdPConfig != null) {
-                idpName = externalIdPConfig.getName();
-            }
-            AUDIT_LOG.info(String.format(
-                    FrameworkConstants.AUDIT_MESSAGE,
-                    username,
-                    "Logout", idpName, auditData, FrameworkConstants.AUDIT_SUCCESS));
-
+        String idpName = null;
+        ExternalIdPConfig externalIdPConfig = context.getExternalIdP();
+        if (externalIdPConfig != null) {
+            idpName = externalIdPConfig.getName();
         }
+        AUDIT_LOG.info(String.format(
+                FrameworkConstants.AUDIT_MESSAGE,
+                username,
+                "Logout", idpName, auditData, FrameworkConstants.AUDIT_SUCCESS));
     }
 
     @Override
