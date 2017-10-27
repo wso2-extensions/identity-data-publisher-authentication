@@ -14,7 +14,7 @@ import org.wso2.carbon.identity.core.bean.context.MessageContext;
 import org.wso2.carbon.identity.core.handler.AbstractIdentityMessageHandler;
 import org.wso2.carbon.identity.core.model.IdentityEventListenerConfig;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
-import org.wso2.carbon.identity.data.publisher.application.authentication.AbstractAuthenticationDataPublisher;
+import org.wso2.carbon.identity.data.publisher.application.authentication.AbstractAuthenticationDataHandler;
 import org.wso2.carbon.identity.data.publisher.application.authentication.AuthPublisherConstants;
 import org.wso2.carbon.identity.data.publisher.application.authentication.model.AuthenticationData;
 import org.wso2.carbon.identity.data.publisher.application.authentication.model.SessionData;
@@ -22,7 +22,7 @@ import org.wso2.carbon.identity.data.publisher.application.authentication.model.
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
-public class AuthenticationAuditLogger extends AbstractAuthenticationDataPublisher {
+public class AuthenticationAuditLogger extends AbstractAuthenticationDataHandler {
 
     private static final Log AUDIT_LOG = CarbonConstants.AUDIT_LOG;
     public static final Log LOG = LogFactory.getLog(AuthenticationAuditLogger.class);

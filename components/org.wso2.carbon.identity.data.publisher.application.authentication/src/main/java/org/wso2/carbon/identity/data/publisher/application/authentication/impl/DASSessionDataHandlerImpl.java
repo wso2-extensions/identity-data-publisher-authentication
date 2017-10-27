@@ -24,7 +24,7 @@ import org.wso2.carbon.databridge.commons.Event;
 import org.wso2.carbon.identity.application.authentication.framework.context.AuthenticationContext;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkUtils;
 import org.wso2.carbon.identity.base.IdentityRuntimeException;
-import org.wso2.carbon.identity.data.publisher.application.authentication.AbstractAuthenticationDataPublisher;
+import org.wso2.carbon.identity.data.publisher.application.authentication.AbstractAuthenticationDataHandler;
 import org.wso2.carbon.identity.data.publisher.application.authentication.AuthPublisherConstants;
 import org.wso2.carbon.identity.data.publisher.application.authentication.AuthnDataPublisherUtils;
 import org.wso2.carbon.identity.data.publisher.application.authentication.internal.AuthenticationDataPublisherDataHolder;
@@ -35,9 +35,9 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
-public class DASSessionDataPublisherImpl extends AbstractAuthenticationDataPublisher {
+public class DASSessionDataHandlerImpl extends AbstractAuthenticationDataHandler {
 
-    public static final Log LOG = LogFactory.getLog(DASSessionDataPublisherImpl.class);
+    public static final Log LOG = LogFactory.getLog(DASSessionDataHandlerImpl.class);
 
     @Override
     public void publishAuthenticationStepSuccess(HttpServletRequest request, AuthenticationContext context,

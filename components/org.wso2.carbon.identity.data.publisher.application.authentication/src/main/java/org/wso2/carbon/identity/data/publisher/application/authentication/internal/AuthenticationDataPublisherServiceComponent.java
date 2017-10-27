@@ -24,10 +24,10 @@ import org.wso2.carbon.event.stream.core.EventStreamService;
 import org.wso2.carbon.identity.application.authentication.framework.AuthenticationDataPublisher;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkConstants;
 import org.wso2.carbon.identity.core.handler.MessageHandlerComparator;
-import org.wso2.carbon.identity.data.publisher.application.authentication.AuthnDataPublisherProxy;
 import org.wso2.carbon.identity.data.publisher.application.authentication.impl.AuthenticationAuditLogger;
-import org.wso2.carbon.identity.data.publisher.application.authentication.impl.DASLoginDataPublisherImpl;
-import org.wso2.carbon.identity.data.publisher.application.authentication.impl.DASSessionDataPublisherImpl;
+import org.wso2.carbon.identity.data.publisher.application.authentication.impl.DASLoginDataHandlerImpl;
+import org.wso2.carbon.identity.data.publisher.application.authentication.impl.DASSessionDataHandlerImpl;
+import org.wso2.carbon.identity.event.handler.AbstractEventHandler;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
 
@@ -56,14 +56,20 @@ public class AuthenticationDataPublisherServiceComponent {
     protected void activate(ComponentContext context) {
 
         BundleContext bundleContext = context.getBundleContext();
+//        bundleContext
+//                .registerService(AuthenticationDataPublisher.class.getName(), new DASLoginDataHandlerImpl(), null);
+//        bundleContext
+//                .registerService(AuthenticationDataPublisher.class.getName(), new DASSessionDataHandlerImpl(), null);
+//        bundleContext
+//                .registerService(AuthenticationDataPublisher.class.getName(), new AuthenticationAuditLogger(), null);
+//        bundleContext
+//                .registerService(AuthenticationDataPublisher.class.getName(), new AuthnDataPublisherProxy(), null);
         bundleContext
-                .registerService(AuthenticationDataPublisher.class.getName(), new DASLoginDataPublisherImpl(), null);
+                .registerService(AbstractEventHandler.class.getName(), new DASLoginDataHandlerImpl(), null);
         bundleContext
-                .registerService(AuthenticationDataPublisher.class.getName(), new DASSessionDataPublisherImpl(), null);
+                .registerService(AbstractEventHandler.class.getName(), new DASSessionDataHandlerImpl(), null);
         bundleContext
-                .registerService(AuthenticationDataPublisher.class.getName(), new AuthenticationAuditLogger(), null);
-        bundleContext
-                .registerService(AuthenticationDataPublisher.class.getName(), new AuthnDataPublisherProxy(), null);
+                .registerService(AbstractEventHandler.class.getName(), new AuthenticationAuditLogger(), null);
 
     }
 
