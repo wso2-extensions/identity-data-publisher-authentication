@@ -597,11 +597,6 @@ public abstract class AbstractAuthenticationDataHandler extends AbstractEventHan
     public abstract void doPublishSessionTermination(SessionData sessionData);
 
     @Override
-    public boolean canHandle(MessageContext messageContext) {
-        return true;
-    }
-
-    @Override
     public boolean isEnabled(MessageContext messageContext) {
         IdentityEventListenerConfig identityEventListenerConfig = IdentityUtil.readEventListenerProperty
                 (AbstractIdentityMessageHandler.class.getName(), this.getClass().getName());
@@ -622,7 +617,7 @@ public abstract class AbstractAuthenticationDataHandler extends AbstractEventHan
         Map<String, Object> unmodifiableParamMap = (Map<String, Object>) event.getEventProperties().get("params");
         String eventName = event.getEventName();
 
-        if (this.isEnabled(context) && this.canHandle(context)) {
+        if (this.isEnabled(context)) {
             if ("SESSION_CREATE".equalsIgnoreCase(eventName)) {
                 publishSessionCreation(request, context, sessionContext, unmodifiableParamMap);
             } else if ("SESSION_UPDATE".equalsIgnoreCase(eventName)) {
