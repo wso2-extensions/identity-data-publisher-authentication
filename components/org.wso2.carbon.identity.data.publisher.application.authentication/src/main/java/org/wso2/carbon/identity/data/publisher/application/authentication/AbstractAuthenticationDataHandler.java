@@ -612,10 +612,10 @@ public abstract class AbstractAuthenticationDataHandler extends AbstractEventHan
     @Override
     public void handleEvent(Event event) throws IdentityEventException {
 
-        HttpServletRequest request = (HttpServletRequest) event.getEventProperties().get("request");
-        SessionContext sessionContext = (SessionContext) event.getEventProperties().get("sessionContext");
-        AuthenticationContext context = (AuthenticationContext) event.getEventProperties().get("context");
-        Map<String, Object> unmodifiableParamMap = (Map<String, Object>) event.getEventProperties().get("params");
+        HttpServletRequest request = (HttpServletRequest) event.getEventProperties().get(AuthPublisherConstants.REQUEST);
+        SessionContext sessionContext = (SessionContext) event.getEventProperties().get(AuthPublisherConstants.CONTEXT);
+        AuthenticationContext context = (AuthenticationContext) event.getEventProperties().get(AuthPublisherConstants.SESSION_CONTEXT);
+        Map<String, Object> unmodifiableParamMap = (Map<String, Object>) event.getEventProperties().get(AuthPublisherConstants.PARAMS);
         String eventName = event.getEventName();
 
         if (this.isEnabled(context)) {

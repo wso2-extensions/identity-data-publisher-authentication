@@ -108,7 +108,6 @@ public class AuthnDataPublisherProxy extends AbstractIdentityMessageHandler impl
         Event event = initiateEvent(request, context, sessionContext, unmodifiableMap, IdentityEventConstants.Event
                 .SESSION_CREATE);
         doPublishEvent(event);
-
     }
 
     /**
@@ -125,8 +124,6 @@ public class AuthnDataPublisherProxy extends AbstractIdentityMessageHandler impl
         Event event = initiateEvent(request, context, sessionContext, unmodifiableMap, IdentityEventConstants.Event
                 .SESSION_UPDATE);
         doPublishEvent(event);
-
-
     }
 
     /**
@@ -168,12 +165,12 @@ public class AuthnDataPublisherProxy extends AbstractIdentityMessageHandler impl
     private Event initiateEvent(HttpServletRequest request, AuthenticationContext context, SessionContext sessionContext,
                                 Map<String, Object> params, String eventName) {
         Map<String, Object> eventProperties = new HashMap<>();
-        eventProperties.put("request", request);
-        eventProperties.put("context", context);
+        eventProperties.put(AuthPublisherConstants.REQUEST, request);
+        eventProperties.put(AuthPublisherConstants.CONTEXT, context);
         if (sessionContext != null) {
-            eventProperties.put("sessionContext", sessionContext);
+            eventProperties.put(AuthPublisherConstants.SESSION_CONTEXT, sessionContext);
         }
-        eventProperties.put("params", params);
+        eventProperties.put(AuthPublisherConstants.PARAMS, params);
         Event event = new Event(eventName, eventProperties);
         return event;
     }
