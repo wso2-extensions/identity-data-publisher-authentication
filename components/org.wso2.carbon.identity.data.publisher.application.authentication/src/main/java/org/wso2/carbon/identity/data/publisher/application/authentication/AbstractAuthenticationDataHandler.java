@@ -35,6 +35,7 @@ import org.wso2.carbon.identity.core.model.IdentityEventListenerConfig;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.data.publisher.application.authentication.model.AuthenticationData;
 import org.wso2.carbon.identity.data.publisher.application.authentication.model.SessionData;
+import org.wso2.carbon.identity.event.IdentityEventConstants;
 import org.wso2.carbon.identity.event.IdentityEventException;
 import org.wso2.carbon.identity.event.event.Event;
 import org.wso2.carbon.identity.event.handler.AbstractEventHandler;
@@ -618,19 +619,25 @@ public abstract class AbstractAuthenticationDataHandler extends AbstractEventHan
         String eventName = event.getEventName();
 
         if (this.isEnabled(context)) {
-            if ("SESSION_CREATE".equalsIgnoreCase(eventName)) {
+            if (IdentityEventConstants.Event.SESSION_CREATE.equalsIgnoreCase(eventName)) {
                 publishSessionCreation(request, context, sessionContext, unmodifiableParamMap);
-            } else if ("SESSION_UPDATE".equalsIgnoreCase(eventName)) {
+
+            } else if (IdentityEventConstants.Event.SESSION_UPDATE.equalsIgnoreCase(eventName)) {
                 publishSessionUpdate(request, context, sessionContext, unmodifiableParamMap);
-            } else if ("SESSION_TERMINATE".equalsIgnoreCase(eventName)) {
+
+            } else if (IdentityEventConstants.Event.SESSION_TERMINATE.equalsIgnoreCase(eventName)) {
                 publishSessionTermination(request, context, sessionContext, unmodifiableParamMap);
-            } else if ("AUTHENTICATION_SUCCESS".equalsIgnoreCase(eventName)) {
+
+            } else if (IdentityEventConstants.Event.AUTHENTICATION_SUCCESS.equalsIgnoreCase(eventName)) {
                 publishAuthenticationSuccess(request, context, unmodifiableParamMap);
-            } else if ("AUTHENTICATION_FAILURE".equalsIgnoreCase(eventName)) {
+
+            } else if (IdentityEventConstants.Event.AUTHENTICATION_FAILURE.equalsIgnoreCase(eventName)) {
                 publishAuthenticationFailure(request, context, unmodifiableParamMap);
-            } else if ("AUTHENTICATION_STEP_SUCCESS".equalsIgnoreCase(eventName)) {
+
+            } else if (IdentityEventConstants.Event.AUTHENTICATION_STEP_SUCCESS.equalsIgnoreCase(eventName)) {
                 publishAuthenticationStepSuccess(request, context, unmodifiableParamMap);
-            } else if ("AUTHENTICATION_STEP_FAILURE".equalsIgnoreCase(eventName)) {
+
+            } else if (IdentityEventConstants.Event.AUTHENTICATION_STEP_FAILURE.equalsIgnoreCase(eventName)) {
                 publishAuthenticationStepFailure(request, context, unmodifiableParamMap);
             }
         }
