@@ -22,16 +22,15 @@ import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.event.stream.core.EventStreamService;
 import org.wso2.carbon.identity.application.authentication.framework.AuthenticationDataPublisher;
-import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkConstants;
-import org.wso2.carbon.identity.core.handler.MessageHandlerComparator;
+import org.wso2.carbon.identity.application.authentication.framework.internal.FrameworkServiceDataHolder;
+import org.wso2.carbon.identity.data.publisher.application.authentication.AuthnDataPublisherProxy;
 import org.wso2.carbon.identity.data.publisher.application.authentication.impl.AuthenticationAuditLogger;
-import org.wso2.carbon.identity.data.publisher.application.authentication.impl.DASLoginDataHandlerImpl;
-import org.wso2.carbon.identity.data.publisher.application.authentication.impl.DASSessionDataHandlerImpl;
+import org.wso2.carbon.identity.data.publisher.application.authentication.impl.DASLoginDataPublisherImpl;
+import org.wso2.carbon.identity.data.publisher.application.authentication.impl.DASSessionDataPublisherImpl;
 import org.wso2.carbon.identity.event.handler.AbstractEventHandler;
+import org.wso2.carbon.identity.event.services.IdentityEventService;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
-
-import java.util.Collections;
 
 /**
  * @scr.component name="org.wso2.carbon.identity.data.publisher.authn" immediate="true"
@@ -46,10 +45,9 @@ import java.util.Collections;
  * interface="org.wso2.carbon.event.stream.core.EventStreamService" cardinality="1..1"
  * policy="dynamic" bind="setEventStreamService" unbind="unsetEventStreamService"
  * unbind="unsetEventStreamService"
- * @scr.reference name="identity.authentication.data.publisher"
- * interface="org.wso2.carbon.identity.application.authentication.framework.AuthenticationDataPublisher"
- * cardinality="0..n" policy="dynamic" bind="setAuthenticationDataPublisher"
- * unbind="unsetAuthenticationDataPublisher"
+ * @scr.reference name="IdentityEventService"
+ * interface="org.wso2.carbon.identity.event.services.IdentityEventService" cardinality="1..1"
+ * policy="dynamic" bind="setIdentityEventService" unbind="unsetIdentityEventService"
  */
 public class AuthenticationDataPublisherServiceComponent {
 
@@ -57,12 +55,13 @@ public class AuthenticationDataPublisherServiceComponent {
 
         BundleContext bundleContext = context.getBundleContext();
         bundleContext
-                .registerService(AbstractEventHandler.class.getName(), new DASLoginDataHandlerImpl(), null);
+                .registerService(AbstractEventHandler.class.getName(), new DASLoginDataPublisherImpl(), null);
         bundleContext
-                .registerService(AbstractEventHandler.class.getName(), new DASSessionDataHandlerImpl(), null);
+                .registerService(AbstractEventHandler.class.getName(), new DASSessionDataPublisherImpl(), null);
         bundleContext
                 .registerService(AbstractEventHandler.class.getName(), new AuthenticationAuditLogger(), null);
-
+        bundleContext
+                .registerService(AuthenticationDataPublisher.class.getName(), new AuthnDataPublisherProxy(), null);
     }
 
     protected void setEventStreamService(EventStreamService publisherService) {
@@ -95,18 +94,12 @@ public class AuthenticationDataPublisherServiceComponent {
         AuthenticationDataPublisherDataHolder.getInstance().setRegistryService(null);
     }
 
-    protected void setAuthenticationDataPublisher(AuthenticationDataPublisher publisher) {
-        if (publisher != null && !FrameworkConstants.AnalyticsAttributes.AUTHN_DATA_PUBLISHER_PROXY.equalsIgnoreCase
-                (publisher.getName())) {
-            AuthenticationDataPublisherDataHolder.getInstance().getDataPublishers().add(publisher);
-            Collections.sort(AuthenticationDataPublisherDataHolder.getInstance().getDataPublishers(),
-                    new MessageHandlerComparator(null));
-            Collections.reverse(AuthenticationDataPublisherDataHolder.getInstance().getDataPublishers());
-        }
+    protected void setIdentityEventService(IdentityEventService eventService) {
+        AuthenticationDataPublisherDataHolder.getInstance().setIdentityEventService(eventService);
     }
 
-    protected void unsetAuthenticationDataPublisher(AuthenticationDataPublisher publisher) {
-        AuthenticationDataPublisherDataHolder.getInstance().getDataPublishers().remove(publisher);
+    protected void unsetIdentityEventService(IdentityEventService eventService) {
+        AuthenticationDataPublisherDataHolder.getInstance().setIdentityEventService(null);
     }
 
 }

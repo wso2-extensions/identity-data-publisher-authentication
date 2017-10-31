@@ -47,9 +47,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-public class DASLoginDataHandlerImpl extends AbstractAuthenticationDataHandler {
+public class DASLoginDataPublisherImpl extends AbstractAuthenticationDataHandler {
 
-    public static final Log LOG = LogFactory.getLog(DASLoginDataHandlerImpl.class);
+    public static final Log LOG = LogFactory.getLog(DASLoginDataPublisherImpl.class);
 
     @Override
     public void publishSessionCreation(HttpServletRequest request, AuthenticationContext context, SessionContext

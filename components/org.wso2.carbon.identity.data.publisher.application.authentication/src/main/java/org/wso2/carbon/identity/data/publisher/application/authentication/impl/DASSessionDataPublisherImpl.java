@@ -35,9 +35,9 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
-public class DASSessionDataHandlerImpl extends AbstractAuthenticationDataHandler {
+public class DASSessionDataPublisherImpl extends AbstractAuthenticationDataHandler {
 
-    public static final Log LOG = LogFactory.getLog(DASSessionDataHandlerImpl.class);
+    public static final Log LOG = LogFactory.getLog(DASSessionDataPublisherImpl.class);
 
     @Override
     public void publishAuthenticationStepSuccess(HttpServletRequest request, AuthenticationContext context,
