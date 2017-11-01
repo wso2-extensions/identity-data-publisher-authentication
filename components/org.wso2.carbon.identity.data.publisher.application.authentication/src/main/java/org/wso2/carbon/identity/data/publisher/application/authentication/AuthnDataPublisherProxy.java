@@ -48,8 +48,8 @@ public class AuthnDataPublisherProxy extends AbstractIdentityMessageHandler impl
      */
     public void publishAuthenticationStepSuccess(HttpServletRequest request, AuthenticationContext context,
                                                  Map<String, Object> params) {
-        Event event = initiateEvent(request, context, null, params, IdentityEventConstants.Event
-                .AUTHENTICATION_STEP_SUCCESS);
+        Event event = initiateEvent(request, context, null, params, IdentityEventConstants.EventName
+                .AUTHENTICATION_STEP_SUCCESS.toString());
         doPublishEvent(event);
     }
 
@@ -62,8 +62,8 @@ public class AuthnDataPublisherProxy extends AbstractIdentityMessageHandler impl
      */
     public void publishAuthenticationStepFailure(HttpServletRequest request, AuthenticationContext context,
                                                  Map<String, Object> unmodifiableMap) {
-        Event event = initiateEvent(request, context, null, unmodifiableMap, IdentityEventConstants.Event
-                .AUTHENTICATION_STEP_FAILURE);
+        Event event = initiateEvent(request, context, null, unmodifiableMap, IdentityEventConstants.EventName
+                .AUTHENTICATION_STEP_FAILURE.toString());
         doPublishEvent(event);
     }
 
@@ -76,8 +76,8 @@ public class AuthnDataPublisherProxy extends AbstractIdentityMessageHandler impl
      */
     public void publishAuthenticationSuccess(HttpServletRequest request, AuthenticationContext context,
                                              Map<String, Object> unmodifiableMap) {
-        Event event = initiateEvent(request, context, null, unmodifiableMap, IdentityEventConstants.Event
-                .AUTHENTICATION_SUCCESS);
+        Event event = initiateEvent(request, context, null, unmodifiableMap, IdentityEventConstants.EventName
+                .AUTHENTICATION_SUCCESS.toString());
         doPublishEvent(event);
     }
 
@@ -90,8 +90,8 @@ public class AuthnDataPublisherProxy extends AbstractIdentityMessageHandler impl
      */
     public void publishAuthenticationFailure(HttpServletRequest request, AuthenticationContext context,
                                              Map<String, Object> unmodifiableMap) {
-        Event event = initiateEvent(request, context, null, unmodifiableMap, IdentityEventConstants.Event
-                .AUTHENTICATION_FAILURE);
+        Event event = initiateEvent(request, context, null, unmodifiableMap, IdentityEventConstants.EventName
+                .AUTHENTICATION_FAILURE.toString());
         doPublishEvent(event);
     }
 
@@ -105,8 +105,8 @@ public class AuthnDataPublisherProxy extends AbstractIdentityMessageHandler impl
      */
     public void publishSessionCreation(HttpServletRequest request, AuthenticationContext context, SessionContext
             sessionContext, Map<String, Object> unmodifiableMap) {
-        Event event = initiateEvent(request, context, sessionContext, unmodifiableMap, IdentityEventConstants.Event
-                .SESSION_CREATE);
+        Event event = initiateEvent(request, context, sessionContext, unmodifiableMap, IdentityEventConstants.EventName
+                .SESSION_CREATE.toString());
         doPublishEvent(event);
     }
 
@@ -121,8 +121,8 @@ public class AuthnDataPublisherProxy extends AbstractIdentityMessageHandler impl
 
     public void publishSessionUpdate(HttpServletRequest request, AuthenticationContext context, SessionContext
             sessionContext, Map<String, Object> unmodifiableMap) {
-        Event event = initiateEvent(request, context, sessionContext, unmodifiableMap, IdentityEventConstants.Event
-                .SESSION_UPDATE);
+        Event event = initiateEvent(request, context, sessionContext, unmodifiableMap, IdentityEventConstants.EventName
+                .SESSION_UPDATE.toString());
         doPublishEvent(event);
     }
 
@@ -137,8 +137,8 @@ public class AuthnDataPublisherProxy extends AbstractIdentityMessageHandler impl
 
     public void publishSessionTermination(HttpServletRequest request, AuthenticationContext context,
                                           SessionContext sessionContext, Map<String, Object> unmodifiableMap) {
-        Event event = initiateEvent(request, context, sessionContext, unmodifiableMap, IdentityEventConstants.Event
-                .SESSION_TERMINATE);
+        Event event = initiateEvent(request, context, sessionContext, unmodifiableMap, IdentityEventConstants.EventName
+                .SESSION_TERMINATE.toString());
         doPublishEvent(event);
     }
 
@@ -165,12 +165,12 @@ public class AuthnDataPublisherProxy extends AbstractIdentityMessageHandler impl
     private Event initiateEvent(HttpServletRequest request, AuthenticationContext context, SessionContext sessionContext,
                                 Map<String, Object> params, String eventName) {
         Map<String, Object> eventProperties = new HashMap<>();
-        eventProperties.put(AuthPublisherConstants.REQUEST, request);
-        eventProperties.put(AuthPublisherConstants.CONTEXT, context);
+        eventProperties.put(IdentityEventConstants.EventProperty.REQUEST, request);
+        eventProperties.put(IdentityEventConstants.EventProperty.CONTEXT, context);
         if (sessionContext != null) {
-            eventProperties.put(AuthPublisherConstants.SESSION_CONTEXT, sessionContext);
+            eventProperties.put(IdentityEventConstants.EventProperty.SESSION_CONTEXT, sessionContext);
         }
-        eventProperties.put(AuthPublisherConstants.PARAMS, params);
+        eventProperties.put(IdentityEventConstants.EventProperty.PARAMS, params);
         Event event = new Event(eventName, eventProperties);
         return event;
     }

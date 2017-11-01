@@ -612,32 +612,40 @@ public abstract class AbstractAuthenticationDataHandler extends AbstractEventHan
     @Override
     public void handleEvent(Event event) throws IdentityEventException {
 
-        HttpServletRequest request = (HttpServletRequest) event.getEventProperties().get(AuthPublisherConstants.REQUEST);
-        SessionContext sessionContext = (SessionContext) event.getEventProperties().get(AuthPublisherConstants.CONTEXT);
-        AuthenticationContext context = (AuthenticationContext) event.getEventProperties().get(AuthPublisherConstants.SESSION_CONTEXT);
-        Map<String, Object> unmodifiableParamMap = (Map<String, Object>) event.getEventProperties().get(AuthPublisherConstants.PARAMS);
+        HttpServletRequest request = (HttpServletRequest) event.getEventProperties()
+                .get(IdentityEventConstants.EventProperty.REQUEST);
+        SessionContext sessionContext = (SessionContext) event.getEventProperties()
+                .get(IdentityEventConstants.EventProperty.CONTEXT);
+        AuthenticationContext context = (AuthenticationContext) event.getEventProperties()
+                .get(IdentityEventConstants.EventProperty.SESSION_CONTEXT);
+        Map<String, Object> unmodifiableParamMap = (Map<String, Object>) event.getEventProperties()
+                .get(IdentityEventConstants.EventProperty.PARAMS);
         String eventName = event.getEventName();
 
         if (this.isEnabled(context)) {
-            if (IdentityEventConstants.Event.SESSION_CREATE.equalsIgnoreCase(eventName)) {
+            if (IdentityEventConstants.EventName.SESSION_CREATE.toString().equalsIgnoreCase(eventName)) {
                 publishSessionCreation(request, context, sessionContext, unmodifiableParamMap);
 
-            } else if (IdentityEventConstants.Event.SESSION_UPDATE.equalsIgnoreCase(eventName)) {
+            } else if (IdentityEventConstants.EventName.SESSION_UPDATE.toString().equalsIgnoreCase(eventName)) {
                 publishSessionUpdate(request, context, sessionContext, unmodifiableParamMap);
 
-            } else if (IdentityEventConstants.Event.SESSION_TERMINATE.equalsIgnoreCase(eventName)) {
+            } else if (IdentityEventConstants.EventName.SESSION_TERMINATE.toString().equalsIgnoreCase(eventName)) {
                 publishSessionTermination(request, context, sessionContext, unmodifiableParamMap);
 
-            } else if (IdentityEventConstants.Event.AUTHENTICATION_SUCCESS.equalsIgnoreCase(eventName)) {
+            } else if (IdentityEventConstants.EventName.AUTHENTICATION_SUCCESS.toString()
+                    .equalsIgnoreCase(eventName)) {
                 publishAuthenticationSuccess(request, context, unmodifiableParamMap);
 
-            } else if (IdentityEventConstants.Event.AUTHENTICATION_FAILURE.equalsIgnoreCase(eventName)) {
+            } else if (IdentityEventConstants.EventName.AUTHENTICATION_FAILURE.toString()
+                    .equalsIgnoreCase(eventName)) {
                 publishAuthenticationFailure(request, context, unmodifiableParamMap);
 
-            } else if (IdentityEventConstants.Event.AUTHENTICATION_STEP_SUCCESS.equalsIgnoreCase(eventName)) {
+            } else if (IdentityEventConstants.EventName.AUTHENTICATION_STEP_SUCCESS.toString()
+                    .equalsIgnoreCase(eventName)) {
                 publishAuthenticationStepSuccess(request, context, unmodifiableParamMap);
 
-            } else if (IdentityEventConstants.Event.AUTHENTICATION_STEP_FAILURE.equalsIgnoreCase(eventName)) {
+            } else if (IdentityEventConstants.EventName.AUTHENTICATION_STEP_FAILURE.toString()
+                    .equalsIgnoreCase(eventName)) {
                 publishAuthenticationStepFailure(request, context, unmodifiableParamMap);
             }
         }
