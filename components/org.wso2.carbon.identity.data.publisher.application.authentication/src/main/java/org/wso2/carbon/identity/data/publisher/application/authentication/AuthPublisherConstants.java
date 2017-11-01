@@ -55,10 +55,4 @@ public class AuthPublisherConstants {
     public static final int SESSION_TERMINATION_STATUS = 0;
     public static final int SESSION_UPDATE_STATUS = 2;
 
-    //event parameters names
-    public static final String REQUEST = "request";
-    public static final String CONTEXT = "context";
-    public static final String SESSION_CONTEXT = "sessionContext";
-    public static final String PARAMS = "params";
-
 }
