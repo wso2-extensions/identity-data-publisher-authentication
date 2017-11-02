@@ -63,52 +63,7 @@ public abstract class AbstractAuthenticationDataHandler extends AbstractEventHan
         if (log.isDebugEnabled()) {
             log.debug("Publishing authentication step success");
         }
-        AuthenticationData authenticationData = new AuthenticationData();
-        int step = context.getCurrentStep();
-        if (context.getExternalIdP() == null) {
-            authenticationData.setIdentityProvider(FrameworkConstants.LOCAL_IDP_NAME);
-        } else {
-            authenticationData.setIdentityProvider(context.getExternalIdP().getIdPName());
-        }
-        Object userObj = params.get(FrameworkConstants.AnalyticsAttributes.USER);
-        if (userObj != null && userObj instanceof AuthenticatedUser) {
-            AuthenticatedUser user = (AuthenticatedUser) userObj;
-            authenticationData.setTenantDomain(user.getTenantDomain());
-            authenticationData.setUserStoreDomain(user.getUserStoreDomain());
-            if (StringUtils.isNotBlank(user.getUserName())) {
-                authenticationData.setUsername(user.getUserName());
-            } else {
-                authenticationData.setUsername(user.getAuthenticatedSubjectIdentifier());
-            }
-        }
-        Object isFederatedObj = params.get(FrameworkConstants.AnalyticsAttributes.IS_FEDERATED);
-        if (isFederatedObj != null) {
-            boolean isFederated = (Boolean) isFederatedObj;
-            if (isFederated) {
-                authenticationData.setIdentityProviderType(FrameworkConstants.FEDERATED_IDP_NAME);
-            } else {
-                authenticationData.setIdentityProviderType(FrameworkConstants.LOCAL_IDP_NAME);
-                authenticationData.setLocalUsername(authenticationData.getUsername());
-            }
-        }
-        authenticationData.setContextId(context.getContextIdentifier());
-        authenticationData.setEventId(UUID.randomUUID().toString());
-        authenticationData.setEventType(AuthPublisherConstants.STEP_EVENT);
-        authenticationData.setAuthnSuccess(false);
-        authenticationData.setRemoteIp(IdentityUtil.getClientIpAddress(request));
-        authenticationData.setServiceProvider(context.getServiceProviderName());
-        authenticationData.setInboundProtocol(context.getRequestType());
-        authenticationData.setRememberMe(context.isRememberMe());
-        authenticationData.setForcedAuthn(context.isForceAuthenticate());
-        authenticationData.setPassive(context.isPassiveAuthenticate());
-        authenticationData.setInitialLogin(false);
-        authenticationData.setAuthenticator(context.getCurrentAuthenticator());
-        authenticationData.setSuccess(true);
-        authenticationData.setStepNo(step);
-        authenticationData.addParameter(AuthPublisherConstants.TENANT_ID, AuthnDataPublisherUtils
-                .getTenantDomains(context.getTenantDomain(), authenticationData.getTenantDomain()));
-        authenticationData.addParameter(AuthPublisherConstants.RELYING_PARTY, context.getRelyingParty());
-
+        AuthenticationData authenticationData = buildAuthnDataForAuthenticationStepStatus(request,context,params,true);
         doPublishAuthenticationStepSuccess(authenticationData);
     }
 
@@ -125,67 +80,7 @@ public abstract class AbstractAuthenticationDataHandler extends AbstractEventHan
         if (log.isDebugEnabled()) {
             log.debug("Publishing authentication step failure");
         }
-        AuthenticationData authenticationData = new AuthenticationData();
-        int step = context.getCurrentStep();
-        if (context.getExternalIdP() == null) {
-            authenticationData.setIdentityProvider(FrameworkConstants.LOCAL_IDP_NAME);
-        } else {
-            authenticationData.setIdentityProvider(context.getExternalIdP().getIdPName());
-        }
-        Object userObj = params.get(FrameworkConstants.AnalyticsAttributes.USER);
-        if (userObj != null && userObj instanceof User) {
-            User user = (User) userObj;
-            authenticationData.setTenantDomain(user.getTenantDomain());
-            authenticationData.setUserStoreDomain(user.getUserStoreDomain());
-            authenticationData.setUsername(user.getUserName());
-        } else if (userObj != null && userObj instanceof AuthenticatedUser) {
-            AuthenticatedUser user = (AuthenticatedUser) userObj;
-            authenticationData.setTenantDomain(user.getTenantDomain());
-            authenticationData.setUserStoreDomain(user.getUserStoreDomain());
-            if(StringUtils.isNotEmpty(user.getUserName())) {
-                authenticationData.setUsername(user.getUserName());
-            } else {
-                authenticationData.setUsername(user.getAuthenticatedSubjectIdentifier());
-            }
-        }
-
-        Object isFederatedObj = params.get(FrameworkConstants.AnalyticsAttributes.IS_FEDERATED);
-        if (isFederatedObj != null) {
-            boolean isFederated = (Boolean) isFederatedObj;
-            if (isFederated) {
-                authenticationData.setIdentityProviderType(FrameworkConstants.FEDERATED_IDP_NAME);
-            } else {
-                authenticationData.setIdentityProviderType(FrameworkConstants.LOCAL_IDP_NAME);
-                authenticationData.setLocalUsername(authenticationData.getUsername());
-            }
-        }
-        authenticationData.setContextId(context.getContextIdentifier());
-        authenticationData.setEventId(UUID.randomUUID().toString());
-        authenticationData.setEventType(AuthPublisherConstants.STEP_EVENT);
-        authenticationData.setAuthnSuccess(false);
-        authenticationData.setRemoteIp(IdentityUtil.getClientIpAddress(request));
-        authenticationData.setServiceProvider(context.getServiceProviderName());
-        authenticationData.setInboundProtocol(context.getRequestType());
-        authenticationData.setRememberMe(context.isRememberMe());
-        authenticationData.setForcedAuthn(context.isForceAuthenticate());
-        authenticationData.setPassive(context.isPassiveAuthenticate());
-        authenticationData.setInitialLogin(false);
-        authenticationData.setAuthenticator(context.getCurrentAuthenticator());
-        authenticationData.setSuccess(false);
-        authenticationData.setStepNo(step);
-        // Should publish the event to both SP tenant domain and the tenant domain of the user who did the login
-        // attempt
-        if (context.getSequenceConfig() != null && context.getSequenceConfig().getApplicationConfig() != null && context
-                .getSequenceConfig().getApplicationConfig().isSaaSApp()) {
-            authenticationData.addParameter(AuthPublisherConstants.TENANT_ID, AuthnDataPublisherUtils
-                    .getTenantDomains(context.getTenantDomain(), authenticationData.getTenantDomain()));
-        } else {
-            authenticationData.addParameter(AuthPublisherConstants.TENANT_ID, AuthnDataPublisherUtils
-                    .getTenantDomains(context.getTenantDomain(), null));
-        }
-
-        authenticationData.addParameter(AuthPublisherConstants.RELYING_PARTY, context.getRelyingParty());
-
+        AuthenticationData authenticationData = buildAuthnDataForAuthenticationStepStatus(request,context,params,false);
         doPublishAuthenticationStepFailure(authenticationData);
     }
 
@@ -202,62 +97,7 @@ public abstract class AbstractAuthenticationDataHandler extends AbstractEventHan
         if (log.isDebugEnabled()) {
             log.debug("Publishing authentication success");
         }
-        AuthenticationData authenticationData = new AuthenticationData();
-        Object userObj = params.get(FrameworkConstants.AnalyticsAttributes.USER);
-        if (userObj != null && userObj instanceof AuthenticatedUser) {
-            AuthenticatedUser user = (AuthenticatedUser) userObj;
-            authenticationData.setUsername(user.getUserName());
-        }
-
-        Object hasFederatedStepObj = context.getProperty(FrameworkConstants.AnalyticsAttributes.HAS_FEDERATED_STEP);
-        Object hasLocalStepObj = context.getProperty(FrameworkConstants.AnalyticsAttributes.HAS_LOCAL_STEP);
-        Object isInitialLoginObj = context.getProperty(FrameworkConstants.AnalyticsAttributes.IS_INITIAL_LOGIN);
-        boolean hasFederated = false;
-        boolean hasLocal = false;
-        boolean isInitialLogin = false;
-        boolean hasPreviousLocalStep = hasPreviousLocalEvent(context);
-        if (hasFederatedStepObj != null) {
-            hasFederated = (Boolean) hasFederatedStepObj;
-        }
-        if (isInitialLoginObj != null) {
-            isInitialLogin = (Boolean) isInitialLoginObj;
-        }
-        if (hasLocalStepObj != null) {
-            hasLocal = (Boolean) hasLocalStepObj;
-        }
-        // If a previous successful local step is there, we need to skip this event from local events
-        if (!hasPreviousLocalStep && hasFederated && hasLocal) {
-            authenticationData.setIdentityProviderType(FrameworkConstants.FEDERATED_IDP_NAME + "," +
-                    FrameworkConstants.LOCAL_IDP_NAME);
-            authenticationData.setStepNo(getLocalStepNo(context));
-        } else if (!hasPreviousLocalStep && hasLocal) {
-            authenticationData.setIdentityProviderType(FrameworkConstants.LOCAL_IDP_NAME);
-            authenticationData.setStepNo(getLocalStepNo(context));
-        } else if (hasFederated) {
-            authenticationData.setIdentityProviderType(FrameworkConstants.FEDERATED_IDP_NAME);
-        }
-        authenticationData.setIdentityProvider(AuthnDataPublisherUtils.getSubjectStepIDP(context));
-        authenticationData.setEventType(AuthPublisherConstants.OVERALL_EVENT);
-        authenticationData.setSuccess(true);
-        authenticationData.setContextId(context.getContextIdentifier());
-        authenticationData.setEventId(UUID.randomUUID().toString());
-        authenticationData.setAuthnSuccess(true);
-        authenticationData.setRemoteIp(IdentityUtil.getClientIpAddress(request));
-        authenticationData.setServiceProvider(context.getServiceProviderName());
-        authenticationData.setInboundProtocol(context.getRequestType());
-        authenticationData.setRememberMe(context.isRememberMe());
-        authenticationData.setForcedAuthn(context.isForceAuthenticate());
-        authenticationData.setPassive(context.isPassiveAuthenticate());
-        authenticationData.setInitialLogin(isInitialLogin);
-        authenticationData = fillLocalEvent(authenticationData, context);
-        authenticationData.addParameter(AuthPublisherConstants.TENANT_ID, AuthnDataPublisherUtils
-                .getTenantDomains(context.getTenantDomain(), authenticationData.getTenantDomain()));
-        authenticationData.addParameter(AuthPublisherConstants.SUBJECT_IDENTIFIER, context.getSequenceConfig()
-                .getAuthenticatedUser().getAuthenticatedSubjectIdentifier());
-        authenticationData.addParameter(AuthPublisherConstants.RELYING_PARTY, context.getRelyingParty());
-        authenticationData.addParameter(AuthPublisherConstants.AUTHENTICATED_IDPS, context.getSequenceConfig()
-                .getAuthenticatedIdPs());
-
+        AuthenticationData authenticationData = buildAuthnDataForAuthenticationStatus(request,context,params,true);
         doPublishAuthenticationSuccess(authenticationData);
     }
 
@@ -274,39 +114,7 @@ public abstract class AbstractAuthenticationDataHandler extends AbstractEventHan
         if (log.isDebugEnabled()) {
             log.debug("Publishing authentication failure");
         }
-        AuthenticationData authenticationData = new AuthenticationData();
-        Object userObj = params.get(FrameworkConstants.AnalyticsAttributes.USER);
-        if (userObj != null && userObj instanceof AuthenticatedUser) {
-            AuthenticatedUser user = (AuthenticatedUser) userObj;
-            authenticationData.setTenantDomain(user.getTenantDomain());
-            authenticationData.setUserStoreDomain(user.getUserStoreDomain());
-            authenticationData.setUsername(user.getUserName());
-        }
-
-        authenticationData.setContextId(context.getContextIdentifier());
-        authenticationData.setEventId(UUID.randomUUID().toString());
-        authenticationData.setEventType(AuthPublisherConstants.OVERALL_EVENT);
-        authenticationData.setAuthnSuccess(false);
-        authenticationData.setRemoteIp(IdentityUtil.getClientIpAddress(request));
-        authenticationData.setServiceProvider(context.getServiceProviderName());
-        authenticationData.setInboundProtocol(context.getRequestType());
-        authenticationData.setRememberMe(context.isRememberMe());
-        authenticationData.setForcedAuthn(context.isForceAuthenticate());
-        authenticationData.setPassive(context.isPassiveAuthenticate());
-        authenticationData.setInitialLogin(false);
-        // Should publish the event to both SP tenant domain and the tenant domain of the user who did the login
-        // attempt
-        if (context.getSequenceConfig() != null && context.getSequenceConfig().getApplicationConfig
-                () != null && context.getSequenceConfig().getApplicationConfig().isSaaSApp()) {
-            authenticationData.addParameter(AuthPublisherConstants.TENANT_ID, AuthnDataPublisherUtils
-                    .getTenantDomains(context.getTenantDomain(), authenticationData.getTenantDomain()));
-        } else {
-            authenticationData.addParameter(AuthPublisherConstants.TENANT_ID, AuthnDataPublisherUtils
-                    .getTenantDomains(context.getTenantDomain(), null));
-        }
-
-        authenticationData.addParameter(AuthPublisherConstants.RELYING_PARTY, context.getRelyingParty());
-
+        AuthenticationData authenticationData = buildAuthnDataForAuthenticationStatus(request,context,params,false);
         doPublishAuthenticationFailure(authenticationData);
     }
 
@@ -324,37 +132,20 @@ public abstract class AbstractAuthenticationDataHandler extends AbstractEventHan
         if (log.isDebugEnabled()) {
             log.debug("Publishing session creation");
         }
-        SessionData sessionData = new SessionData();
-        Object userObj = params.get(FrameworkConstants.AnalyticsAttributes.USER);
-        String sessionId = (String) params.get(FrameworkConstants.AnalyticsAttributes.SESSION_ID);
-        String userName = null;
-        String userStoreDomain = null;
-        String tenantDomain = null;
-        Long terminationTime = null;
+        SessionData sessionData = buildSessionData(request, context, sessionContext, params);
+
         Long createdTime = null;
-        if (userObj != null && userObj instanceof AuthenticatedUser) {
-            AuthenticatedUser user = (AuthenticatedUser) userObj;
-            userName = user.getUserName();
-            userStoreDomain = user.getUserStoreDomain();
-            tenantDomain = user.getTenantDomain();
-        }
+        Long terminationTime = null;
+
         if (sessionContext != null) {
             Object createdTimeObj = sessionContext.getProperty(FrameworkConstants.CREATED_TIMESTAMP);
             createdTime = (Long) createdTimeObj;
             terminationTime = AuthnDataPublisherUtils.getSessionExpirationTime(createdTime, createdTime,
                     context.getTenantDomain(), sessionContext.isRememberMe());
-            sessionData.setIsRememberMe(sessionContext.isRememberMe());
         }
-        sessionData.setUser(userName);
-        sessionData.setUserStoreDomain(userStoreDomain);
-        sessionData.setTenantDomain(tenantDomain);
-        sessionData.setSessionId(sessionId);
         sessionData.setCreatedTimestamp(createdTime);
         sessionData.setUpdatedTimestamp(createdTime);
         sessionData.setTerminationTimestamp(terminationTime);
-        sessionData.setIdentityProviders(getCommaSeparatedIDPs(sessionContext));
-        sessionData.setServiceProvider(context.getServiceProviderName());
-        sessionData.setRemoteIP(IdentityUtil.getClientIpAddress(request));
         sessionData.setUserAgent(request.getHeader(AuthPublisherConstants.USER_AGENT));
         if (context.getSequenceConfig().getApplicationConfig().isSaaSApp()) {
             sessionData.addParameter(AuthPublisherConstants.TENANT_ID, AuthnDataPublisherUtils
@@ -362,6 +153,7 @@ public abstract class AbstractAuthenticationDataHandler extends AbstractEventHan
         } else {
             sessionData.addParameter(AuthPublisherConstants.TENANT_ID, new String[]{sessionData.getTenantDomain()});
         }
+
         doPublishSessionCreation(sessionData);
     }
 
@@ -379,48 +171,29 @@ public abstract class AbstractAuthenticationDataHandler extends AbstractEventHan
         if (log.isDebugEnabled()) {
             log.debug("Publishing session update");
         }
+        SessionData sessionData = buildSessionData(request, context, sessionContext, params);
 
-        SessionData sessionData = new SessionData();
-        Object userObj = params.get(FrameworkConstants.AnalyticsAttributes.USER);
-        String sessionId = (String) params.get(FrameworkConstants.AnalyticsAttributes.SESSION_ID);
-        String userName = null;
-        String userStoreDomain = null;
-        String tenantDomain = null;
-        Long terminationTime = null;
         Long createdTime = null;
+        Long terminationTime = null;
         Long currentTime = System.currentTimeMillis();
-
-        if (userObj != null && userObj instanceof AuthenticatedUser) {
-            AuthenticatedUser user = (AuthenticatedUser) userObj;
-            userName = user.getUserName();
-            userStoreDomain = user.getUserStoreDomain();
-            tenantDomain = user.getTenantDomain();
-        }
 
         if (sessionContext != null) {
             Object createdTimeObj = sessionContext.getProperty(FrameworkConstants.CREATED_TIMESTAMP);
             createdTime = (Long) createdTimeObj;
-            terminationTime = AuthnDataPublisherUtils.getSessionExpirationTime(createdTime, currentTime,
+            terminationTime = AuthnDataPublisherUtils.getSessionExpirationTime(createdTime, createdTime,
                     context.getTenantDomain(), sessionContext.isRememberMe());
-            sessionData.setIsRememberMe(sessionContext.isRememberMe());
         }
-
-        sessionData.setUser(userName);
-        sessionData.setIdentityProviders(getCommaSeparatedIDPs(sessionContext));
-        sessionData.setServiceProvider(context.getServiceProviderName());
-        sessionData.setUserStoreDomain(userStoreDomain);
-        sessionData.setTenantDomain(tenantDomain);
-        sessionData.setSessionId(sessionId);
         sessionData.setCreatedTimestamp(createdTime);
         sessionData.setUpdatedTimestamp(currentTime);
         sessionData.setTerminationTimestamp(terminationTime);
-        sessionData.setRemoteIP(IdentityUtil.getClientIpAddress(request));
+        sessionData.setUserAgent(request.getHeader(AuthPublisherConstants.USER_AGENT));
         if (context.getSequenceConfig().getApplicationConfig().isSaaSApp()) {
             sessionData.addParameter(AuthPublisherConstants.TENANT_ID, AuthnDataPublisherUtils
                     .getTenantDomains(context.getTenantDomain(), sessionData.getTenantDomain()));
         } else {
             sessionData.addParameter(AuthPublisherConstants.TENANT_ID, new String[]{sessionData.getTenantDomain()});
         }
+
         doPublishSessionUpdate(sessionData);
     }
 
@@ -438,44 +211,24 @@ public abstract class AbstractAuthenticationDataHandler extends AbstractEventHan
         if (log.isDebugEnabled()) {
             log.debug("Publishing session termination");
         }
-        SessionData sessionData = new SessionData();
-        Object userObj = params.get(FrameworkConstants.AnalyticsAttributes.USER);
-        String sessionId = (String) params.get(FrameworkConstants.AnalyticsAttributes.SESSION_ID);
-        String userName = null;
-        String userStoreDomain = null;
-        String tenantDomain = null;
+        SessionData sessionData = buildSessionData(request, context, sessionContext, params);
+
         Long createdTime = null;
         Long currentTime = System.currentTimeMillis();
-        if (userObj != null && userObj instanceof AuthenticatedUser) {
-            AuthenticatedUser user = (AuthenticatedUser) userObj;
-            userName = user.getUserName();
-            userStoreDomain = user.getUserStoreDomain();
-            tenantDomain = user.getTenantDomain();
-        }
 
         if (sessionContext != null) {
             Object createdTimeObj = sessionContext.getProperty(FrameworkConstants.CREATED_TIMESTAMP);
             createdTime = (Long) createdTimeObj;
-            sessionData.setIsRememberMe(sessionContext.isRememberMe());
         }
-
-        sessionData.setUser(userName);
-        sessionData.setUserStoreDomain(userStoreDomain);
-        sessionData.setTenantDomain(tenantDomain);
-        sessionData.setSessionId(sessionId);
         sessionData.setCreatedTimestamp(createdTime);
         sessionData.setUpdatedTimestamp(currentTime);
         sessionData.setIdentityProviders(getCommaSeparatedIDPs(sessionContext));
         sessionData.setTerminationTimestamp(currentTime);
         if (context != null) {
-            sessionData.setServiceProvider(context.getServiceProviderName());
             sessionData.addParameter(AuthPublisherConstants.TENANT_ID,
                     AuthnDataPublisherUtils.getTenantDomains(context.getTenantDomain(), sessionData.getTenantDomain()));
         } else {
-            sessionData.addParameter(AuthPublisherConstants.TENANT_ID, new String[] { sessionData.getTenantDomain() });
-        }
-        if (request != null) {
-            sessionData.setRemoteIP(IdentityUtil.getClientIpAddress(request));
+            sessionData.addParameter(AuthPublisherConstants.TENANT_ID, new String[]{sessionData.getTenantDomain()});
         }
         doPublishSessionTermination(sessionData);
     }
@@ -649,6 +402,198 @@ public abstract class AbstractAuthenticationDataHandler extends AbstractEventHan
                 publishAuthenticationStepFailure(request, context, unmodifiableParamMap);
             }
         }
+    }
+
+    private AuthenticationData buildAuthnDataForAuthenticationStepStatus(HttpServletRequest request, AuthenticationContext context,
+                                                                         Map<String, Object> params, Boolean isSuccess){
+
+        AuthenticationData authenticationData = new AuthenticationData();
+        int step = context.getCurrentStep();
+        if (context.getExternalIdP() == null) {
+            authenticationData.setIdentityProvider(FrameworkConstants.LOCAL_IDP_NAME);
+        } else {
+            authenticationData.setIdentityProvider(context.getExternalIdP().getIdPName());
+        }
+        Object userObj = params.get(FrameworkConstants.AnalyticsAttributes.USER);
+        if (userObj != null && userObj instanceof User) {
+            User user = (User) userObj;
+            authenticationData.setTenantDomain(user.getTenantDomain());
+            authenticationData.setUserStoreDomain(user.getUserStoreDomain());
+            authenticationData.setUsername(user.getUserName());
+        } else if (userObj != null && userObj instanceof AuthenticatedUser) {
+            AuthenticatedUser user = (AuthenticatedUser) userObj;
+            authenticationData.setTenantDomain(user.getTenantDomain());
+            authenticationData.setUserStoreDomain(user.getUserStoreDomain());
+            if (StringUtils.isNotEmpty(user.getUserName())) {
+                authenticationData.setUsername(user.getUserName());
+            } else {
+                authenticationData.setUsername(user.getAuthenticatedSubjectIdentifier());
+            }
+        }
+
+        Object isFederatedObj = params.get(FrameworkConstants.AnalyticsAttributes.IS_FEDERATED);
+        if (isFederatedObj != null) {
+            boolean isFederated = (Boolean) isFederatedObj;
+            if (isFederated) {
+                authenticationData.setIdentityProviderType(FrameworkConstants.FEDERATED_IDP_NAME);
+            } else {
+                authenticationData.setIdentityProviderType(FrameworkConstants.LOCAL_IDP_NAME);
+                authenticationData.setLocalUsername(authenticationData.getUsername());
+            }
+        }
+        authenticationData.setContextId(context.getContextIdentifier());
+        authenticationData.setEventId(UUID.randomUUID().toString());
+        authenticationData.setEventType(AuthPublisherConstants.STEP_EVENT);
+        authenticationData.setAuthnSuccess(false);
+        authenticationData.setRemoteIp(IdentityUtil.getClientIpAddress(request));
+        authenticationData.setServiceProvider(context.getServiceProviderName());
+        authenticationData.setInboundProtocol(context.getRequestType());
+        authenticationData.setRememberMe(context.isRememberMe());
+        authenticationData.setForcedAuthn(context.isForceAuthenticate());
+        authenticationData.setPassive(context.isPassiveAuthenticate());
+        authenticationData.setInitialLogin(false);
+        authenticationData.setAuthenticator(context.getCurrentAuthenticator());
+        authenticationData.setSuccess(isSuccess);
+        authenticationData.setStepNo(step);
+
+        if (isSuccess) {
+            authenticationData.addParameter(AuthPublisherConstants.TENANT_ID, AuthnDataPublisherUtils
+                    .getTenantDomains(context.getTenantDomain(), authenticationData.getTenantDomain()));
+        } else {
+            // Should publish the event to both SP tenant domain and the tenant domain of the user who did the login
+            // attempt
+            if (context.getSequenceConfig() != null && context.getSequenceConfig().getApplicationConfig() != null && context
+                    .getSequenceConfig().getApplicationConfig().isSaaSApp()) {
+                authenticationData.addParameter(AuthPublisherConstants.TENANT_ID, AuthnDataPublisherUtils
+                        .getTenantDomains(context.getTenantDomain(), authenticationData.getTenantDomain()));
+            } else {
+                authenticationData.addParameter(AuthPublisherConstants.TENANT_ID, AuthnDataPublisherUtils
+                        .getTenantDomains(context.getTenantDomain(), null));
+            }
+
+        }
+
+        authenticationData.addParameter(AuthPublisherConstants.RELYING_PARTY, context.getRelyingParty());
+        return authenticationData;
+    }
+
+    private AuthenticationData buildAuthnDataForAuthenticationStatus(HttpServletRequest request, AuthenticationContext context,
+                                                                     Map<String, Object> params, Boolean isSuccess){
+
+        AuthenticationData authenticationData = new AuthenticationData();
+        Object userObj = params.get(FrameworkConstants.AnalyticsAttributes.USER);
+        if (userObj != null && userObj instanceof AuthenticatedUser) {
+            AuthenticatedUser user = (AuthenticatedUser) userObj;
+            authenticationData.setUsername(user.getUserName());
+            if (!isSuccess) {
+                authenticationData.setTenantDomain(user.getTenantDomain());
+                authenticationData.setUserStoreDomain(user.getUserStoreDomain());
+            }
+        }
+
+        boolean hasFederated = false;
+        boolean hasLocal = false;
+        boolean isInitialLogin = false;
+
+        if (isSuccess) {
+            Object hasFederatedStepObj = context.getProperty(FrameworkConstants.AnalyticsAttributes.HAS_FEDERATED_STEP);
+            Object hasLocalStepObj = context.getProperty(FrameworkConstants.AnalyticsAttributes.HAS_LOCAL_STEP);
+            Object isInitialLoginObj = context.getProperty(FrameworkConstants.AnalyticsAttributes.IS_INITIAL_LOGIN);
+            boolean hasPreviousLocalStep = hasPreviousLocalEvent(context);
+            if (hasFederatedStepObj != null) {
+                hasFederated = (Boolean) hasFederatedStepObj;
+            }
+            if (isInitialLoginObj != null) {
+                isInitialLogin = (Boolean) isInitialLoginObj;
+            }
+            if (hasLocalStepObj != null) {
+                hasLocal = (Boolean) hasLocalStepObj;
+            }
+
+            if (!hasPreviousLocalStep && hasFederated && hasLocal) {
+                authenticationData.setIdentityProviderType(FrameworkConstants.FEDERATED_IDP_NAME + "," +
+                        FrameworkConstants.LOCAL_IDP_NAME);
+                authenticationData.setStepNo(getLocalStepNo(context));
+            } else if (!hasPreviousLocalStep && hasLocal) {
+                authenticationData.setIdentityProviderType(FrameworkConstants.LOCAL_IDP_NAME);
+                authenticationData.setStepNo(getLocalStepNo(context));
+            } else if (hasFederated) {
+                authenticationData.setIdentityProviderType(FrameworkConstants.FEDERATED_IDP_NAME);
+            }
+            authenticationData.setIdentityProvider(AuthnDataPublisherUtils.getSubjectStepIDP(context));
+            authenticationData.setSuccess(true);
+            authenticationData = fillLocalEvent(authenticationData, context);
+
+        }
+
+        authenticationData.setEventType(AuthPublisherConstants.OVERALL_EVENT);
+        authenticationData.setContextId(context.getContextIdentifier());
+        authenticationData.setEventId(UUID.randomUUID().toString());
+        authenticationData.setAuthnSuccess(true);
+        authenticationData.setRemoteIp(IdentityUtil.getClientIpAddress(request));
+        authenticationData.setServiceProvider(context.getServiceProviderName());
+        authenticationData.setInboundProtocol(context.getRequestType());
+        authenticationData.setRememberMe(context.isRememberMe());
+        authenticationData.setForcedAuthn(context.isForceAuthenticate());
+        authenticationData.setPassive(context.isPassiveAuthenticate());
+        authenticationData.setInitialLogin(isInitialLogin);
+
+        if (isSuccess) {
+            authenticationData.addParameter(AuthPublisherConstants.TENANT_ID, AuthnDataPublisherUtils
+                    .getTenantDomains(context.getTenantDomain(), authenticationData.getTenantDomain()));
+            authenticationData.addParameter(AuthPublisherConstants.SUBJECT_IDENTIFIER, context.getSequenceConfig()
+                    .getAuthenticatedUser().getAuthenticatedSubjectIdentifier());
+            authenticationData.addParameter(AuthPublisherConstants.AUTHENTICATED_IDPS, context.getSequenceConfig()
+                    .getAuthenticatedIdPs());
+        } else {
+            // Should publish the event to both SP tenant domain and the tenant domain of the user who did the login
+            // attempt
+            if (context.getSequenceConfig() != null && context.getSequenceConfig().getApplicationConfig
+                    () != null && context.getSequenceConfig().getApplicationConfig().isSaaSApp()) {
+                authenticationData.addParameter(AuthPublisherConstants.TENANT_ID, AuthnDataPublisherUtils
+                        .getTenantDomains(context.getTenantDomain(), authenticationData.getTenantDomain()));
+            } else {
+                authenticationData.addParameter(AuthPublisherConstants.TENANT_ID, AuthnDataPublisherUtils
+                        .getTenantDomains(context.getTenantDomain(), null));
+            }
+        }
+
+        authenticationData.addParameter(AuthPublisherConstants.RELYING_PARTY, context.getRelyingParty());
+
+        return authenticationData;
+    }
+
+    private SessionData buildSessionData(HttpServletRequest request, AuthenticationContext context, SessionContext
+            sessionContext, Map<String, Object> params){
+
+        SessionData sessionData = new SessionData();
+        Object userObj = params.get(FrameworkConstants.AnalyticsAttributes.USER);
+        String sessionId = (String) params.get(FrameworkConstants.AnalyticsAttributes.SESSION_ID);
+        String userName = null;
+        String userStoreDomain = null;
+        String tenantDomain = null;
+        if (userObj != null && userObj instanceof AuthenticatedUser) {
+            AuthenticatedUser user = (AuthenticatedUser) userObj;
+            userName = user.getUserName();
+            userStoreDomain = user.getUserStoreDomain();
+            tenantDomain = user.getTenantDomain();
+        }
+        sessionData.setUser(userName);
+        sessionData.setUserStoreDomain(userStoreDomain);
+        sessionData.setTenantDomain(tenantDomain);
+        sessionData.setSessionId(sessionId);
+        sessionData.setIdentityProviders(getCommaSeparatedIDPs(sessionContext));
+        if (sessionContext != null) {
+            sessionData.setIsRememberMe(sessionContext.isRememberMe());
+        }
+        if (context != null) {
+            sessionData.setServiceProvider(context.getServiceProviderName());
+        }
+        if (request != null) {
+            sessionData.setRemoteIP(IdentityUtil.getClientIpAddress(request));
+        }
+
+        return sessionData;
     }
 
 }
