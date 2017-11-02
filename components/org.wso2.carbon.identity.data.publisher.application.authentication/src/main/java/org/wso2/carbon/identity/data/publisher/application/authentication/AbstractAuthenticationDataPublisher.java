@@ -368,9 +368,9 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractEventH
         HttpServletRequest request = (HttpServletRequest) event.getEventProperties()
                 .get(IdentityEventConstants.EventProperty.REQUEST);
         SessionContext sessionContext = (SessionContext) event.getEventProperties()
-                .get(IdentityEventConstants.EventProperty.CONTEXT);
-        AuthenticationContext context = (AuthenticationContext) event.getEventProperties()
                 .get(IdentityEventConstants.EventProperty.SESSION_CONTEXT);
+        AuthenticationContext context = (AuthenticationContext) event.getEventProperties()
+                .get(IdentityEventConstants.EventProperty.CONTEXT);
         Map<String, Object> unmodifiableParamMap = (Map<String, Object>) event.getEventProperties()
                 .get(IdentityEventConstants.EventProperty.PARAMS);
         String eventName = event.getEventName();
