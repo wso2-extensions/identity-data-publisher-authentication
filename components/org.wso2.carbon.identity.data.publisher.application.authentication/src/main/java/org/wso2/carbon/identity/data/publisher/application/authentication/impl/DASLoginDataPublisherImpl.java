@@ -30,7 +30,7 @@ import org.wso2.carbon.identity.application.authentication.framework.context.Ses
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkConstants;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkUtils;
 import org.wso2.carbon.identity.base.IdentityRuntimeException;
-import org.wso2.carbon.identity.data.publisher.application.authentication.AbstractAuthenticationDataHandler;
+import org.wso2.carbon.identity.data.publisher.application.authentication.AbstractAuthenticationDataPublisher;
 import org.wso2.carbon.identity.data.publisher.application.authentication.AuthPublisherConstants;
 import org.wso2.carbon.identity.data.publisher.application.authentication.AuthnDataPublisherUtils;
 import org.wso2.carbon.identity.data.publisher.application.authentication.internal.AuthenticationDataPublisherDataHolder;
@@ -47,7 +47,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-public class DASLoginDataPublisherImpl extends AbstractAuthenticationDataHandler {
+public class DASLoginDataPublisherImpl extends AbstractAuthenticationDataPublisher {
 
     public static final Log LOG = LogFactory.getLog(DASLoginDataPublisherImpl.class);
 

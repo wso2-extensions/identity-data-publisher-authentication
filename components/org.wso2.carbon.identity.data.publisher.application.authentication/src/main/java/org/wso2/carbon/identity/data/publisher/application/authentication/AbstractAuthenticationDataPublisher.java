@@ -45,10 +45,10 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 
-public abstract class AbstractAuthenticationDataHandler extends AbstractEventHandler implements
+public abstract class AbstractAuthenticationDataPublisher extends AbstractEventHandler implements
         AuthenticationDataPublisher {
 
-    private static final Log log = LogFactory.getLog(AbstractAuthenticationDataHandler.class);
+    private static final Log log = LogFactory.getLog(AbstractAuthenticationDataPublisher.class);
 
     /**
      * Publish authentication success
