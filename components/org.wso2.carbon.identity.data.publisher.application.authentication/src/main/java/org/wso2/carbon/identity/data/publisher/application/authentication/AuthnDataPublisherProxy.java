@@ -140,17 +140,6 @@ public class AuthnDataPublisherProxy extends AbstractIdentityMessageHandler impl
         return FrameworkConstants.AnalyticsAttributes.AUTHN_DATA_PUBLISHER_PROXY;
     }
 
-    /**
-     * initiate an event with following attributes as event properties and it will be sent to IdentityEventService for
-     * handling
-     *
-     * @param request
-     * @param context
-     * @param sessionContext
-     * @param params
-     * @param eventName
-     * @return
-     */
     private Event createEvent(HttpServletRequest request, AuthenticationContext context, SessionContext
             sessionContext, Map<String, Object> params, EventName eventName) {
         Map<String, Object> eventProperties = new HashMap<>();
