@@ -22,6 +22,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.identity.application.authentication.framework.AuthenticationDataPublisher;
+import org.wso2.carbon.identity.application.authentication.framework.AuthenticatorStatus;
 import org.wso2.carbon.identity.application.authentication.framework.config.model.StepConfig;
 import org.wso2.carbon.identity.application.authentication.framework.context.AuthenticationContext;
 import org.wso2.carbon.identity.application.authentication.framework.context.SessionContext;
@@ -63,7 +64,7 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractEventH
         if (log.isDebugEnabled()) {
             log.debug("Publishing authentication step success");
         }
-        AuthenticationData authenticationData = buildAuthnDataForAuthenticationStepStatus(request,context,params,true);
+        AuthenticationData authenticationData = buildAuthnDataForAuthenticationStepStatus(request, context, params, AuthenticatorStatus.PASS);
         doPublishAuthenticationStepSuccess(authenticationData);
     }
 
@@ -80,7 +81,7 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractEventH
         if (log.isDebugEnabled()) {
             log.debug("Publishing authentication step failure");
         }
-        AuthenticationData authenticationData = buildAuthnDataForAuthenticationStepStatus(request,context,params,false);
+        AuthenticationData authenticationData = buildAuthnDataForAuthenticationStepStatus(request, context, params, AuthenticatorStatus.FAIL);
         doPublishAuthenticationStepFailure(authenticationData);
     }
 
@@ -97,7 +98,7 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractEventH
         if (log.isDebugEnabled()) {
             log.debug("Publishing authentication success");
         }
-        AuthenticationData authenticationData = buildAuthnDataForAuthenticationStatus(request,context,params,true);
+        AuthenticationData authenticationData = buildAuthnDataForAuthenticationStatus(request, context, params, AuthenticatorStatus.PASS);
         doPublishAuthenticationSuccess(authenticationData);
     }
 
@@ -114,7 +115,7 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractEventH
         if (log.isDebugEnabled()) {
             log.debug("Publishing authentication failure");
         }
-        AuthenticationData authenticationData = buildAuthnDataForAuthenticationStatus(request,context,params,false);
+        AuthenticationData authenticationData = buildAuthnDataForAuthenticationStatus(request, context, params, AuthenticatorStatus.FAIL);
         doPublishAuthenticationFailure(authenticationData);
     }
 
@@ -376,36 +377,32 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractEventH
         String eventName = event.getEventName();
 
         if (this.isEnabled(context)) {
-            if (IdentityEventConstants.EventName.SESSION_CREATE.toString().equalsIgnoreCase(eventName)) {
+            if (IdentityEventConstants.EventName.SESSION_CREATE.name().equals(eventName)) {
                 publishSessionCreation(request, context, sessionContext, unmodifiableParamMap);
 
-            } else if (IdentityEventConstants.EventName.SESSION_UPDATE.toString().equalsIgnoreCase(eventName)) {
+            } else if (IdentityEventConstants.EventName.SESSION_UPDATE.name().equals(eventName)) {
                 publishSessionUpdate(request, context, sessionContext, unmodifiableParamMap);
 
-            } else if (IdentityEventConstants.EventName.SESSION_TERMINATE.toString().equalsIgnoreCase(eventName)) {
+            } else if (IdentityEventConstants.EventName.SESSION_TERMINATE.name().equals(eventName)) {
                 publishSessionTermination(request, context, sessionContext, unmodifiableParamMap);
 
-            } else if (IdentityEventConstants.EventName.AUTHENTICATION_SUCCESS.toString()
-                    .equalsIgnoreCase(eventName)) {
+            } else if (IdentityEventConstants.EventName.AUTHENTICATION_SUCCESS.name().equals(eventName)) {
                 publishAuthenticationSuccess(request, context, unmodifiableParamMap);
 
-            } else if (IdentityEventConstants.EventName.AUTHENTICATION_FAILURE.toString()
-                    .equalsIgnoreCase(eventName)) {
+            } else if (IdentityEventConstants.EventName.AUTHENTICATION_FAILURE.name().equals(eventName)) {
                 publishAuthenticationFailure(request, context, unmodifiableParamMap);
 
-            } else if (IdentityEventConstants.EventName.AUTHENTICATION_STEP_SUCCESS.toString()
-                    .equalsIgnoreCase(eventName)) {
+            } else if (IdentityEventConstants.EventName.AUTHENTICATION_STEP_SUCCESS.name().equals(eventName)) {
                 publishAuthenticationStepSuccess(request, context, unmodifiableParamMap);
 
-            } else if (IdentityEventConstants.EventName.AUTHENTICATION_STEP_FAILURE.toString()
-                    .equalsIgnoreCase(eventName)) {
+            } else if (IdentityEventConstants.EventName.AUTHENTICATION_STEP_FAILURE.name().equals(eventName)) {
                 publishAuthenticationStepFailure(request, context, unmodifiableParamMap);
             }
         }
     }
 
     private AuthenticationData buildAuthnDataForAuthenticationStepStatus(HttpServletRequest request, AuthenticationContext context,
-                                                                         Map<String, Object> params, Boolean isSuccess){
+                                                                         Map<String, Object> params, AuthenticatorStatus status){
 
         AuthenticationData authenticationData = new AuthenticationData();
         int step = context.getCurrentStep();
@@ -415,18 +412,15 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractEventH
             authenticationData.setIdentityProvider(context.getExternalIdP().getIdPName());
         }
         Object userObj = params.get(FrameworkConstants.AnalyticsAttributes.USER);
-        if (userObj != null && userObj instanceof User) {
+        if (userObj instanceof User) {
             User user = (User) userObj;
             authenticationData.setTenantDomain(user.getTenantDomain());
             authenticationData.setUserStoreDomain(user.getUserStoreDomain());
             authenticationData.setUsername(user.getUserName());
-        } else if (userObj != null && userObj instanceof AuthenticatedUser) {
+        }
+        if (userObj instanceof AuthenticatedUser) {
             AuthenticatedUser user = (AuthenticatedUser) userObj;
-            authenticationData.setTenantDomain(user.getTenantDomain());
-            authenticationData.setUserStoreDomain(user.getUserStoreDomain());
-            if (StringUtils.isNotEmpty(user.getUserName())) {
-                authenticationData.setUsername(user.getUserName());
-            } else {
+            if (StringUtils.isEmpty(user.getUserName())) {
                 authenticationData.setUsername(user.getAuthenticatedSubjectIdentifier());
             }
         }
@@ -453,10 +447,10 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractEventH
         authenticationData.setPassive(context.isPassiveAuthenticate());
         authenticationData.setInitialLogin(false);
         authenticationData.setAuthenticator(context.getCurrentAuthenticator());
-        authenticationData.setSuccess(isSuccess);
+        authenticationData.setSuccess(AuthenticatorStatus.PASS == status);
         authenticationData.setStepNo(step);
 
-        if (isSuccess) {
+        if (AuthenticatorStatus.PASS == status) {
             authenticationData.addParameter(AuthPublisherConstants.TENANT_ID, AuthnDataPublisherUtils
                     .getTenantDomains(context.getTenantDomain(), authenticationData.getTenantDomain()));
         } else {
@@ -478,37 +472,29 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractEventH
     }
 
     private AuthenticationData buildAuthnDataForAuthenticationStatus(HttpServletRequest request, AuthenticationContext context,
-                                                                     Map<String, Object> params, Boolean isSuccess){
+                                                                     Map<String, Object> params, AuthenticatorStatus status){
 
         AuthenticationData authenticationData = new AuthenticationData();
         Object userObj = params.get(FrameworkConstants.AnalyticsAttributes.USER);
         if (userObj != null && userObj instanceof AuthenticatedUser) {
             AuthenticatedUser user = (AuthenticatedUser) userObj;
             authenticationData.setUsername(user.getUserName());
-            if (!isSuccess) {
+            if (status == AuthenticatorStatus.FAIL) {
                 authenticationData.setTenantDomain(user.getTenantDomain());
                 authenticationData.setUserStoreDomain(user.getUserStoreDomain());
             }
         }
 
-        boolean hasFederated = false;
-        boolean hasLocal = false;
         boolean isInitialLogin = false;
 
-        if (isSuccess) {
+        if (status == AuthenticatorStatus.PASS) {
             Object hasFederatedStepObj = context.getProperty(FrameworkConstants.AnalyticsAttributes.HAS_FEDERATED_STEP);
             Object hasLocalStepObj = context.getProperty(FrameworkConstants.AnalyticsAttributes.HAS_LOCAL_STEP);
             Object isInitialLoginObj = context.getProperty(FrameworkConstants.AnalyticsAttributes.IS_INITIAL_LOGIN);
             boolean hasPreviousLocalStep = hasPreviousLocalEvent(context);
-            if (hasFederatedStepObj != null) {
-                hasFederated = (Boolean) hasFederatedStepObj;
-            }
-            if (isInitialLoginObj != null) {
-                isInitialLogin = (Boolean) isInitialLoginObj;
-            }
-            if (hasLocalStepObj != null) {
-                hasLocal = (Boolean) hasLocalStepObj;
-            }
+            boolean hasFederated = convertToBoolean(hasFederatedStepObj);
+            boolean hasLocal = convertToBoolean(hasLocalStepObj);
+            isInitialLogin = convertToBoolean(isInitialLoginObj);
 
             if (!hasPreviousLocalStep && hasFederated && hasLocal) {
                 authenticationData.setIdentityProviderType(FrameworkConstants.FEDERATED_IDP_NAME + "," +
@@ -538,7 +524,7 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractEventH
         authenticationData.setPassive(context.isPassiveAuthenticate());
         authenticationData.setInitialLogin(isInitialLogin);
 
-        if (isSuccess) {
+        if (status == AuthenticatorStatus.PASS) {
             authenticationData.addParameter(AuthPublisherConstants.TENANT_ID, AuthnDataPublisherUtils
                     .getTenantDomains(context.getTenantDomain(), authenticationData.getTenantDomain()));
             authenticationData.addParameter(AuthPublisherConstants.SUBJECT_IDENTIFIER, context.getSequenceConfig()
@@ -594,6 +580,13 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractEventH
         }
 
         return sessionData;
+    }
+
+    private boolean convertToBoolean(Object object) {
+        if (object != null) {
+            return (Boolean) object;
+        }
+        return false;
     }
 
 }
