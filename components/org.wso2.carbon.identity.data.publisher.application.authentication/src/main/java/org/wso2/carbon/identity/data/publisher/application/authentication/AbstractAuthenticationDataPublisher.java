@@ -37,6 +37,7 @@ import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.data.publisher.application.authentication.model.AuthenticationData;
 import org.wso2.carbon.identity.data.publisher.application.authentication.model.SessionData;
 import org.wso2.carbon.identity.event.IdentityEventConstants;
+import org.wso2.carbon.identity.event.IdentityEventConstants.EventName;
 import org.wso2.carbon.identity.event.IdentityEventException;
 import org.wso2.carbon.identity.event.event.Event;
 import org.wso2.carbon.identity.event.handler.AbstractEventHandler;
@@ -374,29 +375,37 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractEventH
                 .get(IdentityEventConstants.EventProperty.CONTEXT);
         Map<String, Object> unmodifiableParamMap = (Map<String, Object>) event.getEventProperties()
                 .get(IdentityEventConstants.EventProperty.PARAMS);
-        String eventName = event.getEventName();
+        EventName eventName = EventName.valueOf(event.getEventName());
 
         if (this.isEnabled(context)) {
-            if (IdentityEventConstants.EventName.SESSION_CREATE.name().equals(eventName)) {
-                publishSessionCreation(request, context, sessionContext, unmodifiableParamMap);
+            switch (eventName) {
+                case AUTHENTICATION_STEP_SUCCESS:
+                    publishAuthenticationStepSuccess(request, context, unmodifiableParamMap);
+                    break;
 
-            } else if (IdentityEventConstants.EventName.SESSION_UPDATE.name().equals(eventName)) {
-                publishSessionUpdate(request, context, sessionContext, unmodifiableParamMap);
+                case AUTHENTICATION_STEP_FAILURE:
+                    publishAuthenticationStepFailure(request, context, unmodifiableParamMap);
+                    break;
 
-            } else if (IdentityEventConstants.EventName.SESSION_TERMINATE.name().equals(eventName)) {
-                publishSessionTermination(request, context, sessionContext, unmodifiableParamMap);
+                case AUTHENTICATION_SUCCESS:
+                    publishAuthenticationSuccess(request, context, unmodifiableParamMap);
+                    break;
 
-            } else if (IdentityEventConstants.EventName.AUTHENTICATION_SUCCESS.name().equals(eventName)) {
-                publishAuthenticationSuccess(request, context, unmodifiableParamMap);
+                case AUTHENTICATION_FAILURE:
+                    publishAuthenticationFailure(request, context, unmodifiableParamMap);
+                    break;
 
-            } else if (IdentityEventConstants.EventName.AUTHENTICATION_FAILURE.name().equals(eventName)) {
-                publishAuthenticationFailure(request, context, unmodifiableParamMap);
+                case SESSION_CREATE:
+                    publishSessionCreation(request, context, sessionContext, unmodifiableParamMap);
+                    break;
 
-            } else if (IdentityEventConstants.EventName.AUTHENTICATION_STEP_SUCCESS.name().equals(eventName)) {
-                publishAuthenticationStepSuccess(request, context, unmodifiableParamMap);
+                case SESSION_UPDATE:
+                    publishSessionUpdate(request, context, sessionContext, unmodifiableParamMap);
+                    break;
 
-            } else if (IdentityEventConstants.EventName.AUTHENTICATION_STEP_FAILURE.name().equals(eventName)) {
-                publishAuthenticationStepFailure(request, context, unmodifiableParamMap);
+                case SESSION_TERMINATE:
+                    publishSessionTermination(request, context, sessionContext, unmodifiableParamMap);
+                    break;
             }
         }
     }
