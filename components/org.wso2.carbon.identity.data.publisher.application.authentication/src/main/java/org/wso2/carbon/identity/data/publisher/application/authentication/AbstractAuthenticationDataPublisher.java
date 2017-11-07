@@ -485,7 +485,7 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractEventH
 
         AuthenticationData authenticationData = new AuthenticationData();
         Object userObj = params.get(FrameworkConstants.AnalyticsAttributes.USER);
-        if (userObj != null && userObj instanceof AuthenticatedUser) {
+        if (userObj instanceof AuthenticatedUser) {
             AuthenticatedUser user = (AuthenticatedUser) userObj;
             authenticationData.setUsername(user.getUserName());
             if (status == AuthenticatorStatus.FAIL) {
