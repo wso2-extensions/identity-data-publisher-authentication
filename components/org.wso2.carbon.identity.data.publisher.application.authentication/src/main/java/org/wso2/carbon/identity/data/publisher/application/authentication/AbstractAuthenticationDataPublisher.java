@@ -64,7 +64,7 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractEventH
         if (log.isDebugEnabled()) {
             log.debug("Publishing authentication step success");
         }
-        AuthenticationData authenticationData = buildAuthnDataForAuthenticationStepStatus(request, context, params, AuthenticatorStatus.PASS);
+        AuthenticationData authenticationData = buildAuthnDataForAuthnStep(request, context, params, AuthenticatorStatus.PASS);
         doPublishAuthenticationStepSuccess(authenticationData);
     }
 
@@ -81,7 +81,7 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractEventH
         if (log.isDebugEnabled()) {
             log.debug("Publishing authentication step failure");
         }
-        AuthenticationData authenticationData = buildAuthnDataForAuthenticationStepStatus(request, context, params, AuthenticatorStatus.FAIL);
+        AuthenticationData authenticationData = buildAuthnDataForAuthnStep(request, context, params, AuthenticatorStatus.FAIL);
         doPublishAuthenticationStepFailure(authenticationData);
     }
 
@@ -98,7 +98,7 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractEventH
         if (log.isDebugEnabled()) {
             log.debug("Publishing authentication success");
         }
-        AuthenticationData authenticationData = buildAuthnDataForAuthenticationStatus(request, context, params, AuthenticatorStatus.PASS);
+        AuthenticationData authenticationData = buildAuthnDataForAuthentication(request, context, params, AuthenticatorStatus.PASS);
         doPublishAuthenticationSuccess(authenticationData);
     }
 
@@ -115,7 +115,7 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractEventH
         if (log.isDebugEnabled()) {
             log.debug("Publishing authentication failure");
         }
-        AuthenticationData authenticationData = buildAuthnDataForAuthenticationStatus(request, context, params, AuthenticatorStatus.FAIL);
+        AuthenticationData authenticationData = buildAuthnDataForAuthentication(request, context, params, AuthenticatorStatus.FAIL);
         doPublishAuthenticationFailure(authenticationData);
     }
 
@@ -401,8 +401,8 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractEventH
         }
     }
 
-    private AuthenticationData buildAuthnDataForAuthenticationStepStatus(HttpServletRequest request, AuthenticationContext context,
-                                                                         Map<String, Object> params, AuthenticatorStatus status){
+    private AuthenticationData buildAuthnDataForAuthnStep(HttpServletRequest request, AuthenticationContext context,
+                                                          Map<String, Object> params, AuthenticatorStatus status){
 
         AuthenticationData authenticationData = new AuthenticationData();
         int step = context.getCurrentStep();
@@ -471,8 +471,8 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractEventH
         return authenticationData;
     }
 
-    private AuthenticationData buildAuthnDataForAuthenticationStatus(HttpServletRequest request, AuthenticationContext context,
-                                                                     Map<String, Object> params, AuthenticatorStatus status){
+    private AuthenticationData buildAuthnDataForAuthentication(HttpServletRequest request, AuthenticationContext context,
+                                                               Map<String, Object> params, AuthenticatorStatus status){
 
         AuthenticationData authenticationData = new AuthenticationData();
         Object userObj = params.get(FrameworkConstants.AnalyticsAttributes.USER);
