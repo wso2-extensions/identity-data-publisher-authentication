@@ -21,7 +21,6 @@ package org.wso2.carbon.identity.data.publisher.application.authentication;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.identity.application.authentication.framework.AuthenticationDataPublisher;
 import org.wso2.carbon.identity.application.authentication.framework.AuthenticatorStatus;
 import org.wso2.carbon.identity.application.authentication.framework.config.model.StepConfig;
 import org.wso2.carbon.identity.application.authentication.framework.context.AuthenticationContext;
@@ -47,8 +46,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 
-public abstract class AbstractAuthenticationDataPublisher extends AbstractEventHandler implements
-        AuthenticationDataPublisher {
+public abstract class AbstractAuthenticationDataPublisher extends AbstractEventHandler {
 
     private static final Log log = LogFactory.getLog(AbstractAuthenticationDataPublisher.class);
 
@@ -65,7 +63,8 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractEventH
         if (log.isDebugEnabled()) {
             log.debug("Publishing authentication step success");
         }
-        AuthenticationData authenticationData = buildAuthnDataForAuthnStep(request, context, params, AuthenticatorStatus.PASS);
+        AuthenticationData authenticationData = buildAuthnDataForAuthnStep(request, context, params,
+                AuthenticatorStatus.PASS);
         doPublishAuthenticationStepSuccess(authenticationData);
     }
 
@@ -82,7 +81,8 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractEventH
         if (log.isDebugEnabled()) {
             log.debug("Publishing authentication step failure");
         }
-        AuthenticationData authenticationData = buildAuthnDataForAuthnStep(request, context, params, AuthenticatorStatus.FAIL);
+        AuthenticationData authenticationData = buildAuthnDataForAuthnStep(request, context, params,
+                AuthenticatorStatus.FAIL);
         doPublishAuthenticationStepFailure(authenticationData);
     }
 
@@ -99,7 +99,8 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractEventH
         if (log.isDebugEnabled()) {
             log.debug("Publishing authentication success");
         }
-        AuthenticationData authenticationData = buildAuthnDataForAuthentication(request, context, params, AuthenticatorStatus.PASS);
+        AuthenticationData authenticationData = buildAuthnDataForAuthentication(request, context, params,
+                AuthenticatorStatus.PASS);
         doPublishAuthenticationSuccess(authenticationData);
     }
 
@@ -116,7 +117,8 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractEventH
         if (log.isDebugEnabled()) {
             log.debug("Publishing authentication failure");
         }
-        AuthenticationData authenticationData = buildAuthnDataForAuthentication(request, context, params, AuthenticatorStatus.FAIL);
+        AuthenticationData authenticationData = buildAuthnDataForAuthentication(request, context, params,
+                AuthenticatorStatus.FAIL);
         doPublishAuthenticationFailure(authenticationData);
     }
 
