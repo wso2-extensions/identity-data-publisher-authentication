@@ -87,7 +87,7 @@ public class AuthenticationAuditLogger extends AbstractAuthenticationDataPublish
                 + "\",\"" + "AuthenticatedUser" + "\" : \"" + authenticationData.getParameter(AuthPublisherConstants
                 .SUBJECT_IDENTIFIER)
                 + "\",\"" + "AuthenticatedUserTenantDomain" + "\" : \"" + authenticationData.getTenantDomain()
-                + "\",\"" + "ServiceProviderName" + "\" : \"" + authenticationData.getTenantDomain()
+                + "\",\"" + "ServiceProviderName" + "\" : \"" + authenticationData.getServiceProvider()
                 + "\",\"" + "RequestType" + "\" : \"" + authenticationData.getInboundProtocol()
                 + "\",\"" + "RelyingParty" + "\" : \"" + authenticationData.getParameter(AuthPublisherConstants
                 .RELYING_PARTY)
