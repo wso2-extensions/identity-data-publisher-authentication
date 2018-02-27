@@ -98,7 +98,11 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
         authenticationData.setForcedAuthn(context.isForceAuthenticate());
         authenticationData.setPassive(context.isPassiveAuthenticate());
         authenticationData.setInitialLogin(false);
-        authenticationData.setAuthenticator(context.getCurrentAuthenticator());
+
+        String authenticator = AuthnDataPublisherUtils.replaceIfNotAvailable(AuthPublisherConstants.CONFIG_PREFIX +
+                AuthPublisherConstants.AUTHENTICATOR_NAME, (String) params.get(FrameworkConstants.AUTHENTICATOR));
+        authenticationData.setAuthenticator(authenticator);
+
         authenticationData.setSuccess(true);
         authenticationData.setStepNo(step);
         authenticationData.addParameter(AuthPublisherConstants.TENANT_ID, AuthnDataPublisherUtils
@@ -166,7 +170,9 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
         authenticationData.setForcedAuthn(context.isForceAuthenticate());
         authenticationData.setPassive(context.isPassiveAuthenticate());
         authenticationData.setInitialLogin(false);
-        authenticationData.setAuthenticator(context.getCurrentAuthenticator());
+        String authenticator = AuthnDataPublisherUtils.replaceIfNotAvailable(AuthPublisherConstants.CONFIG_PREFIX +
+                AuthPublisherConstants.AUTHENTICATOR_NAME, (String) params.get(FrameworkConstants.AUTHENTICATOR));
+        authenticationData.setAuthenticator(authenticator);
         authenticationData.setSuccess(false);
         authenticationData.setStepNo(step);
         // Should publish the event to both SP tenant domain and the tenant domain of the user who did the login
