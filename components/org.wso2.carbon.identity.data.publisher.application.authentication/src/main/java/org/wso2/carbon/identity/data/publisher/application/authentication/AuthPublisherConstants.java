@@ -32,8 +32,8 @@ public class AuthPublisherConstants {
     public static final String OVERALL_EVENT = "overall";
 
     // Publisher names
-    public static final String DAS_LOGIN_PUBLISHER_NAME = "DAS_LOGIN_DATA_PUBLISHER";
-    public static final String DAS_SESSION_PUBLISHER_NAME = "DAS_SESSION_DATA_PUBLISHER";
+    public static final String DAS_LOGIN_PUBLISHER_NAME = "DASLoginDataPublisher";
+    public static final String DAS_SESSION_PUBLISHER_NAME = "DASSessionDataPublisher";
 
     public static final String CONFIG_PREFIX = "ISAnalytics.DefaultValues.";
     public static final String USERNAME = "userName";

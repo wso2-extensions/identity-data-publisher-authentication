@@ -193,8 +193,4 @@ public class AuthenticationAuditLogger extends AbstractAuthenticationDataPublish
         return Boolean.parseBoolean(identityEventListenerConfig.getEnable());
     }
 
-    @Override
-    public boolean canHandle(MessageContext messageContext) {
-        return true;
-    }
 }

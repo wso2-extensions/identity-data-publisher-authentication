@@ -20,6 +20,7 @@ package org.wso2.carbon.identity.data.publisher.application.authentication.inter
 
 import org.wso2.carbon.event.stream.core.EventStreamService;
 import org.wso2.carbon.identity.application.authentication.framework.AuthenticationDataPublisher;
+import org.wso2.carbon.identity.event.services.IdentityEventService;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
 
@@ -32,6 +33,7 @@ public class AuthenticationDataPublisherDataHolder {
     private RealmService realmService;
     private RegistryService registryService;
     private List<AuthenticationDataPublisher> dataPublishers = new ArrayList<>();
+    private IdentityEventService identityEventService;
 
     private static AuthenticationDataPublisherDataHolder
             serviceHolder = new AuthenticationDataPublisherDataHolder();
@@ -78,5 +80,13 @@ public class AuthenticationDataPublisherDataHolder {
     public List<AuthenticationDataPublisher> getDataPublishers() {
 
         return dataPublishers;
+    }
+
+    public IdentityEventService getIdentityEventService() {
+        return identityEventService;
+    }
+
+    public void setIdentityEventService(IdentityEventService identityEventService) {
+        this.identityEventService = identityEventService;
     }
 }
