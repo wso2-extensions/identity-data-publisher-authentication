@@ -288,10 +288,9 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractEventH
     protected int getLocalStepNo(AuthenticationContext context) {
         int stepNo = 0;
         Map<Integer, StepConfig> map = context.getSequenceConfig().getStepMap();
-        for (Map.Entry<Integer, StepConfig> entry : map.entrySet())
-        {
-            StepConfig stepConfig= entry.getValue();
-            if(stepConfig != null && FrameworkConstants.LOCAL_IDP_NAME.equalsIgnoreCase(stepConfig
+        for (Map.Entry<Integer, StepConfig> entry : map.entrySet()) {
+            StepConfig stepConfig = entry.getValue();
+            if (stepConfig != null && FrameworkConstants.LOCAL_IDP_NAME.equalsIgnoreCase(stepConfig
                     .getAuthenticatedIdP())) {
                 stepNo = entry.getKey();
                 return stepNo;
@@ -416,7 +415,7 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractEventH
     }
 
     private AuthenticationData buildAuthnDataForAuthnStep(HttpServletRequest request, AuthenticationContext context,
-                                                          Map<String, Object> params, AuthenticatorStatus status){
+                                                          Map<String, Object> params, AuthenticatorStatus status) {
 
         AuthenticationData authenticationData = new AuthenticationData();
         int step = context.getCurrentStep();
@@ -486,7 +485,7 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractEventH
     }
 
     private AuthenticationData buildAuthnDataForAuthentication(HttpServletRequest request, AuthenticationContext context,
-                                                               Map<String, Object> params, AuthenticatorStatus status){
+                                                               Map<String, Object> params, AuthenticatorStatus status) {
 
         AuthenticationData authenticationData = new AuthenticationData();
         Object userObj = params.get(FrameworkConstants.AnalyticsAttributes.USER);
@@ -564,7 +563,7 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractEventH
     }
 
     private SessionData buildSessionData(HttpServletRequest request, AuthenticationContext context, SessionContext
-            sessionContext, Map<String, Object> params){
+            sessionContext, Map<String, Object> params) {
 
         SessionData sessionData = new SessionData();
         Object userObj = params.get(FrameworkConstants.AnalyticsAttributes.USER);
