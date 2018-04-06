@@ -36,18 +36,14 @@ import org.wso2.carbon.identity.core.model.IdentityEventListenerConfig;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.data.publisher.application.authentication.model.AuthenticationData;
 import org.wso2.carbon.identity.data.publisher.application.authentication.model.SessionData;
-import org.wso2.carbon.identity.event.IdentityEventConstants;
-import org.wso2.carbon.identity.event.IdentityEventConstants.EventName;
-import org.wso2.carbon.identity.event.IdentityEventException;
-import org.wso2.carbon.identity.event.event.Event;
-import org.wso2.carbon.identity.event.handler.AbstractEventHandler;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 
-public abstract class AbstractAuthenticationDataPublisher extends AbstractEventHandler implements AuthenticationDataPublisher {
+@Deprecated
+public abstract class AbstractAuthenticationDataPublisher implements AuthenticationDataPublisher {
 
     private static final Log log = LogFactory.getLog(AbstractAuthenticationDataPublisher.class);
 
@@ -366,52 +362,6 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractEventH
         }
 
         return Boolean.parseBoolean(identityEventListenerConfig.getEnable());
-    }
-
-    @Override
-    public void handleEvent(Event event) throws IdentityEventException {
-
-        HttpServletRequest request = (HttpServletRequest) event.getEventProperties()
-                .get(IdentityEventConstants.EventProperty.REQUEST);
-        SessionContext sessionContext = (SessionContext) event.getEventProperties()
-                .get(IdentityEventConstants.EventProperty.SESSION_CONTEXT);
-        AuthenticationContext context = (AuthenticationContext) event.getEventProperties()
-                .get(IdentityEventConstants.EventProperty.CONTEXT);
-        Map<String, Object> unmodifiableParamMap = (Map<String, Object>) event.getEventProperties()
-                .get(IdentityEventConstants.EventProperty.PARAMS);
-        EventName eventName = EventName.valueOf(event.getEventName());
-
-        if (this.isEnabled(context)) {
-            switch (eventName) {
-                case AUTHENTICATION_STEP_SUCCESS:
-                    publishAuthenticationStepSuccess(request, context, unmodifiableParamMap);
-                    break;
-
-                case AUTHENTICATION_STEP_FAILURE:
-                    publishAuthenticationStepFailure(request, context, unmodifiableParamMap);
-                    break;
-
-                case AUTHENTICATION_SUCCESS:
-                    publishAuthenticationSuccess(request, context, unmodifiableParamMap);
-                    break;
-
-                case AUTHENTICATION_FAILURE:
-                    publishAuthenticationFailure(request, context, unmodifiableParamMap);
-                    break;
-
-                case SESSION_CREATE:
-                    publishSessionCreation(request, context, sessionContext, unmodifiableParamMap);
-                    break;
-
-                case SESSION_UPDATE:
-                    publishSessionUpdate(request, context, sessionContext, unmodifiableParamMap);
-                    break;
-
-                case SESSION_TERMINATE:
-                    publishSessionTermination(request, context, sessionContext, unmodifiableParamMap);
-                    break;
-            }
-        }
     }
 
     private AuthenticationData buildAuthnDataForAuthnStep(HttpServletRequest request, AuthenticationContext context,

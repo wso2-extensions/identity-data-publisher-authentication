@@ -21,6 +21,7 @@ package org.wso2.carbon.identity.data.publisher.application.authentication;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.identity.application.authentication.framework.AuthenticationDataPublisher;
+import org.wso2.carbon.identity.application.authentication.framework.AuthenticatorStatus;
 import org.wso2.carbon.identity.application.authentication.framework.context.AuthenticationContext;
 import org.wso2.carbon.identity.application.authentication.framework.context.SessionContext;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkConstants;
@@ -32,12 +33,15 @@ import org.wso2.carbon.identity.event.IdentityEventException;
 import org.wso2.carbon.identity.event.event.Event;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 public class AuthnDataPublisherProxy extends AbstractIdentityMessageHandler implements
         AuthenticationDataPublisher {
     private static final Log log = LogFactory.getLog(AuthnDataPublisherProxy.class);
+    private List<AuthenticationDataPublisher> dataPublishers = AuthenticationDataPublisherDataHolder.getInstance()
+            .getDataPublishers();
 
     /**
      * Publish authentication success after managing handler operations
@@ -49,7 +53,13 @@ public class AuthnDataPublisherProxy extends AbstractIdentityMessageHandler impl
     public void publishAuthenticationStepSuccess(HttpServletRequest request, AuthenticationContext context,
                                                  Map<String, Object> params) {
         Event event = createEvent(request, context, null, params, EventName.AUTHENTICATION_STEP_SUCCESS);
+        event.addEventProperty(EventProperty.AUTHENTICATION_STATUS, AuthenticatorStatus.PASS);
         doPublishEvent(event);
+        for (AuthenticationDataPublisher publisher : dataPublishers) {
+            if (publisher.isEnabled(context) && publisher.canHandle(context)) {
+                publisher.publishAuthenticationStepSuccess(request, context, params);
+            }
+        }
     }
 
     /**
@@ -62,7 +72,13 @@ public class AuthnDataPublisherProxy extends AbstractIdentityMessageHandler impl
     public void publishAuthenticationStepFailure(HttpServletRequest request, AuthenticationContext context,
                                                  Map<String, Object> unmodifiableMap) {
         Event event = createEvent(request, context, null, unmodifiableMap, EventName.AUTHENTICATION_STEP_FAILURE);
+        event.addEventProperty(EventProperty.AUTHENTICATION_STATUS,AuthenticatorStatus.FAIL);
         doPublishEvent(event);
+        for (AuthenticationDataPublisher publisher : dataPublishers) {
+            if (publisher.isEnabled(context) && publisher.canHandle(context)) {
+                publisher.publishAuthenticationStepFailure(request, context, unmodifiableMap);
+            }
+        }
     }
 
     /**
@@ -75,7 +91,13 @@ public class AuthnDataPublisherProxy extends AbstractIdentityMessageHandler impl
     public void publishAuthenticationSuccess(HttpServletRequest request, AuthenticationContext context,
                                              Map<String, Object> unmodifiableMap) {
         Event event = createEvent(request, context, null, unmodifiableMap, EventName.AUTHENTICATION_SUCCESS);
+        event.addEventProperty(EventProperty.AUTHENTICATION_STATUS, AuthenticatorStatus.PASS);
         doPublishEvent(event);
+        for (AuthenticationDataPublisher publisher : dataPublishers) {
+            if (publisher != null && publisher.isEnabled(context) && publisher.canHandle(context)) {
+                publisher.publishAuthenticationSuccess(request, context, unmodifiableMap);
+            }
+        }
     }
 
     /**
@@ -88,7 +110,13 @@ public class AuthnDataPublisherProxy extends AbstractIdentityMessageHandler impl
     public void publishAuthenticationFailure(HttpServletRequest request, AuthenticationContext context,
                                              Map<String, Object> unmodifiableMap) {
         Event event = createEvent(request, context, null, unmodifiableMap, EventName.AUTHENTICATION_FAILURE);
+        event.addEventProperty(EventProperty.AUTHENTICATION_STATUS,AuthenticatorStatus.FAIL);
         doPublishEvent(event);
+        for (AuthenticationDataPublisher publisher : dataPublishers) {
+            if (publisher != null && publisher.isEnabled(context) && publisher.canHandle(context)) {
+                publisher.publishAuthenticationFailure(request, context, unmodifiableMap);
+            }
+        }
     }
 
     /**
@@ -103,6 +131,11 @@ public class AuthnDataPublisherProxy extends AbstractIdentityMessageHandler impl
             sessionContext, Map<String, Object> unmodifiableMap) {
         Event event = createEvent(request, context, sessionContext, unmodifiableMap, EventName.SESSION_CREATE);
         doPublishEvent(event);
+        for (AuthenticationDataPublisher publisher : dataPublishers) {
+            if (publisher != null && publisher.isEnabled(context) && publisher.canHandle(context)) {
+                publisher.publishSessionCreation(request, context, sessionContext, unmodifiableMap);
+            }
+        }
     }
 
     /**
@@ -118,6 +151,11 @@ public class AuthnDataPublisherProxy extends AbstractIdentityMessageHandler impl
             sessionContext, Map<String, Object> unmodifiableMap) {
         Event event = createEvent(request, context, sessionContext, unmodifiableMap, EventName.SESSION_UPDATE);
         doPublishEvent(event);
+        for (AuthenticationDataPublisher publisher : dataPublishers) {
+            if (publisher != null && publisher.isEnabled(context) && publisher.canHandle(context)) {
+                publisher.publishSessionUpdate(request, context, sessionContext, unmodifiableMap);
+            }
+        }
     }
 
     /**
@@ -133,6 +171,11 @@ public class AuthnDataPublisherProxy extends AbstractIdentityMessageHandler impl
                                           SessionContext sessionContext, Map<String, Object> unmodifiableMap) {
         Event event = createEvent(request, context, sessionContext, unmodifiableMap, EventName.SESSION_TERMINATE);
         doPublishEvent(event);
+        for (AuthenticationDataPublisher publisher : dataPublishers) {
+            if (publisher != null && publisher.isEnabled(context) && publisher.canHandle(context)) {
+                publisher.publishSessionTermination(request, context, sessionContext, unmodifiableMap);
+            }
+        }
     }
 
     @Override

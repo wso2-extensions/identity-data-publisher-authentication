@@ -25,98 +25,53 @@ import org.wso2.carbon.CarbonException;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.core.util.AnonymousSessionUtil;
 import org.wso2.carbon.databridge.commons.Event;
-import org.wso2.carbon.identity.application.authentication.framework.context.AuthenticationContext;
-import org.wso2.carbon.identity.application.authentication.framework.context.SessionContext;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkConstants;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkUtils;
 import org.wso2.carbon.identity.base.IdentityRuntimeException;
-import org.wso2.carbon.identity.data.publisher.application.authentication.AbstractAuthenticationDataPublisher;
 import org.wso2.carbon.identity.data.publisher.application.authentication.AuthPublisherConstants;
 import org.wso2.carbon.identity.data.publisher.application.authentication.AuthnDataPublisherUtils;
 import org.wso2.carbon.identity.data.publisher.application.authentication.internal.AuthenticationDataPublisherDataHolder;
 import org.wso2.carbon.identity.data.publisher.application.authentication.model.AuthenticationData;
-import org.wso2.carbon.identity.data.publisher.application.authentication.model.SessionData;
+import org.wso2.carbon.identity.event.IdentityEventConstants.EventName;
+import org.wso2.carbon.identity.event.IdentityEventException;
+import org.wso2.carbon.identity.event.handler.AbstractEventHandler;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
-public class DASLoginDataPublisherImpl extends AbstractAuthenticationDataPublisher {
+public class DASLoginDataPublisherImpl extends AbstractEventHandler {
 
-    public static final Log LOG = LogFactory.getLog(DASLoginDataPublisherImpl.class);
+    private static final Log LOG = LogFactory.getLog(DASLoginDataPublisherImpl.class);
 
     @Override
-    public void publishSessionCreation(HttpServletRequest request, AuthenticationContext context, SessionContext
-            sessionContext, Map<String, Object> params) {
-        // This method is overridden to do nothing since this is a login data publisher.
+    public String getName() {
+        return AuthPublisherConstants.DAS_LOGIN_PUBLISHER_NAME;
     }
 
     @Override
-    public void publishSessionUpdate(HttpServletRequest request, AuthenticationContext context, SessionContext
-            sessionContext, Map<String, Object> params) {
-        // This method is overridden to do nothing since this is a session data publisher.
-    }
+    public void handleEvent(org.wso2.carbon.identity.event.event.Event event) throws IdentityEventException {
 
-    @Override
-    public void publishSessionTermination(HttpServletRequest request, AuthenticationContext context, SessionContext
-            sessionContext, Map<String, Object> params) {
-        // This method is overridden to do nothing since this is a session data publisher.
-    }
-
-    @Override
-    public void doPublishAuthenticationStepSuccess(AuthenticationData authenticationData) {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Publishing authentication step success results");
+        if(event.getEventName().equals(EventName.AUTHENTICATION_STEP_SUCCESS.name())||
+                event.getEventName().equals(EventName.AUTHENTICATION_STEP_FAILURE.name())){
+            AuthenticationData authenticationData = HandlerDataBuilder.buildAuthnDataForAuthnStep(event);
+            publishAuthenticationData(authenticationData);
+        } else if(  event.getEventName().equals(EventName.AUTHENTICATION_SUCCESS.name())||
+                event.getEventName().equals(EventName.AUTHENTICATION_FAILURE.name())){
+            AuthenticationData authenticationData = HandlerDataBuilder.buildAuthnDataForAuthentication(event);
+            publishAuthenticationData(authenticationData);
         }
-        publishAuthenticationData(authenticationData);
-    }
-
-    @Override
-    public void doPublishAuthenticationStepFailure(AuthenticationData authenticationData) {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Publishing authentication step failure results");
+        else {
+            LOG.error("Event "+event.getEventName() +" cannot be handled");
         }
-        publishAuthenticationData(authenticationData);
+
     }
 
-    @Override
-    public void doPublishAuthenticationSuccess(AuthenticationData authenticationData) {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Publishing authentication success results");
-        }
-        publishAuthenticationData(authenticationData);
-    }
-
-    @Override
-    public void doPublishAuthenticationFailure(AuthenticationData authenticationData) {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Publishing authentication failure results");
-        }
-        publishAuthenticationData(authenticationData);
-    }
-
-    @Override
-    public void doPublishSessionCreation(SessionData sessionData) {
-        // This method is not implemented since there is no usage of it in login publishing
-    }
-
-    @Override
-    public void doPublishSessionTermination(SessionData sessionData) {
-        // This method is not implemented since there is no usage of it in login publishing
-    }
-
-    @Override
-    public void doPublishSessionUpdate(SessionData sessionData) {
-        // This method is not implemented since there is no usage of it in login publishing
-    }
-
-    protected void publishAuthenticationData(AuthenticationData authenticationData) {
+    private void publishAuthenticationData(AuthenticationData authenticationData) {
 
         try {
             String roleList = null;
@@ -199,11 +154,6 @@ public class DASLoginDataPublisherImpl extends AbstractAuthenticationDataPublish
 
     }
 
-    @Override
-    public String getName() {
-        return AuthPublisherConstants.DAS_LOGIN_PUBLISHER_NAME;
-    }
-
     private String getCommaSeparatedUserRoles(String userName, String tenantDomain) {
 
         if (LOG.isDebugEnabled()) {
@@ -254,5 +204,4 @@ public class DASLoginDataPublisherImpl extends AbstractAuthenticationDataPublish
         }
         return StringUtils.EMPTY;
     }
-
 }
