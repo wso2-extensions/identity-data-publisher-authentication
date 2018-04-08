@@ -46,10 +46,10 @@ import java.util.UUID;
 /*
  * The class builds dtos needed for event handling of publishers
  */
-public class HandlerDataBuilder {
+class HandlerDataBuilder {
     private static final Log log = LogFactory.getLog(HandlerDataBuilder.class);
 
-    public static SessionData buildSessionData(Event event) {
+    static SessionData buildSessionData(Event event) {
 
         Map<String, Object> properties = event.getEventProperties();
         HttpServletRequest request = (HttpServletRequest) properties.get(EventProperty.REQUEST);
@@ -113,7 +113,7 @@ public class HandlerDataBuilder {
         return StringUtils.EMPTY;
     }
 
-    public static AuthenticationData buildAuthnDataForAuthnStep(Event event) {
+    static AuthenticationData buildAuthnDataForAuthnStep(Event event) {
 
         Map<String, Object> properties = event.getEventProperties();
         HttpServletRequest request = (HttpServletRequest) properties.get(EventProperty.REQUEST);
@@ -188,7 +188,7 @@ public class HandlerDataBuilder {
         return authenticationData;
     }
 
-    public static AuthenticationData buildAuthnDataForAuthentication(Event event) {
+    static AuthenticationData buildAuthnDataForAuthentication(Event event) {
 
         Map<String, Object> properties = event.getEventProperties();
         HttpServletRequest request = (HttpServletRequest) properties.get(EventProperty.REQUEST);

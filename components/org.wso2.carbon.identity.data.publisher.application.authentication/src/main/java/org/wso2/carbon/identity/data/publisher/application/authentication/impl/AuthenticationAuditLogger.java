@@ -9,7 +9,6 @@ import org.wso2.carbon.identity.application.authentication.framework.context.Aut
 import org.wso2.carbon.identity.application.authentication.framework.context.SessionContext;
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticationResult;
-import org.wso2.carbon.identity.application.authentication.framework.model.SessionData;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkConstants;
 import org.wso2.carbon.identity.data.publisher.application.authentication.AuthPublisherConstants;
 import org.wso2.carbon.identity.data.publisher.application.authentication.model.AuthenticationData;
@@ -18,7 +17,6 @@ import org.wso2.carbon.identity.event.IdentityEventException;
 import org.wso2.carbon.identity.event.event.Event;
 import org.wso2.carbon.identity.event.handler.AbstractEventHandler;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
 public class AuthenticationAuditLogger extends AbstractEventHandler {
@@ -27,7 +25,7 @@ public class AuthenticationAuditLogger extends AbstractEventHandler {
 
     @Override
     public String getName() {
-        return "AuditDataPublisher";
+        return "auditDataPublisher";
     }
 
     @Override
@@ -44,9 +42,9 @@ public class AuthenticationAuditLogger extends AbstractEventHandler {
         } else if (event.getEventName().equals(IdentityEventConstants.EventName.AUTHENTICATION_FAILURE.name())) {
             AuthenticationData authenticationData = HandlerDataBuilder.buildAuthnDataForAuthentication(event);
             doPublishAuthenticationFailure(authenticationData);
-        } else if (event.getEventName().equals(IdentityEventConstants.EventName.SESSION_TERMINATE.name())){
+        } else if (event.getEventName().equals(IdentityEventConstants.EventName.SESSION_TERMINATE.name())) {
             publishSessionTermination(event);
-        } else{
+        } else {
             LOG.error("Event " + event.getEventName() + " cannot be handled");
         }
     }
