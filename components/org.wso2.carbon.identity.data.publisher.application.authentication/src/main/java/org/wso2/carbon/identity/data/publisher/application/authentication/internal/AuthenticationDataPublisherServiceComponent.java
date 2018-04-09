@@ -24,6 +24,8 @@ import org.wso2.carbon.event.stream.core.EventStreamService;
 import org.wso2.carbon.identity.application.authentication.framework.AuthenticationDataPublisher;
 import org.wso2.carbon.identity.data.publisher.application.authentication.AuthnDataPublisherProxy;
 import org.wso2.carbon.identity.data.publisher.application.authentication.impl.AuthenticationAuditLogger;
+import org.wso2.carbon.identity.data.publisher.application.authentication.impl.DASLoginDataPublisherImpl;
+import org.wso2.carbon.identity.data.publisher.application.authentication.impl.DASSessionDataPublisherImpl;
 import org.wso2.carbon.identity.event.handler.AbstractEventHandler;
 import org.wso2.carbon.identity.event.services.IdentityEventService;
 import org.wso2.carbon.registry.core.service.RegistryService;
@@ -51,10 +53,10 @@ public class AuthenticationDataPublisherServiceComponent {
     protected void activate(ComponentContext context) {
 
         BundleContext bundleContext = context.getBundleContext();
-//        bundleContext
-//                .registerService(AbstractEventHandler.class.getName(), new DASLoginDataPublisherImpl(), null);
-//        bundleContext
-//                .registerService(AbstractEventHandler.class.getName(), new DASSessionDataPublisherImpl(), null);
+        bundleContext
+                .registerService(AbstractEventHandler.class.getName(), new DASLoginDataPublisherImpl(), null);
+        bundleContext
+                .registerService(AbstractEventHandler.class.getName(), new DASSessionDataPublisherImpl(), null);
         bundleContext
                 .registerService(AbstractEventHandler.class.getName(), new AuthenticationAuditLogger(), null);
         bundleContext
