@@ -26,4 +26,8 @@ public class AnalyticsLoginDataPublishConstants {
     public static final int EVENT_AUTHENTICATION = 1;
 
     public static final String NOT_AVAILABLE = "NOT_AVAILABLE";
+
+    // Event types
+    public static final String STEP_EVENT = "step";
+    public static final String OVERALL_EVENT = "overall";
 }
