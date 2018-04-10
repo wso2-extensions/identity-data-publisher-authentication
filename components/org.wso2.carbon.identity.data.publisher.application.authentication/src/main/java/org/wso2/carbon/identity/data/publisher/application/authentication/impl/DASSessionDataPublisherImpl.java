@@ -51,19 +51,19 @@ public class DASSessionDataPublisherImpl extends AbstractEventHandler {
             doPublishSessionTermination(sessionData);
         } else if (event.getEventName().equals(EventName.SESSION_UPDATE.name())) {
             doPublishSessionUpdate(sessionData);
-        }else {
-            LOG.error("Event "+event.getEventName() +" cannot be handled");
+        } else {
+            LOG.error("Event " + event.getEventName() + " cannot be handled");
         }
     }
 
-    private void doPublishSessionCreation(SessionData sessionData) {
+    protected void doPublishSessionCreation(SessionData sessionData) {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Publishing session creation to DAS");
         }
         publishSessionData(sessionData, AuthPublisherConstants.SESSION_CREATION_STATUS);
     }
 
-    private void doPublishSessionTermination(SessionData sessionData) {
+    protected void doPublishSessionTermination(SessionData sessionData) {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Publishing session termination to DAS");
         }
@@ -71,14 +71,14 @@ public class DASSessionDataPublisherImpl extends AbstractEventHandler {
 
     }
 
-    private void doPublishSessionUpdate(SessionData sessionData) {
+    protected void doPublishSessionUpdate(SessionData sessionData) {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Publishing session update to DAS");
         }
         publishSessionData(sessionData, AuthPublisherConstants.SESSION_UPDATE_STATUS);
     }
 
-    private void publishSessionData(SessionData sessionData, int actionId) {
+    protected void publishSessionData(SessionData sessionData, int actionId) {
 
         if (sessionData != null) {
             Object[] payloadData = new Object[15];

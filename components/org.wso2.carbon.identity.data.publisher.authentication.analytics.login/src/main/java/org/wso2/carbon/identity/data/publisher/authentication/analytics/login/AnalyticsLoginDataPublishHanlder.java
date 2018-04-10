@@ -1,22 +1,22 @@
 /*
- * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
+ * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations
  * under the License.
  */
 
-package org.wso2.carbon.identity.data.publisher.application.authentication.impl;
+package org.wso2.carbon.identity.data.publisher.authentication.analytics.login;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -24,16 +24,16 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonException;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.core.util.AnonymousSessionUtil;
-import org.wso2.carbon.databridge.commons.Event;
+import org.wso2.carbon.identity.application.authentication.framework.AuthenticatorStatus;
+import org.wso2.carbon.identity.application.authentication.framework.context.AuthenticationContext;
+import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkConstants;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkUtils;
+import org.wso2.carbon.identity.application.common.model.User;
 import org.wso2.carbon.identity.base.IdentityRuntimeException;
-import org.wso2.carbon.identity.data.publisher.application.authentication.AuthPublisherConstants;
-import org.wso2.carbon.identity.data.publisher.application.authentication.AuthnDataPublisherUtils;
-import org.wso2.carbon.identity.data.publisher.application.authentication.internal.AuthenticationDataPublisherDataHolder;
-import org.wso2.carbon.identity.data.publisher.application.authentication.model.AuthenticationData;
-import org.wso2.carbon.identity.event.IdentityEventConstants.EventName;
+import org.wso2.carbon.identity.event.IdentityEventConstants;
 import org.wso2.carbon.identity.event.IdentityEventException;
+import org.wso2.carbon.identity.event.event.Event;
 import org.wso2.carbon.identity.event.handler.AbstractEventHandler;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -41,45 +41,52 @@ import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
-public class DASLoginDataPublisherImpl extends AbstractEventHandler {
-
-    private static final Log LOG = LogFactory.getLog(DASLoginDataPublisherImpl.class);
+/*
+ * Publish authentication login data to analytics server
+ */
+public class AnalyticsLoginDataPublishHanlder extends AbstractEventHandler{
+    private static final Log LOG = LogFactory.getLog(AnalyticsLoginDataPublishHanlder.class);
 
     @Override
     public String getName() {
-        return AuthPublisherConstants.DAS_LOGIN_PUBLISHER_NAME;
+        return "analyticsLoginDataPublishHandler";
     }
 
     @Override
-    public void handleEvent(org.wso2.carbon.identity.event.event.Event event) throws IdentityEventException {
-
-        if (event.getEventName().equals(EventName.AUTHENTICATION_STEP_SUCCESS.name()) ||
-                event.getEventName().equals(EventName.AUTHENTICATION_STEP_FAILURE.name())) {
-            AuthenticationData authenticationData = HandlerDataBuilder.buildAuthnDataForAuthnStep(event);
-            publishAuthenticationData(authenticationData);
-        } else if (event.getEventName().equals(EventName.AUTHENTICATION_SUCCESS.name()) ||
-                event.getEventName().equals(EventName.AUTHENTICATION_FAILURE.name())) {
-            AuthenticationData authenticationData = HandlerDataBuilder.buildAuthnDataForAuthentication(event);
-            publishAuthenticationData(authenticationData);
+    public void handleEvent(Event event) throws IdentityEventException {
+        if (event.getEventName().equals(IdentityEventConstants.EventName.AUTHENTICATION_STEP_SUCCESS.name()) ||
+                event.getEventName().equals(IdentityEventConstants.EventName.AUTHENTICATION_STEP_FAILURE.name())) {
+            publishAuthenticationData(event,AnalyticsLoginDataPublishConstants.EVENT_AUTHENTICATION_STEP);
+        } else if (event.getEventName().equals(IdentityEventConstants.EventName.AUTHENTICATION_SUCCESS.name()) ||
+                event.getEventName().equals(IdentityEventConstants.EventName.AUTHENTICATION_FAILURE.name())) {
+            publishAuthenticationData(event,AnalyticsLoginDataPublishConstants.EVENT_AUTHENTICATION);
         } else {
             LOG.error("Event " + event.getEventName() + " cannot be handled");
         }
-
     }
 
-    protected void publishAuthenticationData(AuthenticationData authenticationData) {
+
+    protected void publishAuthenticationData(Event event,int eventType) {
+
+        Map<String, Object> properties = event.getEventProperties();
+        HttpServletRequest request = (HttpServletRequest) properties.get(IdentityEventConstants.EventProperty.REQUEST);
+        Map<String, Object> params = (Map<String, Object>) properties.get(IdentityEventConstants.EventProperty.PARAMS);
+        AuthenticationContext context = (AuthenticationContext) properties.get(IdentityEventConstants.EventProperty.CONTEXT);
+        AuthenticatorStatus status = (AuthenticatorStatus) properties.get(IdentityEventConstants.EventProperty.AUTHENTICATION_STATUS);
 
         try {
             String roleList = null;
-            if (FrameworkConstants.LOCAL_IDP_NAME.equalsIgnoreCase(authenticationData.getIdentityProviderType())) {
-                roleList = getCommaSeparatedUserRoles(authenticationData.getUserStoreDomain() + "/" + authenticationData
-                        .getUsername(), authenticationData.getTenantDomain());
+            if (FrameworkConstants.LOCAL_IDP_NAME.equalsIgnoreCase(this.getIdentityProviderType(context,eventType))) {
+                roleList = getCommaSeparatedUserRoles(this.getUserStoreDomain(params,eventType,status) + "/" +
+                        this.getUsername(params,eventType), this.getTenantDomain(params,eventType,status));
             } else if (StringUtils.isNotEmpty(authenticationData.getLocalUsername())) {
-                roleList = getCommaSeparatedUserRoles(authenticationData.getUserStoreDomain() + "/" + authenticationData
-                        .getLocalUsername(), authenticationData.getTenantDomain());
+                roleList = getCommaSeparatedUserRoles(this.getUserStoreDomain(params,eventType,status) + "/" +
+                        authenticationData.getLocalUsername(), this.getTenantDomain(params,eventType,status));
             }
 
             Object[] payloadData = new Object[23];
@@ -132,11 +139,11 @@ public class DASLoginDataPublisherImpl extends AbstractEventHandler {
                     for (String publishingDomain : publishingDomains) {
                         Object[] metadataArray = AuthnDataPublisherUtils.getMetaDataArray(publishingDomain);
 
-                        Event event = new Event(AuthPublisherConstants.AUTHN_DATA_STREAM_NAME, System.currentTimeMillis(),
+                        org.wso2.carbon.databridge.commons.Event publishingEvent = new org.wso2.carbon.databridge.commons.Event(AuthPublisherConstants.AUTHN_DATA_STREAM_NAME, System.currentTimeMillis(),
                                 metadataArray, null, payloadData);
-                        AuthenticationDataPublisherDataHolder.getInstance().getPublisherService().publish(event);
-                        if (LOG.isDebugEnabled() && event != null) {
-                            LOG.debug("Sending out event : " + event.toString());
+                        AuthenticationDataPublisherDataHolder.getInstance().getPublisherService().publish(publishingEvent);
+                        if (LOG.isDebugEnabled() && publishingEvent != null) {
+                            LOG.debug("Sending out event : " + publishingEvent.toString());
                         }
                         payloadData[1] = UUID.randomUUID().toString();
 
@@ -152,6 +159,9 @@ public class DASLoginDataPublisherImpl extends AbstractEventHandler {
         }
 
     }
+
+
+
 
     private String getCommaSeparatedUserRoles(String userName, String tenantDomain) {
 
@@ -203,4 +213,91 @@ public class DASLoginDataPublisherImpl extends AbstractEventHandler {
         }
         return StringUtils.EMPTY;
     }
+
+
+    private String getIdentityProviderType(Map<String, Object> params,int eventType){
+        String idpType = null;
+        if(eventType == AnalyticsLoginDataPublishConstants.EVENT_AUTHENTICATION_STEP) {
+            Object isFederatedObj = params.get(FrameworkConstants.AnalyticsAttributes.IS_FEDERATED);
+            if (isFederatedObj != null) {
+                boolean isFederated = (Boolean) isFederatedObj;
+                if (isFederated) {
+                    idpType = FrameworkConstants.FEDERATED_IDP_NAME;
+                } else {
+                    idpType = FrameworkConstants.LOCAL_IDP_NAME;
+                }
+            }
+        }
+        else {
+
+        }
+    }
+
+
+    private String getUsername(Map<String, Object> params,int eventType){
+        Object userObj = params.get(FrameworkConstants.AnalyticsAttributes.USER);
+        String username = null;
+        if(AnalyticsLoginDataPublishConstants.EVENT_AUTHENTICATION_STEP == eventType) {
+            if (userObj instanceof User) {
+                User user = (User) userObj;
+                username = user.getUserName();
+            }
+            if (userObj instanceof AuthenticatedUser) {
+                AuthenticatedUser user = (AuthenticatedUser) userObj;
+                if (StringUtils.isEmpty(user.getUserName())) {
+                    username = user.getAuthenticatedSubjectIdentifier();
+                }
+            }
+        }
+        else {
+            if (userObj instanceof AuthenticatedUser) {
+                AuthenticatedUser user = (AuthenticatedUser) userObj;
+                username = user.getUserName();
+            }
+        }
+        return username;
+    }
+
+
+    private String getUserStoreDomain(Map<String, Object> params,int eventType,AuthenticatorStatus status){
+        Object userObj = params.get(FrameworkConstants.AnalyticsAttributes.USER);
+        String userStoreDomain = null;
+        if(AnalyticsLoginDataPublishConstants.EVENT_AUTHENTICATION_STEP == eventType) {
+            if (userObj instanceof User) {
+                User user = (User) userObj;
+                userStoreDomain = user.getUserStoreDomain();
+            }
+        }
+        else {
+            if (userObj instanceof AuthenticatedUser && status == AuthenticatorStatus.FAIL) {
+                AuthenticatedUser user = (AuthenticatedUser) userObj;
+                userStoreDomain = user.getUserStoreDomain();
+            }
+        }
+        return userStoreDomain;
+    }
+
+    private String getTenantDomain(Map<String, Object> params,int eventType,AuthenticatorStatus status){
+        Object userObj = params.get(FrameworkConstants.AnalyticsAttributes.USER);
+        String tenantDomain = null;
+        if(AnalyticsLoginDataPublishConstants.EVENT_AUTHENTICATION_STEP == eventType) {
+            if (userObj instanceof User) {
+                User user = (User) userObj;
+                tenantDomain = user.getTenantDomain();
+            }
+        }
+        else {
+            if (userObj instanceof AuthenticatedUser && status == AuthenticatorStatus.FAIL) {
+                AuthenticatedUser user = (AuthenticatedUser) userObj;
+                tenantDomain = user.getTenantDomain();
+            }
+        }
+        return tenantDomain;
+    }
+
+    private String getLocalUsername(){
+
+    }
+
+
 }

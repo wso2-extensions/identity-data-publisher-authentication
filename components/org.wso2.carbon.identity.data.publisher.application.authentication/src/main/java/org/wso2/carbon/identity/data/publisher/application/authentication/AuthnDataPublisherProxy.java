@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -32,10 +32,10 @@ import org.wso2.carbon.identity.event.IdentityEventConstants.EventProperty;
 import org.wso2.carbon.identity.event.IdentityEventException;
 import org.wso2.carbon.identity.event.event.Event;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.servlet.http.HttpServletRequest;
 
 public class AuthnDataPublisherProxy extends AbstractIdentityMessageHandler implements
         AuthenticationDataPublisher {
@@ -72,7 +72,7 @@ public class AuthnDataPublisherProxy extends AbstractIdentityMessageHandler impl
     public void publishAuthenticationStepFailure(HttpServletRequest request, AuthenticationContext context,
                                                  Map<String, Object> unmodifiableMap) {
         Event event = createEvent(request, context, null, unmodifiableMap, EventName.AUTHENTICATION_STEP_FAILURE);
-        event.addEventProperty(EventProperty.AUTHENTICATION_STATUS,AuthenticatorStatus.FAIL);
+        event.addEventProperty(EventProperty.AUTHENTICATION_STATUS, AuthenticatorStatus.FAIL);
         doPublishEvent(event);
         for (AuthenticationDataPublisher publisher : dataPublishers) {
             if (publisher.isEnabled(context) && publisher.canHandle(context)) {
@@ -110,7 +110,7 @@ public class AuthnDataPublisherProxy extends AbstractIdentityMessageHandler impl
     public void publishAuthenticationFailure(HttpServletRequest request, AuthenticationContext context,
                                              Map<String, Object> unmodifiableMap) {
         Event event = createEvent(request, context, null, unmodifiableMap, EventName.AUTHENTICATION_FAILURE);
-        event.addEventProperty(EventProperty.AUTHENTICATION_STATUS,AuthenticatorStatus.FAIL);
+        event.addEventProperty(EventProperty.AUTHENTICATION_STATUS, AuthenticatorStatus.FAIL);
         doPublishEvent(event);
         for (AuthenticationDataPublisher publisher : dataPublishers) {
             if (publisher != null && publisher.isEnabled(context) && publisher.canHandle(context)) {
@@ -146,7 +146,6 @@ public class AuthnDataPublisherProxy extends AbstractIdentityMessageHandler impl
      * @param sessionContext  Session context
      * @param unmodifiableMap Other relevant parameters which needs to be published
      */
-
     public void publishSessionUpdate(HttpServletRequest request, AuthenticationContext context, SessionContext
             sessionContext, Map<String, Object> unmodifiableMap) {
         Event event = createEvent(request, context, sessionContext, unmodifiableMap, EventName.SESSION_UPDATE);

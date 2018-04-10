@@ -1,4 +1,22 @@
-package org.wso2.carbon.identity.data.publisher.application.authentication.impl;
+/*
+ * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+package org.wso2.carbon.identity.data.publisher.authentication.audit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -10,8 +28,6 @@ import org.wso2.carbon.identity.application.authentication.framework.context.Ses
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticationResult;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkConstants;
-import org.wso2.carbon.identity.data.publisher.application.authentication.AuthPublisherConstants;
-import org.wso2.carbon.identity.data.publisher.application.authentication.model.AuthenticationData;
 import org.wso2.carbon.identity.event.IdentityEventConstants;
 import org.wso2.carbon.identity.event.IdentityEventException;
 import org.wso2.carbon.identity.event.event.Event;
@@ -19,17 +35,16 @@ import org.wso2.carbon.identity.event.handler.AbstractEventHandler;
 
 import java.util.Map;
 
-public class AuthenticationAuditLogger extends AbstractEventHandler {
+/*
+ * Log the authentication login data
+ */
+public class AuthenticationAuditLogingHandler extends AbstractEventHandler {
     private static final Log AUDIT_LOG = CarbonConstants.AUDIT_LOG;
-    private static final Log LOG = LogFactory.getLog(AuthenticationAuditLogger.class);
+    private static final Log LOG = LogFactory.getLog(AuthenticationAuditLogingHandler.class);
 
     @Override
-    public String getName() {
-        return "auditDataPublisher";
-    }
-
-    @Override
-    public void handleEvent(org.wso2.carbon.identity.event.event.Event event) throws IdentityEventException {
+    public void handleEvent(Event event) throws IdentityEventException {
+        Map<String, Object> properties = event.getEventProperties();
         if (event.getEventName().equals(IdentityEventConstants.EventName.AUTHENTICATION_STEP_SUCCESS.name())) {
             AuthenticationData authenticationData = HandlerDataBuilder.buildAuthnDataForAuthnStep(event);
             doPublishAuthenticationStepSuccess(authenticationData);
@@ -49,10 +64,9 @@ public class AuthenticationAuditLogger extends AbstractEventHandler {
         }
     }
 
+    protected void doPublishAuthenticationStepSuccess(Map<String, Object> properties) {
 
-    protected void doPublishAuthenticationStepSuccess(AuthenticationData authenticationData) {
-
-        String auditData = "\"" + "ContextIdentifier" + "\" : \"" + authenticationData.getContextId()
+        String auditData = "\"" + "ContextIdentifier" + "\" : \"" + context.getContextIdentifier()
                 + "\",\"" + "AuthenticatedUser" + "\" : \"" + authenticationData.getUsername()
                 + "\",\"" + "AuthenticatedUserTenantDomain" + "\" : \"" + authenticationData.getTenantDomain()
                 + "\",\"" + "ServiceProviderName" + "\" : \"" + authenticationData.getServiceProvider()
