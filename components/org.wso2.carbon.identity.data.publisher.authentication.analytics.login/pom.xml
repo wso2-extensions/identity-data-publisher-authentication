@@ -29,8 +29,8 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.identity.data.publisher.authentication.analytics.login</artifactId>
     <packaging>bundle</packaging>
-    <name>WSO2 Carbon - Analytics Login Data Publisher</name>
-    <description>Carbon - Analytics Login Data Publisher</description>
+    <name>WSO2 Carbon - Analytics Login Data Publusher</name>
+    <description>Carbon - Authentication Audit Logger</description>
     <url>http://wso2.org</url>
 
     <dependencies>
@@ -60,6 +60,11 @@
         </dependency>
     </dependencies>
 
+    <properties>
+        <osgi.framework.imp.pkg.version.range>[1.7.0, 2.0.0)</osgi.framework.imp.pkg.version.range>
+        <osgi.service.component.imp.pkg.version.range>[1.2.0, 2.0.0)</osgi.service.component.imp.pkg.version.range>
+    </properties>
+
     <build>
         <plugins>
             <plugin>
@@ -79,16 +84,32 @@
                             org.wso2.carbon.identity.data.publisher.application.authentication.internal,
                         </Private-Package>
                         <Import-Package>
-                            !org.wso2.carbon.identity.data.publisher.authentication.analytics.login*,
-                            org.wso2.carbon; version="${carbon.kernel.package.import.version.range}",
-                            org.apache.commons.logging; version="${commons-logging.osgi.version.range}",
-                            org.wso2.carbon.identity.application.authentication.framework.*;version="${carbon.identity.framework.package.import.version.range}",
-                            org.wso2.carbon.databridge.commons; version="${carbon.analytics-common.version}",
-                            *;resolution:=optional
+                            <!--org.wso2.carbon; version="${carbon.kernel.package.import.version.range}",-->
+                            <!--org.apache.commons.logging; version="${commons-logging.osgi.version.range}",-->
+                            <!--org.wso2.carbon.identity.application.authentication.framework.*;version="${carbon.identity.framework.package.import.version.range}",-->
+                            <!--org.wso2.carbon.databridge.commons; version="${carbon.analytics-common.version}",-->
+                            <!--*;resolution:=optional-->
+                            org.osgi.framework; version="${osgi.framework.imp.pkg.version.range}",
+                            org.osgi.service.component; version="${osgi.service.component.imp.pkg.version.range}",
+                            org.apache.commons.lang,
+                            org.apache.commons.logging,
+                            org.wso2.carbon.context,
+                            org.wso2.carbon.base,
+                            org.wso2.carbon.event.stream.core,
+                            org.wso2.carbon.registry.core.service,
+                            org.wso2.carbon.user.core.service,
+                            org.wso2.carbon.identity.application.authentication.framework,
+                            org.wso2.carbon,
+                            org.wso2.carbon.identity.core.util,
+                            org.wso2.carbon.identity.event.*,
+                            org.wso2.carbon.user.core,
+                            org.wso2.carbon.user.core.util
+
                         </Import-Package>
                         <Export-Package>
-                            !org.wso2.carbon.identity.data.publisher.application.authentication.internal,
-                            org.wso2.carbon.identity.data.publisher.application.authentication.*;version="${carbon.identity.data.publisher.package.export.version}"
+                            !org.wso2.carbon.identity.data.publisher.authentication.analytics.login.internal,
+                            org.wso2.carbon.identity.data.publisher.authentication.analytics.login.*;
+                            version="${carbon.identity.data.publisher.package.export.version}"
                         </Export-Package>
                     </instructions>
                 </configuration>

@@ -22,14 +22,21 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.identity.application.authentication.framework.context.AuthenticationContext;
 import org.wso2.carbon.identity.application.authentication.framework.context.SessionContext;
+import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
+import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkConstants;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
+import org.wso2.carbon.identity.data.publisher.authentication.analytics.session.model.SessionData;
+import org.wso2.carbon.identity.event.IdentityEventConstants;
+import org.wso2.carbon.identity.event.event.Event;
 import org.wso2.carbon.idp.mgt.util.IdPManagementUtil;
 
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import javax.servlet.http.HttpServletRequest;
 
 /*
  * Utils for Analytics session data publish handler
@@ -114,6 +121,91 @@ public class SessionDataPublisherUtil {
         return metaData;
     }
 
+    /**
+     * Create the session data object to pupulate payload of event
+     * @param event - triggered event object from framework
+     * @return
+     */
+    public static SessionData buildSessionData(Event event) {
+
+        Map<String, Object> properties = event.getEventProperties();
+        HttpServletRequest request = (HttpServletRequest) properties.get(IdentityEventConstants.EventProperty.REQUEST);
+        Map<String, Object> params = (Map<String, Object>) properties.get(IdentityEventConstants.EventProperty.PARAMS);
+        SessionContext sessionContext = (SessionContext) properties.get(IdentityEventConstants.EventProperty.SESSION_CONTEXT);
+        AuthenticationContext context = (AuthenticationContext) properties.get(IdentityEventConstants.EventProperty.CONTEXT);
+
+        SessionData sessionData = new SessionData();
+        Object userObj = params.get(FrameworkConstants.AnalyticsAttributes.USER);
+        String sessionId = (String) params.get(FrameworkConstants.AnalyticsAttributes.SESSION_ID);
+        String userName = null;
+        String userStoreDomain = null;
+        String tenantDomain = null;
+        if (userObj != null && userObj instanceof AuthenticatedUser) {
+            AuthenticatedUser user = (AuthenticatedUser) userObj;
+            userName = user.getUserName();
+            userStoreDomain = user.getUserStoreDomain();
+            tenantDomain = user.getTenantDomain();
+        }
+        sessionData.setSessionContext(sessionContext);
+        sessionData.setUser(userName);
+        sessionData.setUserStoreDomain(userStoreDomain);
+        sessionData.setTenantDomain(tenantDomain);
+        sessionData.setSessionId(sessionId);
+        sessionData.setIdentityProviders(getCommaSeparatedIDPs(sessionContext));
+        sessionData.setUserAgent(request.getHeader(SessionDataPublisherConstants.USER_AGENT));
+        if (sessionContext != null) {
+            sessionData.setIsRememberMe(sessionContext.isRememberMe());
+        }
+        if (context != null) {
+            sessionData.setServiceProvider(context.getServiceProviderName());
+        }
+        if (request != null) {
+            sessionData.setRemoteIP(IdentityUtil.getClientIpAddress(request));
+        }
+
+        if (context.getSequenceConfig().getApplicationConfig().isSaaSApp()) {
+            sessionData.addParameter(SessionDataPublisherConstants.TENANT_ID, SessionDataPublisherUtil
+                    .getTenantDomains(context.getTenantDomain(), sessionData.getTenantDomain()));
+        } else {
+            sessionData.addParameter(SessionDataPublisherConstants.TENANT_ID, new String[]{sessionData.getTenantDomain()});
+        }
+
+        return sessionData;
+    }
+
+
+    public static void updateTimeStamps(SessionData sessionData,int actionId){
+        SessionContext sessionContext = sessionData.getSessionContext();
+        Long createdTime = null;
+        Long terminationTime = null;
+        Long updatedTime = null;
+        if(sessionContext != null) {
+            Object createdTimeObj = sessionContext.getProperty(FrameworkConstants.CREATED_TIMESTAMP);
+            createdTime = (Long) createdTimeObj;
+            if (actionId == SessionDataPublisherConstants.SESSION_CREATION_STATUS) {
+                terminationTime = SessionDataPublisherUtil.getSessionExpirationTime(createdTime, createdTime,
+                        sessionData.getTenantDomain(), sessionContext.isRememberMe());
+                updatedTime = createdTime;
+
+            } else if (actionId == SessionDataPublisherConstants.SESSION_UPDATE_STATUS) {
+                Long currentTime = System.currentTimeMillis();
+                terminationTime = SessionDataPublisherUtil.getSessionExpirationTime(createdTime, createdTime,
+                        sessionData.getTenantDomain(), sessionContext.isRememberMe());
+                updatedTime = currentTime;
+
+            } else if (actionId == SessionDataPublisherConstants.SESSION_TERMINATION_STATUS) {
+                Long currentTime = System.currentTimeMillis();
+                terminationTime = currentTime;
+                updatedTime = currentTime;
+            }
+            sessionData.setCreatedTimestamp(createdTime);
+            sessionData.setUpdatedTimestamp(updatedTime);
+            sessionData.setTerminationTimestamp(terminationTime);
+        }
+
+
+
+    }
 
     public static String getCommaSeparatedIDPs(SessionContext sessionContext) {
 

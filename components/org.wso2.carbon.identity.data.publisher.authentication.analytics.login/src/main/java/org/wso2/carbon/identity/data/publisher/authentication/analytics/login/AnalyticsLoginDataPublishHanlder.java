@@ -28,7 +28,7 @@ import org.wso2.carbon.identity.application.authentication.framework.util.Framew
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkUtils;
 import org.wso2.carbon.identity.base.IdentityRuntimeException;
 import org.wso2.carbon.identity.data.publisher.authentication.analytics.login.Model.AuthenticationData;
-import org.wso2.carbon.identity.data.publisher.authentication.analytics.login.internal.AuthenticationDataPublisherDataHolder;
+import org.wso2.carbon.identity.data.publisher.authentication.analytics.login.internal.AnalyticsLoginDataPublishDataHolder;
 import org.wso2.carbon.identity.event.IdentityEventConstants;
 import org.wso2.carbon.identity.event.IdentityEventException;
 import org.wso2.carbon.identity.event.handler.AbstractEventHandler;
@@ -155,7 +155,7 @@ public class AnalyticsLoginDataPublishHanlder extends AbstractEventHandler {
                     org.wso2.carbon.databridge.commons.Event event = new org.wso2.carbon.databridge.commons
                             .Event(AnalyticsLoginDataPublishConstants.AUTHN_DATA_STREAM_NAME, System.currentTimeMillis(),
                             metadataArray, null, payloadData);
-//                        AuthenticationDataPublisherDataHolder.getInstance().getPublisherService().publish(event);
+                        AnalyticsLoginDataPublishDataHolder.getInstance().getPublisherService().publish(event);
                     if (LOG.isDebugEnabled() && event != null) {
                         LOG.debug("Sending out event : " + event.toString());
                     }
@@ -177,8 +177,8 @@ public class AnalyticsLoginDataPublishHanlder extends AbstractEventHandler {
             return StringUtils.EMPTY;
         }
 
-        RegistryService registryService = AuthenticationDataPublisherDataHolder.getInstance().getRegistryService();
-        RealmService realmService = AuthenticationDataPublisherDataHolder.getInstance().getRealmService();
+        RegistryService registryService = AnalyticsLoginDataPublishDataHolder.getInstance().getRegistryService();
+        RealmService realmService = AnalyticsLoginDataPublishDataHolder.getInstance().getRealmService();
 
         UserRealm realm = null;
         UserStoreManager userstore = null;

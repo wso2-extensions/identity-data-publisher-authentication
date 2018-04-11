@@ -23,10 +23,6 @@ import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.event.stream.core.EventStreamService;
 import org.wso2.carbon.identity.application.authentication.framework.AuthenticationDataPublisher;
 import org.wso2.carbon.identity.data.publisher.application.authentication.AuthnDataPublisherProxy;
-import org.wso2.carbon.identity.data.publisher.application.authentication.impl.AuthenticationAuditLogger;
-import org.wso2.carbon.identity.data.publisher.application.authentication.impl.DASLoginDataPublisherImpl;
-import org.wso2.carbon.identity.data.publisher.application.authentication.impl.DASSessionDataPublisherImpl;
-import org.wso2.carbon.identity.event.handler.AbstractEventHandler;
 import org.wso2.carbon.identity.event.services.IdentityEventService;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -53,12 +49,12 @@ public class AuthenticationDataPublisherServiceComponent {
     protected void activate(ComponentContext context) {
 
         BundleContext bundleContext = context.getBundleContext();
-        bundleContext
-                .registerService(AbstractEventHandler.class.getName(), new DASLoginDataPublisherImpl(), null);
-        bundleContext
-                .registerService(AbstractEventHandler.class.getName(), new DASSessionDataPublisherImpl(), null);
-        bundleContext
-                .registerService(AbstractEventHandler.class.getName(), new AuthenticationAuditLogger(), null);
+//        bundleContext
+//                .registerService(AbstractEventHandler.class.getName(), new DASLoginDataPublisherImpl(), null);
+//        bundleContext
+//                .registerService(AbstractEventHandler.class.getName(), new DASSessionDataPublisherImpl(), null);
+//        bundleContext
+//                .registerService(AbstractEventHandler.class.getName(), new AuthenticationAuditLogger(), null);
         bundleContext
                 .registerService(AuthenticationDataPublisher.class.getName(), new AuthnDataPublisherProxy(), null);
     }
@@ -94,10 +90,12 @@ public class AuthenticationDataPublisherServiceComponent {
     }
 
     protected void setIdentityEventService(IdentityEventService eventService) {
+
         AuthenticationDataPublisherDataHolder.getInstance().setIdentityEventService(eventService);
     }
 
     protected void unsetIdentityEventService(IdentityEventService eventService) {
+
         AuthenticationDataPublisherDataHolder.getInstance().setIdentityEventService(null);
     }
 

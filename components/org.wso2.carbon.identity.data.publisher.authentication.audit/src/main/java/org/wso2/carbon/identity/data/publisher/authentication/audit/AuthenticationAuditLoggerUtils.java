@@ -18,13 +18,18 @@
 
 package org.wso2.carbon.identity.data.publisher.authentication.audit;
 
+import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.identity.application.authentication.framework.AuthenticatorStatus;
 import org.wso2.carbon.identity.application.authentication.framework.config.model.StepConfig;
 import org.wso2.carbon.identity.application.authentication.framework.context.AuthenticationContext;
 import org.wso2.carbon.identity.application.authentication.framework.context.SessionContext;
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedIdPData;
+import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkConstants;
+import org.wso2.carbon.identity.application.common.model.User;
+import org.wso2.carbon.identity.data.publisher.authentication.audit.Model.AuthenticationAuditData;
 import org.wso2.carbon.identity.event.IdentityEventConstants;
+import org.wso2.carbon.identity.event.event.Event;
 
 import java.util.Map;
 
@@ -33,28 +38,184 @@ import java.util.Map;
  */
 public class AuthenticationAuditLoggerUtils {
 
-    public static AuthenticationContext getAuthenticationContextFromProperties(Map<String, Object> properties) {
+    public static AuthenticationAuditData createAuthenticationAudiDataObject(Event event, String authType) {
+
+        Map<String, Object> properties = event.getEventProperties();
+        AuthenticationContext context = getAuthenticationContextFromProperties(properties);
+        Map<String, Object> params = getParamsFromProperties(properties);
+        AuthenticatorStatus status = getAutheticatorStatusFromProperties(properties);
+
+        AuthenticationAuditData authenticationAuditData = new AuthenticationAuditData();
+
+        authenticationAuditData.setContextIdentifier(getContextIdentifier(context));
+        authenticationAuditData.setServiceProvider(getServiceProvider(context));
+        authenticationAuditData.setInboundProtocol(getInboundProtocol(context));
+        authenticationAuditData.setRelyingParty(getRelyingParty(context));
+
+        if (authType.equals(AuthenticationAuditLoggerConstants.AUDIT_AUTHENTICATION_STEP)) {
+            authenticationAuditData.setAuthenticatedUser(getUserNameForAuthenticationStep(params));
+            authenticationAuditData.setTenantDomain(getTenantDomainForAuthenticationStep(params));
+            authenticationAuditData.setAuthenticatedIdp(getIdentityProviderForAuthenticationStep(context));
+            authenticationAuditData.setStepNo(getStepNoForAutheticationStep(context));
+
+        } else if (authType.equals(AuthenticationAuditLoggerConstants.AUDIT_AUTHENTICATION)) {
+            authenticationAuditData.setAuthenticatedUser(getSubjectIdentifier(context, status));
+            authenticationAuditData.setTenantDomain(getTenantDomainForAuthentication(context, params, status));
+            authenticationAuditData.setStepNo(getStepNoForAuthentication(context, status));
+            authenticationAuditData.setAuthenticatedIdps(getIdenitityProviderList(context, status));
+
+        }
+
+        return authenticationAuditData;
+    }
+
+    private static String getContextIdentifier(AuthenticationContext context) {
+
+        return context.getContextIdentifier();
+    }
+
+    private static String getUserNameForAuthenticationStep(Map<String, Object> params) {
+
+        String userName = null;
+        Object userObj = params.get(FrameworkConstants.AnalyticsAttributes.USER);
+        if (userObj instanceof User) {
+            User user = (User) userObj;
+            userName = user.getUserName();
+        }
+        if (userObj instanceof AuthenticatedUser) {
+            AuthenticatedUser user = (AuthenticatedUser) userObj;
+            if (StringUtils.isEmpty(user.getUserName())) {
+                userName = user.getAuthenticatedSubjectIdentifier();
+            }
+        }
+        return userName;
+    }
+
+    private static String getTenantDomainForAuthenticationStep(Map<String, Object> params) {
+
+        String tenantDomain = null;
+        Object userObj = params.get(FrameworkConstants.AnalyticsAttributes.USER);
+        if (userObj instanceof User) {
+            User user = (User) userObj;
+            tenantDomain = user.getTenantDomain();
+        }
+        return tenantDomain;
+    }
+
+    private static String getTenantDomainForAuthentication(AuthenticationContext context, Map<String, Object> params,
+                                                           AuthenticatorStatus status) {
+
+        String tenantDomain = null;
+        Object userObj = params.get(FrameworkConstants.AnalyticsAttributes.USER);
+        if (userObj instanceof AuthenticatedUser) {
+            AuthenticatedUser user = (AuthenticatedUser) userObj;
+            if (status == AuthenticatorStatus.FAIL) {
+                tenantDomain = user.getTenantDomain();
+            }
+        }
+        if (status == AuthenticatorStatus.PASS) {
+            AuthenticatedIdPData localIDPData = null;
+            Map<String, AuthenticatedIdPData> previousAuthenticatedIDPs = context.getPreviousAuthenticatedIdPs();
+            Map<String, AuthenticatedIdPData> currentAuthenticatedIDPs = context.getCurrentAuthenticatedIdPs();
+            if (currentAuthenticatedIDPs != null && currentAuthenticatedIDPs.size() > 0) {
+                localIDPData = currentAuthenticatedIDPs.get(FrameworkConstants.LOCAL_IDP_NAME);
+            }
+            if (localIDPData == null && previousAuthenticatedIDPs != null && previousAuthenticatedIDPs.size() > 0) {
+                localIDPData = previousAuthenticatedIDPs.get(FrameworkConstants.LOCAL_IDP_NAME);
+            }
+
+            if (localIDPData != null) {
+                tenantDomain = localIDPData.getUser().getTenantDomain();
+            }
+        }
+        return tenantDomain;
+    }
+
+    private static String getServiceProvider(AuthenticationContext context) {
+
+        return context.getServiceProviderName();
+    }
+
+    private static String getInboundProtocol(AuthenticationContext context) {
+
+        return context.getRequestType();
+    }
+
+    private static String getRelyingParty(AuthenticationContext context) {
+
+        return context.getRelyingParty();
+    }
+
+    private static String getIdentityProviderForAuthenticationStep(AuthenticationContext context) {
+
+        String idpProvider = null;
+        if (context.getExternalIdP() == null) {
+            idpProvider = FrameworkConstants.LOCAL_IDP_NAME;
+        } else {
+            idpProvider = context.getExternalIdP().getIdPName();
+        }
+        return idpProvider;
+    }
+
+    private static int getStepNoForAutheticationStep(AuthenticationContext context) {
+
+        return context.getCurrentStep();
+    }
+
+    private static int getStepNoForAuthentication(AuthenticationContext context, AuthenticatorStatus status) {
+
+        int step = 0;
+        if (status == AuthenticatorStatus.PASS) {
+            Object hasLocalStepObj = context.getProperty(FrameworkConstants.AnalyticsAttributes.HAS_LOCAL_STEP);
+            boolean hasPreviousLocalStep = hasPreviousLocalEvent(context);
+            boolean hasLocal = convertToBoolean(hasLocalStepObj);
+
+            if (!hasPreviousLocalStep && hasLocal) {
+                step = getLocalStepNo(context);
+            }
+        }
+        return step;
+    }
+
+    private static String getSubjectIdentifier(AuthenticationContext context, AuthenticatorStatus status) {
+
+        String subjectIdentifier = null;
+        if (status == AuthenticatorStatus.PASS) {
+            subjectIdentifier = context.getSequenceConfig().getAuthenticatedUser().getAuthenticatedSubjectIdentifier();
+        }
+        return subjectIdentifier;
+    }
+
+    private static String getIdenitityProviderList(AuthenticationContext context, AuthenticatorStatus status) {
+
+        String authenticatedIdps = null;
+        if (status == AuthenticatorStatus.PASS) {
+            authenticatedIdps = context.getSequenceConfig().getAuthenticatedIdPs();
+        }
+        return authenticatedIdps;
+    }
+
+    private static AuthenticationContext getAuthenticationContextFromProperties(Map<String, Object> properties) {
 
         return (AuthenticationContext) properties.get(IdentityEventConstants.EventProperty.CONTEXT);
     }
 
-    public static AuthenticatorStatus getAutheticatorStatusFromProperties(Map<String, Object> properties) {
+    private static AuthenticatorStatus getAutheticatorStatusFromProperties(Map<String, Object> properties) {
 
         return (AuthenticatorStatus) properties.get(IdentityEventConstants.EventProperty.AUTHENTICATION_STATUS);
     }
 
-    public static SessionContext getSessionContextFromProperties(Map<String, Object> properties) {
+    private static SessionContext getSessionContextFromProperties(Map<String, Object> properties) {
 
         return (SessionContext) properties.get(IdentityEventConstants.EventProperty.SESSION_CONTEXT);
     }
 
-
-    public static Map<String, Object> getParamsFromProperties(Map<String, Object> properties) {
+    private static Map<String, Object> getParamsFromProperties(Map<String, Object> properties) {
 
         return (Map<String, Object>) properties.get(IdentityEventConstants.EventProperty.PARAMS);
     }
 
-    public static boolean hasPreviousLocalEvent(AuthenticationContext context) {
+    private static boolean hasPreviousLocalEvent(AuthenticationContext context) {
 
         Map<String, AuthenticatedIdPData> previousAuthenticatedIDPs = context.getPreviousAuthenticatedIdPs();
         if (previousAuthenticatedIDPs.get(FrameworkConstants.LOCAL_IDP_NAME) != null) {
@@ -63,7 +224,7 @@ public class AuthenticationAuditLoggerUtils {
         return false;
     }
 
-    public static boolean convertToBoolean(Object object) {
+    private static boolean convertToBoolean(Object object) {
 
         if (object != null) {
             return (Boolean) object;
@@ -71,7 +232,7 @@ public class AuthenticationAuditLoggerUtils {
         return false;
     }
 
-    public static int getLocalStepNo(AuthenticationContext context) {
+    private static int getLocalStepNo(AuthenticationContext context) {
 
         int stepNo = 0;
         Map<Integer, StepConfig> map = context.getSequenceConfig().getStepMap();

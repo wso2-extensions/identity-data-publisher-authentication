@@ -26,9 +26,6 @@ public class AnalyticsLoginDataPublishConstants {
     public static final String ANALYTICS_LOGIN_PUBLISHER_NAME = "DASLoginDataPublisher";
     public static final String AUTHN_DATA_STREAM_NAME = "org.wso2.is.analytics.stream.OverallAuthentication:1.0.0";
 
-    public static final int EVENT_AUTHENTICATION_STEP = 0;
-    public static final int EVENT_AUTHENTICATION = 1;
-
     public static final String NOT_AVAILABLE = "NOT_AVAILABLE";
     public static final String CONFIG_PREFIX = "ISAnalytics.DefaultValues.";
     public static final String USERNAME = "userName";
