@@ -162,12 +162,13 @@ public class SessionDataPublisherUtil {
         if (request != null) {
             sessionData.setRemoteIP(IdentityUtil.getClientIpAddress(request));
         }
-
-        if (context.getSequenceConfig().getApplicationConfig().isSaaSApp()) {
-            sessionData.addParameter(SessionDataPublisherConstants.TENANT_ID, SessionDataPublisherUtil
-                    .getTenantDomains(context.getTenantDomain(), sessionData.getTenantDomain()));
-        } else {
-            sessionData.addParameter(SessionDataPublisherConstants.TENANT_ID, new String[]{sessionData.getTenantDomain()});
+        if(context != null && context.getSequenceConfig() != null) {
+            if (context.getSequenceConfig().getApplicationConfig().isSaaSApp()) {
+                sessionData.addParameter(SessionDataPublisherConstants.TENANT_ID, SessionDataPublisherUtil
+                        .getTenantDomains(context.getTenantDomain(), sessionData.getTenantDomain()));
+            } else {
+                sessionData.addParameter(SessionDataPublisherConstants.TENANT_ID, new String[]{sessionData.getTenantDomain()});
+            }
         }
 
         return sessionData;

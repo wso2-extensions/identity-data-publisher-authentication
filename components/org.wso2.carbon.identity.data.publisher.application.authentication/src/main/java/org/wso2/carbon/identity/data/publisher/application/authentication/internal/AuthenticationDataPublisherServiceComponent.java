@@ -49,12 +49,6 @@ public class AuthenticationDataPublisherServiceComponent {
     protected void activate(ComponentContext context) {
 
         BundleContext bundleContext = context.getBundleContext();
-//        bundleContext
-//                .registerService(AbstractEventHandler.class.getName(), new DASLoginDataPublisherImpl(), null);
-//        bundleContext
-//                .registerService(AbstractEventHandler.class.getName(), new DASSessionDataPublisherImpl(), null);
-//        bundleContext
-//                .registerService(AbstractEventHandler.class.getName(), new AuthenticationAuditLogger(), null);
         bundleContext
                 .registerService(AuthenticationDataPublisher.class.getName(), new AuthnDataPublisherProxy(), null);
     }

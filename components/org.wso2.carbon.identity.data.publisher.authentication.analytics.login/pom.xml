@@ -81,29 +81,15 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Private-Package>
-                            org.wso2.carbon.identity.data.publisher.application.authentication.internal,
+                            org.wso2.carbon.identity.data.publisher.authentication.analytics.login.internal,
                         </Private-Package>
                         <Import-Package>
-                            <!--org.wso2.carbon; version="${carbon.kernel.package.import.version.range}",-->
-                            <!--org.apache.commons.logging; version="${commons-logging.osgi.version.range}",-->
-                            <!--org.wso2.carbon.identity.application.authentication.framework.*;version="${carbon.identity.framework.package.import.version.range}",-->
-                            <!--org.wso2.carbon.databridge.commons; version="${carbon.analytics-common.version}",-->
-                            <!--*;resolution:=optional-->
-                            org.osgi.framework; version="${osgi.framework.imp.pkg.version.range}",
-                            org.osgi.service.component; version="${osgi.service.component.imp.pkg.version.range}",
-                            org.apache.commons.lang,
-                            org.apache.commons.logging,
-                            org.wso2.carbon.context,
-                            org.wso2.carbon.base,
-                            org.wso2.carbon.event.stream.core,
-                            org.wso2.carbon.registry.core.service,
-                            org.wso2.carbon.user.core.service,
-                            org.wso2.carbon.identity.application.authentication.framework,
-                            org.wso2.carbon,
-                            org.wso2.carbon.identity.core.util,
-                            org.wso2.carbon.identity.event.*,
-                            org.wso2.carbon.user.core,
-                            org.wso2.carbon.user.core.util
+                            !org.wso2.carbon.identity.data.publisher.authentication.analytics.login.*,
+                            org.wso2.carbon; version="${carbon.kernel.package.import.version.range}",
+                            org.apache.commons.logging; version="${commons-logging.osgi.version.range}",
+                            org.wso2.carbon.identity.application.authentication.framework.*;version="${carbon.identity.framework.package.import.version.range}",
+                            org.wso2.carbon.databridge.commons; version="${carbon.analytics-common.version}",
+                            *;resolution:=optional
 
                         </Import-Package>
                         <Export-Package>

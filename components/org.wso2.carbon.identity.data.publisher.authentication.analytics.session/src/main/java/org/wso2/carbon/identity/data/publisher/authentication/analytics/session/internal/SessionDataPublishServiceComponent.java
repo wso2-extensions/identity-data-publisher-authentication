@@ -22,28 +22,25 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
 import org.wso2.carbon.event.stream.core.EventStreamService;
 import org.wso2.carbon.identity.data.publisher.authentication.analytics.session.AnalyticsSessionDataPublishHandler;
 import org.wso2.carbon.identity.event.handler.AbstractEventHandler;
-import org.wso2.carbon.registry.core.service.RegistryService;
 
 /*
  * Service registering class for session data publish of analytics
  */
-@Component(
-        name = "identity.data.publisher.authentication.analytics.session",
-        immediate = true
-)
+
+/**
+ * @scr.component name="identity.data.publisher.authentication.analytics.session" immediate="true"
+ * @scr.reference name="eventStreamManager.service"
+ * interface="org.wso2.carbon.event.stream.core.EventStreamService" cardinality="1..1"
+ * policy="dynamic" bind="setEventStreamService" unbind="unsetEventStreamService"
+ */
+
 public class SessionDataPublishServiceComponent {
+
     private static Log log = LogFactory.getLog(SessionDataPublishServiceComponent.class);
 
-    @Activate
     protected void activate(ComponentContext context) {
 
         try {
@@ -61,21 +58,6 @@ public class SessionDataPublishServiceComponent {
         }
     }
 
-    @Deactivate
-    protected void deactivate(ComponentContext context) {
-
-        if (log.isDebugEnabled()) {
-            log.debug("org.wso2.carbon.identity.data.publisher.authentication.analytics.session bundle is deactivated");
-        }
-    }
-
-    @Reference(
-            name = "EventStreamService",
-            service = RegistryService.class,
-            cardinality = ReferenceCardinality.MANDATORY,
-            policy = ReferencePolicy.DYNAMIC,
-            unbind = "unsetEventStreamService"
-    )
     protected void setEventStreamService(EventStreamService eventStreamService) {
 
         if (log.isDebugEnabled()) {
@@ -91,7 +73,5 @@ public class SessionDataPublishServiceComponent {
         }
         SessionDataPublishServiceHolder.getInstance().setPublisherService(null);
     }
-
-
 
 }

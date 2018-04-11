@@ -23,7 +23,7 @@ package org.wso2.carbon.identity.data.publisher.authentication.analytics.login;
  */
 public class AnalyticsLoginDataPublishConstants {
 
-    public static final String ANALYTICS_LOGIN_PUBLISHER_NAME = "DASLoginDataPublisher";
+    public static final String ANALYTICS_LOGIN_PUBLISHER_NAME = "analyticsLoginDataPublisher";
     public static final String AUTHN_DATA_STREAM_NAME = "org.wso2.is.analytics.stream.OverallAuthentication:1.0.0";
 
     public static final String NOT_AVAILABLE = "NOT_AVAILABLE";
