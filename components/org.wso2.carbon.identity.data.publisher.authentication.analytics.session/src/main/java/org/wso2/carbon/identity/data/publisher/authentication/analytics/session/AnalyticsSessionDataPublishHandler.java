@@ -69,6 +69,190 @@ public class AnalyticsSessionDataPublishHandler extends AbstractEventHandler {
         return StringUtils.EMPTY;
     }
 
+    private static String getSessionId(Map<String, Object> params) {
+        return (String) params.get(FrameworkConstants.AnalyticsAttributes.SESSION_ID);
+    }
+
+    private static String getUser(Map<String, Object> params) {
+        String userName = null;
+        Object userObj = params.get(FrameworkConstants.AnalyticsAttributes.USER);
+        if (userObj != null && userObj instanceof AuthenticatedUser) {
+            AuthenticatedUser user = (AuthenticatedUser) userObj;
+            userName = user.getUserName();
+        }
+        return userName;
+    }
+
+    private static String getUserStoreDomain(Map<String, Object> params) {
+        String userStoreDomain = null;
+        Object userObj = params.get(FrameworkConstants.AnalyticsAttributes.USER);
+        if (userObj != null && userObj instanceof AuthenticatedUser) {
+            AuthenticatedUser user = (AuthenticatedUser) userObj;
+            userStoreDomain = user.getUserStoreDomain();
+        }
+        return userStoreDomain;
+    }
+
+    private static String getRemoteIp(HttpServletRequest request) {
+        String remoteIp = null;
+        if (request != null) {
+            remoteIp = IdentityUtil.getClientIpAddress(request);
+        }
+        return remoteIp;
+    }
+
+    private static String getTenantDomain(Map<String, Object> params) {
+        String tenantDomain = null;
+        Object userObj = params.get(FrameworkConstants.AnalyticsAttributes.USER);
+        if (userObj != null && userObj instanceof AuthenticatedUser) {
+            AuthenticatedUser user = (AuthenticatedUser) userObj;
+            tenantDomain = user.getTenantDomain();
+        }
+        return tenantDomain;
+    }
+
+    private static String getServiceProvider(AuthenticationContext context) {
+        String serviceProvider = null;
+        if (context != null) {
+            serviceProvider = context.getServiceProviderName();
+        }
+        return serviceProvider;
+    }
+
+    private static String getIdentityProviders(SessionContext context) {
+        String identityProviders = null;
+        if (context != null) {
+            identityProviders = getCommaSeparatedIDPs(context);
+        }
+
+        return identityProviders;
+    }
+
+    private static boolean isRememberMe(SessionContext context) {
+        return context.isRememberMe();
+    }
+
+    private static Long getCreatedTimestamp(SessionContext sessionContext) {
+        Long createdTime = null;
+        if (sessionContext != null) {
+            Object createdTimeObj = sessionContext.getProperty(FrameworkConstants.CREATED_TIMESTAMP);
+            createdTime = (Long) createdTimeObj;
+        }
+        return createdTime;
+    }
+
+    private static Long getUpdatedTimestamp(SessionContext sessionContext, int actionId) {
+        Long updatedTimestamp = null;
+        if (SessionDataPublisherConstants.SESSION_CREATION_STATUS == actionId) {
+            updatedTimestamp = getCreatedTimestamp(sessionContext);
+        } else if (SessionDataPublisherConstants.SESSION_UPDATE_STATUS == actionId ||
+                SessionDataPublisherConstants.SESSION_TERMINATION_STATUS == actionId) {
+            updatedTimestamp = System.currentTimeMillis();
+        }
+        return updatedTimestamp;
+    }
+
+    private static Long getTerminationTimestamp(SessionContext sessionContext, AuthenticationContext context, int actionId) {
+        Long terminationTime = null;
+        if (SessionDataPublisherConstants.SESSION_CREATION_STATUS == actionId ||
+                SessionDataPublisherConstants.SESSION_UPDATE_STATUS == actionId) {
+            Long createTimestamp = getCreatedTimestamp(sessionContext);
+            terminationTime = SessionDataPublisherUtil.getSessionExpirationTime(createTimestamp, createTimestamp,
+                    context.getTenantDomain(), isRememberMe(sessionContext));
+        } else if (SessionDataPublisherConstants.SESSION_TERMINATION_STATUS == actionId) {
+            terminationTime = System.currentTimeMillis();
+        }
+        return terminationTime;
+    }
+
+    private static String getUserAgent(HttpServletRequest request) {
+        return request.getHeader(SessionDataPublisherConstants.USER_AGENT);
+    }
+
+    private static String[] getPublishingDomains(AuthenticationContext context, Map<String, Object> params) {
+        String[] publishingDomains;
+        if (context.getSequenceConfig().getApplicationConfig().isSaaSApp()) {
+            publishingDomains = SessionDataPublisherUtil
+                    .getTenantDomains(context.getTenantDomain(), getTenantDomain(params));
+        } else {
+            publishingDomains = new String[]{getTenantDomain(params)};
+        }
+        return publishingDomains;
+    }
+
+    /**
+     * Create payload needed for publishing the data
+     *
+     * @param actionId       - the session state
+     * @param request        - the HttpServletRequestObject
+     * @param params         - parameters in the event
+     * @param sessionContext - session context
+     * @param context        - authentication context
+     * @return
+     */
+    private Object[] populatePayload(int actionId, HttpServletRequest request, Map<String, Object> params,
+                                     SessionContext sessionContext, AuthenticationContext context) {
+
+        Object[] payloadData = new Object[15];
+        payloadData[0] = SessionDataPublisherUtil.replaceIfNotAvailable(SessionDataPublisherConstants.CONFIG_PREFIX +
+                SessionDataPublisherConstants.SESSION_ID, getSessionId(params));
+        payloadData[1] = getCreatedTimestamp(sessionContext);
+        payloadData[2] = getUpdatedTimestamp(sessionContext, actionId);
+        payloadData[3] = getTerminationTimestamp(sessionContext, context, actionId);
+        payloadData[4] = actionId;
+        payloadData[5] = SessionDataPublisherUtil.replaceIfNotAvailable(SessionDataPublisherConstants.CONFIG_PREFIX +
+                SessionDataPublisherConstants.USERNAME, getUser(params));
+        payloadData[6] = SessionDataPublisherUtil.replaceIfNotAvailable(SessionDataPublisherConstants.CONFIG_PREFIX +
+                SessionDataPublisherConstants.USER_STORE_DOMAIN, getUserStoreDomain(params));
+        payloadData[7] = getRemoteIp(request);
+        payloadData[8] = SessionDataPublisherConstants.NOT_AVAILABLE;
+        payloadData[9] = getTenantDomain(params);
+        payloadData[10] = getServiceProvider(context);
+        payloadData[11] = getIdentityProviders(sessionContext);
+        payloadData[12] = isRememberMe(sessionContext);
+        payloadData[13] = getUserAgent(request);
+        payloadData[14] = System.currentTimeMillis();
+
+        if (LOG.isDebugEnabled()) {
+            for (int i = 0; i < 14; i++) {
+                if (payloadData[i] != null) {
+                    LOG.debug("Payload data for entry " + i + " " + payloadData[i].toString());
+                } else {
+                    LOG.debug("Payload data for entry " + i + " is null");
+                }
+            }
+        }
+
+        return payloadData;
+    }
+
+    /**
+     * Publish data to the analytics
+     *
+     * @param payloadData       - populated payload with session data
+     * @param publishingDomains - the domains that should publish
+     */
+    private void publishData(Object[] payloadData, String[] publishingDomains) {
+        if (publishingDomains != null && publishingDomains.length > 0) {
+            try {
+                FrameworkUtils.startTenantFlow(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+                for (String publishingDomain : publishingDomains) {
+                    Object[] metadataArray = SessionDataPublisherUtil.getMetaDataArray(publishingDomain);
+                    org.wso2.carbon.databridge.commons.Event publishingEvent =
+                            new org.wso2.carbon.databridge.commons.Event(SessionDataPublisherConstants
+                                    .SESSION_DATA_STREAM_NAME, System
+                                    .currentTimeMillis(), metadataArray, null, payloadData);
+//                            AuthenticationDataPublisherDataHolder.getInstance().getPublisherService().publish(publishingEvent);
+                    if (LOG.isDebugEnabled() && publishingEvent != null) {
+                        LOG.debug("Sending out event : " + publishingEvent.toString());
+                    }
+                }
+            } finally {
+                FrameworkUtils.endTenantFlow();
+            }
+        }
+    }
+
     @Override
     public String getName() {
         return SessionDataPublisherConstants.ANALYTICS_SESSION_PUBLISHER_NAME;
@@ -111,7 +295,7 @@ public class AnalyticsSessionDataPublishHandler extends AbstractEventHandler {
     }
 
     protected void publishSessionData(Event event, int actionId) {
-        if (event != null){
+        if (event != null) {
             Map<String, Object> properties = event.getEventProperties();
             HttpServletRequest request = (HttpServletRequest) properties.get(IdentityEventConstants.EventProperty.REQUEST);
             Map<String, Object> params = (Map<String, Object>) properties.get(IdentityEventConstants.EventProperty.PARAMS);
@@ -119,9 +303,9 @@ public class AnalyticsSessionDataPublishHandler extends AbstractEventHandler {
             AuthenticationContext context = (AuthenticationContext) properties.get(IdentityEventConstants.EventProperty.CONTEXT);
 
             try {
-                Object[] payloadData = getObjects(actionId, request, params, sessionContext, context);
+                Object[] payloadData = populatePayload(actionId, request, params, sessionContext, context);
 
-                String[] publishingDomains = this.getPublishingDomains(context, params);
+                String[] publishingDomains = getPublishingDomains(context, params);
                 publishData(payloadData, publishingDomains);
 
             } catch (IdentityRuntimeException e) {
@@ -130,191 +314,6 @@ public class AnalyticsSessionDataPublishHandler extends AbstractEventHandler {
                 }
             }
         }
-    }
-
-    /**
-     * Create payload needed for publishing the data
-     * @param actionId - the session state
-     * @param request - the HttpServletRequestObject
-     * @param params - parameters in the event
-     * @param sessionContext - session context
-     * @param context - authentication context
-     * @return
-     */
-    private Object[] getObjects(int actionId, HttpServletRequest request, Map<String, Object> params,
-                                SessionContext sessionContext, AuthenticationContext context) {
-
-        Object[] payloadData = new Object[15];
-        payloadData[0] = SessionDataPublisherUtil.replaceIfNotAvailable(SessionDataPublisherConstants.CONFIG_PREFIX +
-                SessionDataPublisherConstants.SESSION_ID, this.getSessionId(params));
-        payloadData[1] = this.getCreatedTimestamp(sessionContext);
-        payloadData[2] = this.getUpdatedTimestamp(sessionContext, actionId);
-        payloadData[3] = this.getTerminationTimestamp(sessionContext, context, actionId);
-        payloadData[4] = actionId;
-        payloadData[5] = SessionDataPublisherUtil.replaceIfNotAvailable(SessionDataPublisherConstants.CONFIG_PREFIX +
-                SessionDataPublisherConstants.USERNAME, this.getUser(params));
-        payloadData[6] = SessionDataPublisherUtil.replaceIfNotAvailable(SessionDataPublisherConstants.CONFIG_PREFIX +
-                SessionDataPublisherConstants.USER_STORE_DOMAIN, this.getUserStoreDomain(params));
-        payloadData[7] = this.getRemoteIp(request);
-        payloadData[8] = SessionDataPublisherConstants.NOT_AVAILABLE;
-        payloadData[9] = this.getTenantDomain(params);
-        payloadData[10] = this.getServiceProvider(context);
-        payloadData[11] = this.getIdentityProviders(sessionContext);
-        payloadData[12] = this.isRememberMe(sessionContext);
-        payloadData[13] = this.getUserAgent(request);
-        payloadData[14] = System.currentTimeMillis();
-
-        if (LOG.isDebugEnabled()) {
-            for (int i = 0; i < 14; i++) {
-                if (payloadData[i] != null) {
-                    LOG.debug("Payload data for entry " + i + " " + payloadData[i].toString());
-                } else {
-                    LOG.debug("Payload data for entry " + i + " is null");
-                }
-            }
-        }
-
-        return payloadData;
-    }
-
-    /**
-     * Publish data to the analytics
-     * @param payloadData - populated payload with session data
-     * @param publishingDomains - the domains that should publish
-     */
-    private void publishData(Object[] payloadData, String[] publishingDomains) {
-        if (publishingDomains != null && publishingDomains.length > 0) {
-            try {
-                FrameworkUtils.startTenantFlow(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-                for (String publishingDomain : publishingDomains) {
-                    Object[] metadataArray = SessionDataPublisherUtil.getMetaDataArray(publishingDomain);
-                    org.wso2.carbon.databridge.commons.Event publishingEvent =
-                            new org.wso2.carbon.databridge.commons.Event(SessionDataPublisherConstants
-                                    .SESSION_DATA_STREAM_NAME, System
-                                    .currentTimeMillis(), metadataArray, null, payloadData);
-//                            AuthenticationDataPublisherDataHolder.getInstance().getPublisherService().publish(publishingEvent);
-                    if (LOG.isDebugEnabled() && publishingEvent != null) {
-                        LOG.debug("Sending out event : " + publishingEvent.toString());
-                    }
-                }
-            } finally {
-                FrameworkUtils.endTenantFlow();
-            }
-        }
-    }
-
-
-    private String getSessionId(Map<String, Object> params) {
-        return (String) params.get(FrameworkConstants.AnalyticsAttributes.SESSION_ID);
-    }
-
-    private String getUser(Map<String, Object> params) {
-        String userName = null;
-        Object userObj = params.get(FrameworkConstants.AnalyticsAttributes.USER);
-        if (userObj != null && userObj instanceof AuthenticatedUser) {
-            AuthenticatedUser user = (AuthenticatedUser) userObj;
-            userName = user.getUserName();
-        }
-        return userName;
-    }
-
-    private String getUserStoreDomain(Map<String, Object> params) {
-        String userStoreDomain = null;
-        Object userObj = params.get(FrameworkConstants.AnalyticsAttributes.USER);
-        if (userObj != null && userObj instanceof AuthenticatedUser) {
-            AuthenticatedUser user = (AuthenticatedUser) userObj;
-            userStoreDomain = user.getUserStoreDomain();
-        }
-        return userStoreDomain;
-    }
-
-    private String getRemoteIp(HttpServletRequest request) {
-        String remoteIp = null;
-        if (request != null) {
-            remoteIp = IdentityUtil.getClientIpAddress(request);
-        }
-        return remoteIp;
-    }
-
-    private String getTenantDomain(Map<String, Object> params) {
-        String tenantDomain = null;
-        Object userObj = params.get(FrameworkConstants.AnalyticsAttributes.USER);
-        if (userObj != null && userObj instanceof AuthenticatedUser) {
-            AuthenticatedUser user = (AuthenticatedUser) userObj;
-            tenantDomain = user.getTenantDomain();
-        }
-        return tenantDomain;
-    }
-
-    private String getServiceProvider(AuthenticationContext context) {
-        String serviceProvider = null;
-        if (context != null) {
-            serviceProvider = context.getServiceProviderName();
-        }
-        return serviceProvider;
-    }
-
-    private String getIdentityProviders(SessionContext context) {
-        String identityProviders = null;
-        if (context != null) {
-            identityProviders = getCommaSeparatedIDPs(context);
-        }
-
-        return identityProviders;
-    }
-
-    private boolean isRememberMe(SessionContext context) {
-        return context.isRememberMe();
-    }
-
-    private Long getCreatedTimestamp(SessionContext sessionContext) {
-        Long createdTime = null;
-        if (sessionContext != null) {
-            Object createdTimeObj = sessionContext.getProperty(FrameworkConstants.CREATED_TIMESTAMP);
-            createdTime = (Long) createdTimeObj;
-        }
-        return createdTime;
-    }
-
-    private Long getUpdatedTimestamp(SessionContext sessionContext, int actionId) {
-        Long updatedTimestamp = null;
-        if (SessionDataPublisherConstants.SESSION_CREATION_STATUS == actionId) {
-            updatedTimestamp = this.getCreatedTimestamp(sessionContext);
-        } else if (SessionDataPublisherConstants.SESSION_UPDATE_STATUS == actionId ||
-                SessionDataPublisherConstants.SESSION_TERMINATION_STATUS == actionId) {
-            updatedTimestamp = System.currentTimeMillis();
-        }
-        return updatedTimestamp;
-    }
-
-
-    private Long getTerminationTimestamp(SessionContext sessionContext, AuthenticationContext context, int actionId) {
-        Long terminationTime = null;
-        if (SessionDataPublisherConstants.SESSION_CREATION_STATUS == actionId ||
-                SessionDataPublisherConstants.SESSION_UPDATE_STATUS == actionId) {
-            Long createTimestamp = this.getCreatedTimestamp(sessionContext);
-            terminationTime = SessionDataPublisherUtil.getSessionExpirationTime(createTimestamp, createTimestamp,
-                    context.getTenantDomain(), this.isRememberMe(sessionContext));
-        } else if (SessionDataPublisherConstants.SESSION_TERMINATION_STATUS == actionId) {
-            terminationTime = System.currentTimeMillis();
-        }
-        return terminationTime;
-    }
-
-    private String getUserAgent(HttpServletRequest request) {
-        return request.getHeader(SessionDataPublisherConstants.USER_AGENT);
-    }
-
-
-    private String[] getPublishingDomains(AuthenticationContext context, Map<String, Object> params) {
-        String[] publishingDomains;
-        if (context.getSequenceConfig().getApplicationConfig().isSaaSApp()) {
-            publishingDomains = SessionDataPublisherUtil
-                    .getTenantDomains(context.getTenantDomain(), getTenantDomain(params));
-        } else {
-            publishingDomains = new String[]{getTenantDomain(params)};
-        }
-        return publishingDomains;
     }
 
 

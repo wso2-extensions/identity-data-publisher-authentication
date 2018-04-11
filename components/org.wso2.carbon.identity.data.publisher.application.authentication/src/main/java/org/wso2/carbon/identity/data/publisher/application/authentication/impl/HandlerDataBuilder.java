@@ -293,10 +293,7 @@ class HandlerDataBuilder {
 
     private static boolean hasPreviousLocalEvent(AuthenticationContext context) {
         Map<String, AuthenticatedIdPData> previousAuthenticatedIDPs = context.getPreviousAuthenticatedIdPs();
-        if (previousAuthenticatedIDPs.get(FrameworkConstants.LOCAL_IDP_NAME) != null) {
-            return true;
-        }
-        return false;
+        return previousAuthenticatedIDPs.get(FrameworkConstants.LOCAL_IDP_NAME) != null;
     }
 
     private static boolean convertToBoolean(Object object) {

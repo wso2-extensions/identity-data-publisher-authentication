@@ -27,7 +27,7 @@ import org.wso2.carbon.idp.mgt.util.IdPManagementUtil;
 import java.util.concurrent.TimeUnit;
 
 /*
- * TODO - comment class work
+ * Utils for Analytics session data publish handler
  */
 public class SessionDataPublisherUtil {
     public static final String NOT_AVAILABLE = "NOT_AVAILABLE";
