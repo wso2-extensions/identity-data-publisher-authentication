@@ -19,19 +19,25 @@
 package org.wso2.carbon.identity.data.publisher.authentication.analytics.session;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.identity.application.authentication.framework.context.SessionContext;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.idp.mgt.util.IdPManagementUtil;
 
+import java.util.Iterator;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /*
  * Utils for Analytics session data publish handler
  */
 public class SessionDataPublisherUtil {
-    public static final String NOT_AVAILABLE = "NOT_AVAILABLE";
 
+    public static final String NOT_AVAILABLE = "NOT_AVAILABLE";
+    private static final Log LOG = LogFactory.getLog(SessionDataPublisherUtil.class);
 
     /**
      * Add default values if the values coming in are null or empty
@@ -41,6 +47,7 @@ public class SessionDataPublisherUtil {
      * @return
      */
     public static String replaceIfNotAvailable(String name, String value) {
+
         if (StringUtils.isNotEmpty(name) && StringUtils.isEmpty(value)) {
             String defaultValue = IdentityUtil.getProperty(name);
             if (defaultValue != null) {
@@ -92,10 +99,12 @@ public class SessionDataPublisherUtil {
 
     /**
      * Get metadata array for different tenants with tenant domain
+     *
      * @param tenantDomain
      * @return
      */
     public static Object[] getMetaDataArray(String tenantDomain) {
+
         Object[] metaData = new Object[1];
         if (StringUtils.isBlank(tenantDomain)) {
             metaData[0] = MultitenantConstants.SUPER_TENANT_ID;
@@ -103,5 +112,31 @@ public class SessionDataPublisherUtil {
             metaData[0] = IdentityTenantUtil.getTenantId(tenantDomain);
         }
         return metaData;
+    }
+
+
+    public static String getCommaSeparatedIDPs(SessionContext sessionContext) {
+
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Retrieving current IDPw for user ");
+        }
+        if (sessionContext == null || sessionContext.getAuthenticatedIdPs() == null || sessionContext
+                .getAuthenticatedIdPs().isEmpty()) {
+            return StringUtils.EMPTY;
+        }
+
+        Iterator iterator = sessionContext.getAuthenticatedIdPs().entrySet().iterator();
+        StringBuilder sb = new StringBuilder();
+        while (iterator.hasNext()) {
+            Map.Entry pair = (Map.Entry) iterator.next();
+            sb.append(",").append(pair.getKey());
+        }
+        if (sb.length() > 0) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Returning roles, " + sb.substring(1));
+            }
+            return sb.substring(1); //remove the first comma
+        }
+        return StringUtils.EMPTY;
     }
 }

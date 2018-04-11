@@ -37,11 +37,11 @@ import org.wso2.carbon.identity.event.event.Event;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.util.UserCoreUtil;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import javax.servlet.http.HttpServletRequest;
 
 /*
  * Utils for Analytics Login data publisher
@@ -59,6 +59,7 @@ public class AnalyticsLoginDataPublisherUtils {
      * @return Name of the identity provider.
      */
     public static String getSubjectStepIDP(AuthenticationContext context) {
+
         SequenceConfig sequenceConfig = context.getSequenceConfig();
         for (Map.Entry<Integer, StepConfig> entry : sequenceConfig.getStepMap().entrySet()) {
             StepConfig stepConfig = entry.getValue();
@@ -69,7 +70,6 @@ public class AnalyticsLoginDataPublisherUtils {
         return AnalyticsLoginDataPublishConstants.NOT_AVAILABLE;
     }
 
-
     /**
      * Add default values if the values coming in are null or empty
      *
@@ -78,6 +78,7 @@ public class AnalyticsLoginDataPublisherUtils {
      * @return
      */
     public static String replaceIfNotAvailable(String name, String value) {
+
         if (StringUtils.isNotEmpty(name) && StringUtils.isEmpty(value)) {
             String defaultValue = IdentityUtil.getProperty(name);
             if (defaultValue != null) {
@@ -89,7 +90,6 @@ public class AnalyticsLoginDataPublisherUtils {
         }
         return value;
     }
-
 
     static AuthenticationData buildAuthnDataForAuthnStep(Event event) {
 
@@ -250,8 +250,8 @@ public class AnalyticsLoginDataPublisherUtils {
         return authenticationData;
     }
 
-
     private static AuthenticationData fillLocalEvent(AuthenticationData authenticationData, AuthenticationContext context) {
+
         AuthenticatedIdPData localIDPData = null;
         Map<String, AuthenticatedIdPData> previousAuthenticatedIDPs = context.getPreviousAuthenticatedIdPs();
         Map<String, AuthenticatedIdPData> currentAuthenticatedIDPs = context.getCurrentAuthenticatedIdPs();
@@ -272,6 +272,7 @@ public class AnalyticsLoginDataPublisherUtils {
     }
 
     private static boolean hasPreviousLocalEvent(AuthenticationContext context) {
+
         Map<String, AuthenticatedIdPData> previousAuthenticatedIDPs = context.getPreviousAuthenticatedIdPs();
         if (previousAuthenticatedIDPs.get(FrameworkConstants.LOCAL_IDP_NAME) != null) {
             return true;
@@ -280,6 +281,7 @@ public class AnalyticsLoginDataPublisherUtils {
     }
 
     private static boolean convertToBoolean(Object object) {
+
         if (object != null) {
             return (Boolean) object;
         }
@@ -287,6 +289,7 @@ public class AnalyticsLoginDataPublisherUtils {
     }
 
     private static int getLocalStepNo(AuthenticationContext context) {
+
         int stepNo = 0;
         Map<Integer, StepConfig> map = context.getSequenceConfig().getStepMap();
         for (Map.Entry<Integer, StepConfig> entry : map.entrySet()) {
@@ -302,10 +305,12 @@ public class AnalyticsLoginDataPublisherUtils {
 
     /**
      * Get metadata array for different tenants with tenant domain
+     *
      * @param tenantDomain
      * @return
      */
     public static Object[] getMetaDataArray(String tenantDomain) {
+
         Object[] metaData = new Object[1];
         if (StringUtils.isBlank(tenantDomain)) {
             metaData[0] = MultitenantConstants.SUPER_TENANT_ID;
@@ -339,6 +344,7 @@ public class AnalyticsLoginDataPublisherUtils {
      * @return All external roles and Internal roles except internal everyone and application roles.
      */
     public static List<String> filterRoles(String[] roleList) {
+
         List<String> externalRoles = new ArrayList<String>();
         if (roleList != null) {
             int index;

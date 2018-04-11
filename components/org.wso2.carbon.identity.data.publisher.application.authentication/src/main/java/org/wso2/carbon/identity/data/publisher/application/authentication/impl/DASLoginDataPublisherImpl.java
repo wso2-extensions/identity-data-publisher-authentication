@@ -50,6 +50,7 @@ public class DASLoginDataPublisherImpl extends AbstractEventHandler {
 
     @Override
     public String getName() {
+
         return AuthPublisherConstants.DAS_LOGIN_PUBLISHER_NAME;
     }
 

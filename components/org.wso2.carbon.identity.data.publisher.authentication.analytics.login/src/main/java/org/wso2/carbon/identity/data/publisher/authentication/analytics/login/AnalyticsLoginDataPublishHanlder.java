@@ -45,10 +45,12 @@ import java.util.UUID;
  * Publish authentication login data to analytics server
  */
 public class AnalyticsLoginDataPublishHanlder extends AbstractEventHandler {
+
     private static final Log LOG = LogFactory.getLog(AnalyticsLoginDataPublishHanlder.class);
 
     @Override
     public String getName() {
+
         return AnalyticsLoginDataPublishConstants.ANALYTICS_LOGIN_PUBLISHER_NAME;
     }
 
@@ -70,9 +72,9 @@ public class AnalyticsLoginDataPublishHanlder extends AbstractEventHandler {
     }
 
     protected void publishAuthenticationData(AuthenticationData authenticationData) {
+
         try {
             Object[] payloadData = populatePayloadData(authenticationData);
-
 
             publishEvent(payloadData, authenticationData);
 
@@ -85,6 +87,7 @@ public class AnalyticsLoginDataPublishHanlder extends AbstractEventHandler {
     }
 
     private Object[] populatePayloadData(AuthenticationData authenticationData) {
+
         String roleList = null;
         if (FrameworkConstants.LOCAL_IDP_NAME.equalsIgnoreCase(authenticationData.getIdentityProviderType())) {
             roleList = getCommaSeparatedUserRoles(authenticationData.getUserStoreDomain() + "/" + authenticationData
@@ -140,6 +143,7 @@ public class AnalyticsLoginDataPublishHanlder extends AbstractEventHandler {
     }
 
     private void publishEvent(Object[] payloadData, AuthenticationData authenticationData) {
+
         String[] publishingDomains = (String[]) authenticationData.getParameter(AnalyticsLoginDataPublishConstants.TENANT_ID);
         if (publishingDomains != null && publishingDomains.length > 0) {
 
@@ -214,6 +218,5 @@ public class AnalyticsLoginDataPublishHanlder extends AbstractEventHandler {
         }
         return StringUtils.EMPTY;
     }
-
 
 }

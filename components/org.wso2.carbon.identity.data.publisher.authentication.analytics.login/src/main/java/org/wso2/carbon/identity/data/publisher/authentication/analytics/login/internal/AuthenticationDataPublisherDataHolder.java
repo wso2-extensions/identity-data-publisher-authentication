@@ -29,14 +29,13 @@ import java.util.List;
 
 public class AuthenticationDataPublisherDataHolder {
 
+    private static AuthenticationDataPublisherDataHolder
+            serviceHolder = new AuthenticationDataPublisherDataHolder();
     private EventStreamService publisherService;
     private RealmService realmService;
     private RegistryService registryService;
     private List<AuthenticationDataPublisher> dataPublishers = new ArrayList<>();
     private IdentityEventService identityEventService;
-
-    private static AuthenticationDataPublisherDataHolder
-            serviceHolder = new AuthenticationDataPublisherDataHolder();
 
     private AuthenticationDataPublisherDataHolder() {
 
@@ -57,24 +56,24 @@ public class AuthenticationDataPublisherDataHolder {
         this.publisherService = publisherService;
     }
 
-    public void setRealmService(RealmService realmService) {
-
-        this.realmService = realmService;
-    }
-
-    public void setRegistryService(RegistryService registryService) {
-
-        this.registryService = registryService;
-    }
-
     public RealmService getRealmService() {
 
         return realmService;
     }
 
+    public void setRealmService(RealmService realmService) {
+
+        this.realmService = realmService;
+    }
+
     public RegistryService getRegistryService() {
 
         return registryService;
+    }
+
+    public void setRegistryService(RegistryService registryService) {
+
+        this.registryService = registryService;
     }
 
     public List<AuthenticationDataPublisher> getDataPublishers() {
@@ -83,10 +82,12 @@ public class AuthenticationDataPublisherDataHolder {
     }
 
     public IdentityEventService getIdentityEventService() {
+
         return identityEventService;
     }
 
     public void setIdentityEventService(IdentityEventService identityEventService) {
+
         this.identityEventService = identityEventService;
     }
 }

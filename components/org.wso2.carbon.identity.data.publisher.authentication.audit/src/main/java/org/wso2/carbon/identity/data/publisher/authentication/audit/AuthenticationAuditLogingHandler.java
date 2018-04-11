@@ -25,7 +25,6 @@ import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.identity.application.authentication.framework.AuthenticatorStatus;
 import org.wso2.carbon.identity.application.authentication.framework.config.model.ExternalIdPConfig;
 import org.wso2.carbon.identity.application.authentication.framework.config.model.SequenceConfig;
-import org.wso2.carbon.identity.application.authentication.framework.config.model.StepConfig;
 import org.wso2.carbon.identity.application.authentication.framework.context.AuthenticationContext;
 import org.wso2.carbon.identity.application.authentication.framework.context.SessionContext;
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedIdPData;
@@ -44,18 +43,33 @@ import java.util.Map;
  * Log the authentication login data
  */
 public class AuthenticationAuditLogingHandler extends AbstractEventHandler {
+
     private static final Log AUDIT_LOG = CarbonConstants.AUDIT_LOG;
     private static final Log LOG = LogFactory.getLog(AuthenticationAuditLogingHandler.class);
+    private AuthenticationContext context;
+    private Map<String, Object> params;
+    private AuthenticatorStatus status;
+    private SessionContext sessionContext;
 
-    private static String getContextIdentifier(Map<String, Object> properties) {
-        AuthenticationContext context = getAuthenticationContextFromProperties(properties);
-        return context.getContextIdentifier();
+    private void init(Event event) {
+
+        Map<String, Object> properties = event.getEventProperties();
+        this.context = AuthenticationAuditLoggerUtils.getAuthenticationContextFromProperties(properties);
+        this.params = AuthenticationAuditLoggerUtils.getParamsFromProperties(properties);
+        this.status = AuthenticationAuditLoggerUtils.getAutheticatorStatusFromProperties(properties);
+        this.sessionContext = AuthenticationAuditLoggerUtils.getSessionContextFromProperties(properties);
+
     }
 
-    private static String getUserNameForAuthenticationStep(Map<String, Object> properties) {
+    private String getContextIdentifier() {
+
+        return this.context.getContextIdentifier();
+    }
+
+    private String getUserNameForAuthenticationStep() {
+
         String userName = null;
-        Map<String, Object> params = getParamsFromProperties(properties);
-        Object userObj = params.get(FrameworkConstants.AnalyticsAttributes.USER);
+        Object userObj = this.params.get(FrameworkConstants.AnalyticsAttributes.USER);
         if (userObj instanceof User) {
             User user = (User) userObj;
             userName = user.getUserName();
@@ -69,11 +83,10 @@ public class AuthenticationAuditLogingHandler extends AbstractEventHandler {
         return userName;
     }
 
+    private String getTenantDomainForAuthenticationStep() {
 
-    private static String getTenantDomainForAuthenticationStep(Map<String, Object> properties) {
         String tenantDomain = null;
-        Map<String, Object> params = getParamsFromProperties(properties);
-        Object userObj = params.get(FrameworkConstants.AnalyticsAttributes.USER);
+        Object userObj = this.params.get(FrameworkConstants.AnalyticsAttributes.USER);
         if (userObj instanceof User) {
             User user = (User) userObj;
             tenantDomain = user.getTenantDomain();
@@ -81,22 +94,20 @@ public class AuthenticationAuditLogingHandler extends AbstractEventHandler {
         return tenantDomain;
     }
 
-    private static String getTenantDomainForAuthentication(Map<String, Object> properties) {
+    private String getTenantDomainForAuthentication() {
+
         String tenantDomain = null;
-        Map<String, Object> params = getParamsFromProperties(properties);
-        AuthenticatorStatus status = getAutheticatorStatusFromProperties(properties);
-        AuthenticationContext context = getAuthenticationContextFromProperties(properties);
-        Object userObj = params.get(FrameworkConstants.AnalyticsAttributes.USER);
+        Object userObj = this.params.get(FrameworkConstants.AnalyticsAttributes.USER);
         if (userObj instanceof AuthenticatedUser) {
             AuthenticatedUser user = (AuthenticatedUser) userObj;
-            if (status == AuthenticatorStatus.FAIL) {
+            if (this.status == AuthenticatorStatus.FAIL) {
                 tenantDomain = user.getTenantDomain();
             }
         }
-        if (status == AuthenticatorStatus.PASS) {
+        if (this.status == AuthenticatorStatus.PASS) {
             AuthenticatedIdPData localIDPData = null;
-            Map<String, AuthenticatedIdPData> previousAuthenticatedIDPs = context.getPreviousAuthenticatedIdPs();
-            Map<String, AuthenticatedIdPData> currentAuthenticatedIDPs = context.getCurrentAuthenticatedIdPs();
+            Map<String, AuthenticatedIdPData> previousAuthenticatedIDPs = this.context.getPreviousAuthenticatedIdPs();
+            Map<String, AuthenticatedIdPData> currentAuthenticatedIDPs = this.context.getCurrentAuthenticatedIdPs();
             if (currentAuthenticatedIDPs != null && currentAuthenticatedIDPs.size() > 0) {
                 localIDPData = currentAuthenticatedIDPs.get(FrameworkConstants.LOCAL_IDP_NAME);
             }
@@ -111,163 +122,115 @@ public class AuthenticationAuditLogingHandler extends AbstractEventHandler {
         return tenantDomain;
     }
 
-    private static String getServiceProvider(Map<String, Object> properties) {
-        AuthenticationContext context = getAuthenticationContextFromProperties(properties);
-        return context.getServiceProviderName();
+    private String getServiceProvider() {
+
+        return this.context.getServiceProviderName();
     }
 
-    private static String getInboundProtocol(Map<String, Object> properties) {
-        AuthenticationContext context = getAuthenticationContextFromProperties(properties);
-        return context.getRequestType();
+    private String getInboundProtocol() {
+
+        return this.context.getRequestType();
     }
 
-    private static String getRelyingParty(Map<String, Object> properties) {
-        AuthenticationContext context = getAuthenticationContextFromProperties(properties);
-        return context.getRelyingParty();
+    private String getRelyingParty() {
+
+        return this.context.getRelyingParty();
     }
 
-    private static String getIdentityProviderForAuthenticationStep(Map<String, Object> properties) {
+    private String getIdentityProviderForAuthenticationStep() {
+
         String idpProvider = null;
-        AuthenticationContext context = getAuthenticationContextFromProperties(properties);
-        if (context.getExternalIdP() == null) {
+        if (this.context.getExternalIdP() == null) {
             idpProvider = FrameworkConstants.LOCAL_IDP_NAME;
         } else {
-            idpProvider = context.getExternalIdP().getIdPName();
+            idpProvider = this.context.getExternalIdP().getIdPName();
         }
         return idpProvider;
     }
 
-    private static int getStepNoForAutheticationStep(Map<String, Object> properties) {
-        AuthenticationContext context = getAuthenticationContextFromProperties(properties);
+    private int getStepNoForAutheticationStep() {
+
         return context.getCurrentStep();
     }
 
-    private static int getStepNoForAuthentication(Map<String, Object> properties) {
-        int step = 0;
-        AuthenticationContext context = getAuthenticationContextFromProperties(properties);
-        AuthenticatorStatus status = (AuthenticatorStatus) properties.get(IdentityEventConstants.EventProperty.AUTHENTICATION_STATUS);
-        if (status == AuthenticatorStatus.PASS) {
-            Object hasFederatedStepObj = context.getProperty(FrameworkConstants.AnalyticsAttributes.HAS_FEDERATED_STEP);
-            Object hasLocalStepObj = context.getProperty(FrameworkConstants.AnalyticsAttributes.HAS_LOCAL_STEP);
-            boolean hasPreviousLocalStep = hasPreviousLocalEvent(context);
-            boolean hasFederated = convertToBoolean(hasFederatedStepObj);
-            boolean hasLocal = convertToBoolean(hasLocalStepObj);
+    private int getStepNoForAuthentication() {
 
-            if (!hasPreviousLocalStep && hasFederated && hasLocal) {
-                step = getLocalStepNo(context);
-            } else if (!hasPreviousLocalStep && hasLocal) {
-                step = getLocalStepNo(context);
+        int step = 0;
+        if (this.status == AuthenticatorStatus.PASS) {
+            Object hasLocalStepObj = this.context.getProperty(FrameworkConstants.AnalyticsAttributes.HAS_LOCAL_STEP);
+            boolean hasPreviousLocalStep = AuthenticationAuditLoggerUtils.hasPreviousLocalEvent(this.context);
+            boolean hasLocal = AuthenticationAuditLoggerUtils.convertToBoolean(hasLocalStepObj);
+
+            if (!hasPreviousLocalStep && hasLocal) {
+                step = AuthenticationAuditLoggerUtils.getLocalStepNo(this.context);
             }
         }
         return step;
     }
 
-    private static String getSubjectIdentifier(Map<String, Object> properties) {
+    private String getSubjectIdentifier() {
+
         String subjectIdentifier = null;
-        AuthenticatorStatus status = getAutheticatorStatusFromProperties(properties);
-        AuthenticationContext context = getAuthenticationContextFromProperties(properties);
-        if (status == AuthenticatorStatus.PASS) {
-            subjectIdentifier = context.getSequenceConfig().getAuthenticatedUser().getAuthenticatedSubjectIdentifier();
+        if (this.status == AuthenticatorStatus.PASS) {
+            subjectIdentifier = this.context.getSequenceConfig().getAuthenticatedUser().getAuthenticatedSubjectIdentifier();
         }
         return subjectIdentifier;
     }
 
-    private static String getIdenitityProviderList(Map<String, Object> properties) {
+    private String getIdenitityProviderList() {
+
         String authenticatedIdps = null;
-        AuthenticatorStatus status = getAutheticatorStatusFromProperties(properties);
-        AuthenticationContext context = getAuthenticationContextFromProperties(properties);
-        if (status == AuthenticatorStatus.PASS) {
-            authenticatedIdps = context.getSequenceConfig().getAuthenticatedIdPs();
+        if (this.status == AuthenticatorStatus.PASS) {
+            authenticatedIdps = this.context.getSequenceConfig().getAuthenticatedIdPs();
         }
         return authenticatedIdps;
     }
 
-    private static Map<String, Object> getParamsFromProperties(Map<String, Object> properties) {
-        return (Map<String, Object>) properties.get(IdentityEventConstants.EventProperty.PARAMS);
-    }
-
-    private static AuthenticationContext getAuthenticationContextFromProperties(Map<String, Object> properties) {
-        return (AuthenticationContext) properties.get(IdentityEventConstants.EventProperty.CONTEXT);
-    }
-
-    private static AuthenticatorStatus getAutheticatorStatusFromProperties(Map<String, Object> properties) {
-        return (AuthenticatorStatus) properties.get(IdentityEventConstants.EventProperty.AUTHENTICATION_STATUS);
-    }
-
-    private static boolean hasPreviousLocalEvent(AuthenticationContext context) {
-        Map<String, AuthenticatedIdPData> previousAuthenticatedIDPs = context.getPreviousAuthenticatedIdPs();
-        if (previousAuthenticatedIDPs.get(FrameworkConstants.LOCAL_IDP_NAME) != null) {
-            return true;
-        }
-        return false;
-    }
-
-    private static boolean convertToBoolean(Object object) {
-        if (object != null) {
-            return (Boolean) object;
-        }
-        return false;
-    }
-
-    private static int getLocalStepNo(AuthenticationContext context) {
-        int stepNo = 0;
-        Map<Integer, StepConfig> map = context.getSequenceConfig().getStepMap();
-        for (Map.Entry<Integer, StepConfig> entry : map.entrySet()) {
-            StepConfig stepConfig = entry.getValue();
-            if (stepConfig != null && FrameworkConstants.LOCAL_IDP_NAME.equalsIgnoreCase(stepConfig
-                    .getAuthenticatedIdP())) {
-                stepNo = entry.getKey();
-                return stepNo;
-            }
-        }
-        return stepNo;
-    }
-
     @Override
     public void handleEvent(Event event) throws IdentityEventException {
-        Map<String, Object> properties = event.getEventProperties();
+
+        this.init(event);
         if (event.getEventName().equals(IdentityEventConstants.EventName.AUTHENTICATION_STEP_SUCCESS.name())) {
-            doPublishAuthenticationStepSuccess(properties);
+            doPublishAuthenticationStepSuccess();
         } else if (event.getEventName().equals(IdentityEventConstants.EventName.AUTHENTICATION_STEP_FAILURE.name())) {
-            doPublishAuthenticationStepFailure(properties);
+            doPublishAuthenticationStepFailure();
         } else if (event.getEventName().equals(IdentityEventConstants.EventName.AUTHENTICATION_SUCCESS.name())) {
-            doPublishAuthenticationSuccess(properties);
+            doPublishAuthenticationSuccess();
         } else if (event.getEventName().equals(IdentityEventConstants.EventName.AUTHENTICATION_FAILURE.name())) {
-            doPublishAuthenticationFailure(properties);
+            doPublishAuthenticationFailure();
         } else if (event.getEventName().equals(IdentityEventConstants.EventName.SESSION_TERMINATE.name())) {
-            publishSessionTermination(event);
+            publishSessionTermination();
         } else {
             LOG.error("Event " + event.getEventName() + " cannot be handled");
         }
     }
 
-    protected void doPublishAuthenticationStepSuccess(Map<String, Object> properties) {
+    protected void doPublishAuthenticationStepSuccess() {
 
-        String auditData = "\"" + "ContextIdentifier" + "\" : \"" + getContextIdentifier(properties)
-                + "\",\"" + "AuthenticatedUser" + "\" : \"" + getUserNameForAuthenticationStep(properties)
-                + "\",\"" + "AuthenticatedUserTenantDomain" + "\" : \"" + getTenantDomainForAuthenticationStep(properties)
-                + "\",\"" + "ServiceProviderName" + "\" : \"" + getServiceProvider(properties)
-                + "\",\"" + "RequestType" + "\" : \"" + getInboundProtocol(properties)
-                + "\",\"" + "RelyingParty" + "\" : \"" + getRelyingParty(properties)
-                + "\",\"" + "AuthenticatedIdP" + "\" : \"" + getIdentityProviderForAuthenticationStep(properties)
+        String auditData = "\"" + "ContextIdentifier" + "\" : \"" + getContextIdentifier()
+                + "\",\"" + "AuthenticatedUser" + "\" : \"" + getUserNameForAuthenticationStep()
+                + "\",\"" + "AuthenticatedUserTenantDomain" + "\" : \"" + getTenantDomainForAuthenticationStep()
+                + "\",\"" + "ServiceProviderName" + "\" : \"" + getServiceProvider()
+                + "\",\"" + "RequestType" + "\" : \"" + getInboundProtocol()
+                + "\",\"" + "RelyingParty" + "\" : \"" + getRelyingParty()
+                + "\",\"" + "AuthenticatedIdP" + "\" : \"" + getIdentityProviderForAuthenticationStep()
                 + "\"";
 
         AUDIT_LOG.info(String.format(
                 FrameworkConstants.AUDIT_MESSAGE,
-                getUserNameForAuthenticationStep(properties),
+                getUserNameForAuthenticationStep(),
                 "LoginStepSuccess",
                 "ApplicationAuthenticationFramework", auditData, FrameworkConstants.AUDIT_SUCCESS));
 
-
     }
 
-    protected void doPublishAuthenticationStepFailure(Map<String, Object> properties) {
+    protected void doPublishAuthenticationStepFailure() {
 
-        String auditData = "\"" + "ContextIdentifier" + "\" : \"" + getContextIdentifier(properties)
-                + "\",\"" + "ServiceProviderName" + "\" : \"" + getServiceProvider(properties)
-                + "\",\"" + "RequestType" + "\" : \"" + getInboundProtocol(properties)
-                + "\",\"" + "RelyingParty" + "\" : \"" + getRelyingParty(properties)
-                + "\",\"" + "StepNo" + "\" : \"" + getStepNoForAutheticationStep(properties)
+        String auditData = "\"" + "ContextIdentifier" + "\" : \"" + getContextIdentifier()
+                + "\",\"" + "ServiceProviderName" + "\" : \"" + getServiceProvider()
+                + "\",\"" + "RequestType" + "\" : \"" + getInboundProtocol()
+                + "\",\"" + "RelyingParty" + "\" : \"" + getRelyingParty()
+                + "\",\"" + "StepNo" + "\" : \"" + getStepNoForAutheticationStep()
                 + "\"";
 
         AUDIT_LOG.info(String.format(
@@ -277,32 +240,33 @@ public class AuthenticationAuditLogingHandler extends AbstractEventHandler {
                 "ApplicationAuthenticationFramework", auditData, FrameworkConstants.AUDIT_FAILED));
     }
 
-    protected void doPublishAuthenticationSuccess(Map<String, Object> properties) {
+    protected void doPublishAuthenticationSuccess() {
 
         AuthenticationResult authenticationResult = new AuthenticationResult();
         authenticationResult.setAuthenticated(true);
-        String auditData = "\"" + "ContextIdentifier" + "\" : \"" + getContextIdentifier(properties)
-                + "\",\"" + "AuthenticatedUser" + "\" : \"" + getSubjectIdentifier(properties)
-                + "\",\"" + "AuthenticatedUserTenantDomain" + "\" : \"" + getTenantDomainForAuthentication(properties)
-                + "\",\"" + "ServiceProviderName" + "\" : \"" + getServiceProvider(properties)
-                + "\",\"" + "RequestType" + "\" : \"" + getInboundProtocol(properties)
-                + "\",\"" + "RelyingParty" + "\" : \"" + getRelyingParty(properties)
-                + "\",\"" + "AuthenticatedIdPs" + "\" : \"" + getIdenitityProviderList(properties)
+        String auditData = "\"" + "ContextIdentifier" + "\" : \"" + getContextIdentifier()
+                + "\",\"" + "AuthenticatedUser" + "\" : \"" + getSubjectIdentifier()
+                + "\",\"" + "AuthenticatedUserTenantDomain" + "\" : \"" + getTenantDomainForAuthentication()
+                + "\",\"" + "ServiceProviderName" + "\" : \"" + getServiceProvider()
+                + "\",\"" + "RequestType" + "\" : \"" + getInboundProtocol()
+                + "\",\"" + "RelyingParty" + "\" : \"" + getRelyingParty()
+                + "\",\"" + "AuthenticatedIdPs" + "\" : \"" + getIdenitityProviderList()
                 + "\"";
 
         AUDIT_LOG.info(String.format(
                 FrameworkConstants.AUDIT_MESSAGE,
-                getSubjectIdentifier(properties),
+                getSubjectIdentifier(),
                 "Login",
                 "ApplicationAuthenticationFramework", auditData, FrameworkConstants.AUDIT_SUCCESS));
     }
 
-    protected void doPublishAuthenticationFailure(Map<String, Object> properties) {
-        String auditData = "\"" + "ContextIdentifier" + "\" : \"" + getContextIdentifier(properties)
-                + "\",\"" + "ServiceProviderName" + "\" : \"" + getServiceProvider(properties)
-                + "\",\"" + "RequestType" + "\" : \"" + getInboundProtocol(properties)
-                + "\",\"" + "RelyingParty" + "\" : \"" + getRelyingParty(properties)
-                + "\",\"" + "StepNo" + "\" : \"" + getStepNoForAuthentication(properties)
+    protected void doPublishAuthenticationFailure() {
+
+        String auditData = "\"" + "ContextIdentifier" + "\" : \"" + getContextIdentifier()
+                + "\",\"" + "ServiceProviderName" + "\" : \"" + getServiceProvider()
+                + "\",\"" + "RequestType" + "\" : \"" + getInboundProtocol()
+                + "\",\"" + "RelyingParty" + "\" : \"" + getRelyingParty()
+                + "\",\"" + "StepNo" + "\" : \"" + getStepNoForAuthentication()
                 + "\"";
 
         AUDIT_LOG.info(String.format(
@@ -312,15 +276,12 @@ public class AuthenticationAuditLogingHandler extends AbstractEventHandler {
                 "ApplicationAuthenticationFramework", auditData, FrameworkConstants.AUDIT_FAILED));
     }
 
-    protected void publishSessionTermination(Event event) {
-        Map<String, Object> properties = event.getEventProperties();
-        SessionContext sessionContext = (SessionContext) properties.get(IdentityEventConstants.EventProperty.SESSION_CONTEXT);
-        AuthenticationContext context = (AuthenticationContext) properties.get(IdentityEventConstants.EventProperty.CONTEXT);
+    protected void publishSessionTermination() {
 
         if (context == null) {
             return;
         }
-        SequenceConfig sequenceConfig = context.getSequenceConfig();
+        SequenceConfig sequenceConfig = this.context.getSequenceConfig();
         AuthenticatedUser authenticatedUser = null;
         String username = "";
         String tenantDomain = "";
@@ -330,7 +291,7 @@ public class AuthenticationAuditLogingHandler extends AbstractEventHandler {
             authenticatedUser = sequenceConfig.getAuthenticatedUser();
             authenticatedIDPs = sequenceConfig.getAuthenticatedIdPs();
         } else {
-            Object authenticatedUserObj = sessionContext.getProperty(FrameworkConstants.AUTHENTICATED_USER);
+            Object authenticatedUserObj = this.sessionContext.getProperty(FrameworkConstants.AUTHENTICATED_USER);
             if (authenticatedUserObj != null) {
                 authenticatedUser = (AuthenticatedUser) authenticatedUserObj;
             }
@@ -341,12 +302,12 @@ public class AuthenticationAuditLogingHandler extends AbstractEventHandler {
             tenantDomain = authenticatedUser.getTenantDomain();
         }
 
-        String auditData = "\"" + "ContextIdentifier" + "\" : \"" + context.getContextIdentifier()
+        String auditData = "\"" + "ContextIdentifier" + "\" : \"" + this.getContextIdentifier()
                 + "\",\"" + "LoggedOutUser" + "\" : \"" + username
                 + "\",\"" + "LoggedOutUserTenantDomain" + "\" : \"" + tenantDomain
-                + "\",\"" + "ServiceProviderName" + "\" : \"" + context.getServiceProviderName()
-                + "\",\"" + "RequestType" + "\" : \"" + context.getRequestType()
-                + "\",\"" + "RelyingParty" + "\" : \"" + context.getRelyingParty()
+                + "\",\"" + "ServiceProviderName" + "\" : \"" + this.getServiceProvider()
+                + "\",\"" + "RequestType" + "\" : \"" + this.getInboundProtocol()
+                + "\",\"" + "RelyingParty" + "\" : \"" + this.getRelyingParty()
                 + "\",\"" + "AuthenticatedIdPs" + "\" : \"" + authenticatedIDPs
                 + "\"";
 

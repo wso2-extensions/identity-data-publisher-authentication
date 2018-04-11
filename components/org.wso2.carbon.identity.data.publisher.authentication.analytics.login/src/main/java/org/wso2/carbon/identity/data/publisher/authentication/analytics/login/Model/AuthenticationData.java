@@ -26,6 +26,7 @@ import java.util.Map;
 
 public class AuthenticationData<T1 extends Object, T2 extends Object> {
 
+    protected Map<T1, T2> parameters = new HashMap<>();
     private String eventId;
     private String contextId;
     private String eventType;
@@ -46,7 +47,6 @@ public class AuthenticationData<T1 extends Object, T2 extends Object> {
     private String identityProvider;
     private String authenticator;
     private boolean success;
-    protected Map<T1, T2> parameters = new HashMap<>();
 
     public String getEventId() {
 
@@ -69,18 +69,22 @@ public class AuthenticationData<T1 extends Object, T2 extends Object> {
     }
 
     public String getEventType() {
+
         return eventType;
     }
 
     public void setEventType(String eventType) {
+
         this.eventType = eventType;
     }
 
     public String getLocalUsername() {
+
         return localUsername;
     }
 
     public void setLocalUsername(String localUsername) {
+
         this.localUsername = localUsername;
     }
 
@@ -245,6 +249,7 @@ public class AuthenticationData<T1 extends Object, T2 extends Object> {
     }
 
     public void addParameter(T1 key, T2 value) {
+
         if (this.parameters.containsKey(key)) {
             throw IdentityRuntimeException.error("Parameters map trying to override existing key " +
                     key);
@@ -253,6 +258,7 @@ public class AuthenticationData<T1 extends Object, T2 extends Object> {
     }
 
     public void addParameters(Map<T1, T2> parameters) {
+
         for (Map.Entry<T1, T2> parameter : parameters.entrySet()) {
             if (this.parameters.containsKey(parameter.getKey())) {
                 throw IdentityRuntimeException.error("Parameters map trying to override existing key " + parameter.getKey());
@@ -262,10 +268,12 @@ public class AuthenticationData<T1 extends Object, T2 extends Object> {
     }
 
     public Map<T1, T2> getParameters() {
+
         return Collections.unmodifiableMap(parameters);
     }
 
     public T2 getParameter(T1 key) {
+
         return parameters.get(key);
     }
 

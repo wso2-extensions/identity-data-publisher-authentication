@@ -84,10 +84,12 @@ public class AuthenticationDataPublisherServiceComponent {
     }
 
     protected void setIdentityEventService(IdentityEventService eventService) {
+
         AuthenticationDataPublisherDataHolder.getInstance().setIdentityEventService(eventService);
     }
 
     protected void unsetIdentityEventService(IdentityEventService eventService) {
+
         AuthenticationDataPublisherDataHolder.getInstance().setIdentityEventService(null);
     }
 

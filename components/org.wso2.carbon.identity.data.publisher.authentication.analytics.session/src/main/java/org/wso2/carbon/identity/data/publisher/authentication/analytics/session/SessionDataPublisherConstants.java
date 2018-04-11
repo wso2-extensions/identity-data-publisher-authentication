@@ -35,7 +35,6 @@ public class SessionDataPublisherConstants {
     public static final String USER_AGENT = "User-Agent";
     public static final String TENANT_ID = "tenantId";
 
-
     // Session status codes
     public static final int SESSION_CREATION_STATUS = 1;
     public static final int SESSION_TERMINATION_STATUS = 0;
