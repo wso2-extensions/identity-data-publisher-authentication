@@ -39,4 +39,9 @@ public class SessionDataPublisherConstants {
     public static final int SESSION_CREATION_STATUS = 1;
     public static final int SESSION_TERMINATION_STATUS = 0;
     public static final int SESSION_UPDATE_STATUS = 2;
+
+
+    private SessionDataPublisherConstants(){
+
+    }
 }

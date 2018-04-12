@@ -41,4 +41,8 @@ public class AnalyticsLoginDataPublishConstants {
     // Event types
     public static final String STEP_EVENT = "step";
     public static final String OVERALL_EVENT = "overall";
+
+    private AnalyticsLoginDataPublishConstants() {
+
+    }
 }

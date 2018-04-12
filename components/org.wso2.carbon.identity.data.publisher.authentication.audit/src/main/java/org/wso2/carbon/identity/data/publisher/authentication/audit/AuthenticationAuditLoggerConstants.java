@@ -27,4 +27,8 @@ public class AuthenticationAuditLoggerConstants {
 
     public static final String AUDIT_AUTHENTICATION_STEP = "audtStep";
     public static final String AUDIT_AUTHENTICATION = "auditAuth";
+
+    private AuthenticationAuditLoggerConstants(){
+
+    }
 }
