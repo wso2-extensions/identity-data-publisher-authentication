@@ -20,26 +20,12 @@ package org.wso2.carbon.identity.data.publisher.application.authentication.inter
 
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
-import org.wso2.carbon.event.stream.core.EventStreamService;
 import org.wso2.carbon.identity.application.authentication.framework.AuthenticationDataPublisher;
 import org.wso2.carbon.identity.data.publisher.application.authentication.AuthnDataPublisherProxy;
 import org.wso2.carbon.identity.event.services.IdentityEventService;
-import org.wso2.carbon.registry.core.service.RegistryService;
-import org.wso2.carbon.user.core.service.RealmService;
 
 /**
  * @scr.component name="org.wso2.carbon.identity.data.publisher.authn" immediate="true"
- * @scr.reference name="registry.service"
- * interface="org.wso2.carbon.registry.core.service.RegistryService"
- * cardinality="1..1" policy="dynamic" bind="setRegistryService"
- * unbind="unsetRegistryService"
- * @scr.reference name="realm.service" interface="org.wso2.carbon.user.core.service.RealmService"
- * cardinality="1..1" policy="dynamic" bind="setRealmService"
- * unbind="unsetRealmService"
- * @scr.reference name="eventStreamManager.service"
- * interface="org.wso2.carbon.event.stream.core.EventStreamService" cardinality="1..1"
- * policy="dynamic" bind="setEventStreamService" unbind="unsetEventStreamService"
- * unbind="unsetEventStreamService"
  * @scr.reference name="IdentityEventService"
  * interface="org.wso2.carbon.identity.event.services.IdentityEventService" cardinality="1..1"
  * policy="dynamic" bind="setIdentityEventService" unbind="unsetIdentityEventService"
@@ -51,36 +37,6 @@ public class AuthenticationDataPublisherServiceComponent {
         BundleContext bundleContext = context.getBundleContext();
         bundleContext
                 .registerService(AuthenticationDataPublisher.class.getName(), new AuthnDataPublisherProxy(), null);
-    }
-
-    protected void setEventStreamService(EventStreamService publisherService) {
-
-        AuthenticationDataPublisherDataHolder.getInstance().setPublisherService(publisherService);
-    }
-
-    protected void unsetEventStreamService(EventStreamService publisherService) {
-
-        AuthenticationDataPublisherDataHolder.getInstance().setPublisherService(null);
-    }
-
-    protected void setRealmService(RealmService realmService) {
-
-        AuthenticationDataPublisherDataHolder.getInstance().setRealmService(realmService);
-    }
-
-    protected void unsetRealmService(RealmService realmService) {
-
-        AuthenticationDataPublisherDataHolder.getInstance().setRealmService(null);
-    }
-
-    protected void setRegistryService(RegistryService registryService) {
-
-        AuthenticationDataPublisherDataHolder.getInstance().setRegistryService(registryService);
-    }
-
-    protected void unsetRegistryService(RegistryService registryService) {
-
-        AuthenticationDataPublisherDataHolder.getInstance().setRegistryService(null);
     }
 
     protected void setIdentityEventService(IdentityEventService eventService) {
