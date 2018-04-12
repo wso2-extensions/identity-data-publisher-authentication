@@ -89,7 +89,7 @@ public class AuthenticationAuditLogingHandler extends AbstractEventHandler {
                 + "\",\"" + "ServiceProviderName" + "\" : \"" + authenticationData.getServiceProvider()
                 + "\",\"" + "RequestType" + "\" : \"" + authenticationData.getInboundProtocol()
                 + "\",\"" + "RelyingParty" + "\" : \"" + authenticationData.getRelyingParty()
-                + "\",\"" + "AuthenticatedIdP" + "\" : \"" + authenticationData.getAuthenticatedIdp()
+                + "\",\"" + "AuthenticatedIdP" + "\" : \"" + authenticationData.getAuthenticatedIdps()
                 + "\"";
 
         AUDIT_LOG.info(String.format(

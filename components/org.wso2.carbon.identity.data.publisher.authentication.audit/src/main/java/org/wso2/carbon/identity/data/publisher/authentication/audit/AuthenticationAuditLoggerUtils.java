@@ -55,7 +55,7 @@ public class AuthenticationAuditLoggerUtils {
         if (authType.equals(AuthenticationAuditLoggerConstants.AUDIT_AUTHENTICATION_STEP)) {
             authenticationAuditData.setAuthenticatedUser(getUserNameForAuthenticationStep(params));
             authenticationAuditData.setTenantDomain(getTenantDomainForAuthenticationStep(params));
-            authenticationAuditData.setAuthenticatedIdp(getIdentityProviderForAuthenticationStep(context));
+            authenticationAuditData.setAuthenticatedIdps(getIdentityProviderForAuthenticationStep(context));
             authenticationAuditData.setStepNo(getStepNoForAutheticationStep(context));
 
         } else if (authType.equals(AuthenticationAuditLoggerConstants.AUDIT_AUTHENTICATION)) {

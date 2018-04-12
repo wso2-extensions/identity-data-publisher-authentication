@@ -181,21 +181,6 @@ public class SessionData<T1 extends Object, T2 extends Object> {
         parameters.put(key, value);
     }
 
-    public void addParameters(Map<T1, T2> parameters) {
-
-        for (Map.Entry<T1, T2> parameter : parameters.entrySet()) {
-            if (this.parameters.containsKey(parameter.getKey())) {
-                throw IdentityRuntimeException.error("Parameters map trying to override existing key " + parameter.getKey());
-            }
-            parameters.put(parameter.getKey(), parameter.getValue());
-        }
-    }
-
-    public Map<T1, T2> getParameters() {
-
-        return Collections.unmodifiableMap(parameters);
-    }
-
     public T2 getParameter(T1 key) {
 
         return parameters.get(key);

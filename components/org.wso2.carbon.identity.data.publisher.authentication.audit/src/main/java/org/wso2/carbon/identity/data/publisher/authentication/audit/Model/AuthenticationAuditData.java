@@ -29,7 +29,6 @@ public class AuthenticationAuditData {
     private String serviceProvider;
     private String inboundProtocol;
     private String relyingParty;
-    private String authenticatedIdp;
     private String authenticatedIdps;
     private int stepNo;
 
@@ -91,16 +90,6 @@ public class AuthenticationAuditData {
     public void setRelyingParty(String relyingParty) {
 
         this.relyingParty = relyingParty;
-    }
-
-    public String getAuthenticatedIdp() {
-
-        return authenticatedIdp;
-    }
-
-    public void setAuthenticatedIdp(String authenticatedIdp) {
-
-        this.authenticatedIdp = authenticatedIdp;
     }
 
     public String getAuthenticatedIdps() {
