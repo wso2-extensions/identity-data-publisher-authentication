@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.identity.data.publisher.authentication.audit.Model;
+package org.wso2.carbon.identity.data.publisher.authentication.audit.model;
 
 /*
  * Data object class for authentication audit logger

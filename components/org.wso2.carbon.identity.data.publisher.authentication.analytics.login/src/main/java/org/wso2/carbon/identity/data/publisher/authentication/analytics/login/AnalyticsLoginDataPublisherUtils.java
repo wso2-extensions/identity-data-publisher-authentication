@@ -31,7 +31,7 @@ import org.wso2.carbon.identity.application.authentication.framework.util.Framew
 import org.wso2.carbon.identity.application.common.model.User;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
-import org.wso2.carbon.identity.data.publisher.authentication.analytics.login.Model.AuthenticationData;
+import org.wso2.carbon.identity.data.publisher.authentication.analytics.login.model.AuthenticationData;
 import org.wso2.carbon.identity.event.IdentityEventConstants;
 import org.wso2.carbon.identity.event.event.Event;
 import org.wso2.carbon.user.core.UserCoreConstants;

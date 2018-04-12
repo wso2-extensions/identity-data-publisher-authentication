@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.identity.data.publisher.authentication.analytics.login.Model;
+package org.wso2.carbon.identity.data.publisher.authentication.analytics.login.model;
 
 import org.wso2.carbon.identity.base.IdentityRuntimeException;
 

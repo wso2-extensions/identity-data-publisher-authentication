@@ -27,7 +27,7 @@ import org.wso2.carbon.core.util.AnonymousSessionUtil;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkConstants;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkUtils;
 import org.wso2.carbon.identity.base.IdentityRuntimeException;
-import org.wso2.carbon.identity.data.publisher.authentication.analytics.login.Model.AuthenticationData;
+import org.wso2.carbon.identity.data.publisher.authentication.analytics.login.model.AuthenticationData;
 import org.wso2.carbon.identity.data.publisher.authentication.analytics.login.internal.AnalyticsLoginDataPublishDataHolder;
 import org.wso2.carbon.identity.event.IdentityEventConstants;
 import org.wso2.carbon.identity.event.IdentityEventException;
