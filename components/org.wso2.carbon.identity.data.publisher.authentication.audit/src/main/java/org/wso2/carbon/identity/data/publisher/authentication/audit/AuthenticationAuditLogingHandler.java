@@ -45,7 +45,8 @@ public class AuthenticationAuditLogingHandler extends AbstractEventHandler {
     private static final Log LOG = LogFactory.getLog(AuthenticationAuditLogingHandler.class);
 
     @Override
-    public String getName(){
+    public String getName() {
+
         return AuthenticationAuditLoggerConstants.AUTHENTICATION_AUDIT_LOGGER;
     }
 

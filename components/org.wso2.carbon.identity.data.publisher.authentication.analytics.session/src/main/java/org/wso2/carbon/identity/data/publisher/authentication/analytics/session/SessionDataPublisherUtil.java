@@ -123,6 +123,7 @@ public class SessionDataPublisherUtil {
 
     /**
      * Create the session data object to pupulate payload of event
+     *
      * @param event - triggered event object from framework
      * @return
      */
@@ -162,7 +163,7 @@ public class SessionDataPublisherUtil {
         if (request != null) {
             sessionData.setRemoteIP(IdentityUtil.getClientIpAddress(request));
         }
-        if(context != null && context.getSequenceConfig() != null) {
+        if (context != null && context.getSequenceConfig() != null) {
             if (context.getSequenceConfig().getApplicationConfig().isSaaSApp()) {
                 sessionData.addParameter(SessionDataPublisherConstants.TENANT_ID, SessionDataPublisherUtil
                         .getTenantDomains(context.getTenantDomain(), sessionData.getTenantDomain()));
@@ -174,13 +175,13 @@ public class SessionDataPublisherUtil {
         return sessionData;
     }
 
+    public static void updateTimeStamps(SessionData sessionData, int actionId) {
 
-    public static void updateTimeStamps(SessionData sessionData,int actionId){
         SessionContext sessionContext = sessionData.getSessionContext();
         Long createdTime = null;
         Long terminationTime = null;
         Long updatedTime = null;
-        if(sessionContext != null) {
+        if (sessionContext != null) {
             Object createdTimeObj = sessionContext.getProperty(FrameworkConstants.CREATED_TIMESTAMP);
             createdTime = (Long) createdTimeObj;
             if (actionId == SessionDataPublisherConstants.SESSION_CREATION_STATUS) {
@@ -203,8 +204,6 @@ public class SessionDataPublisherUtil {
             sessionData.setUpdatedTimestamp(updatedTime);
             sessionData.setTerminationTimestamp(terminationTime);
         }
-
-
 
     }
 

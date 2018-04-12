@@ -24,16 +24,17 @@ import org.wso2.carbon.event.stream.core.EventStreamService;
  */
 
 public class SessionDataPublishServiceHolder {
-    private EventStreamService publisherService;
 
     private static SessionDataPublishServiceHolder sessionDataPublishServiceHolder =
             new SessionDataPublishServiceHolder();
+    private EventStreamService publisherService;
 
-    private SessionDataPublishServiceHolder(){
+    private SessionDataPublishServiceHolder() {
 
     }
 
-    public static SessionDataPublishServiceHolder getInstance(){
+    public static SessionDataPublishServiceHolder getInstance() {
+
         return sessionDataPublishServiceHolder;
     }
 

@@ -84,7 +84,8 @@ public class AnalyticsSessionDataPublishHandler extends AbstractEventHandler {
     }
 
     protected void publishSessionData(SessionData sessionData, int actionId) {
-        SessionDataPublisherUtil.updateTimeStamps(sessionData,actionId);
+
+        SessionDataPublisherUtil.updateTimeStamps(sessionData, actionId);
         if (sessionData != null) {
             try {
                 Object[] payloadData = createPayload(sessionData, actionId);
@@ -109,7 +110,7 @@ public class AnalyticsSessionDataPublishHandler extends AbstractEventHandler {
                     org.wso2.carbon.databridge.commons.Event event =
                             new org.wso2.carbon.databridge.commons.Event(SessionDataPublisherConstants.SESSION_DATA_STREAM_NAME, System
                                     .currentTimeMillis(), metadataArray, null, payloadData);
-                            SessionDataPublishServiceHolder.getInstance().getPublisherService().publish(event);
+                    SessionDataPublishServiceHolder.getInstance().getPublisherService().publish(event);
                     if (LOG.isDebugEnabled() && event != null) {
                         LOG.debug("Sending out event : " + event.toString());
                     }

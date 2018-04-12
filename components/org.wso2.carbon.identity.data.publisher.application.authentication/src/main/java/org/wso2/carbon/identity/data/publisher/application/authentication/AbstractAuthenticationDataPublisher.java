@@ -37,10 +37,10 @@ import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.data.publisher.application.authentication.model.AuthenticationData;
 import org.wso2.carbon.identity.data.publisher.application.authentication.model.SessionData;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
+import javax.servlet.http.HttpServletRequest;
 
 @Deprecated
 public abstract class AbstractAuthenticationDataPublisher implements AuthenticationDataPublisher {
@@ -262,6 +262,7 @@ public abstract class AbstractAuthenticationDataPublisher implements Authenticat
     }
 
     protected AuthenticationData fillLocalEvent(AuthenticationData authenticationData, AuthenticationContext context) {
+
         AuthenticatedIdPData localIDPData = null;
         Map<String, AuthenticatedIdPData> previousAuthenticatedIDPs = context.getPreviousAuthenticatedIdPs();
         Map<String, AuthenticatedIdPData> currentAuthenticatedIDPs = context.getCurrentAuthenticatedIdPs();
@@ -282,6 +283,7 @@ public abstract class AbstractAuthenticationDataPublisher implements Authenticat
     }
 
     protected int getLocalStepNo(AuthenticationContext context) {
+
         int stepNo = 0;
         Map<Integer, StepConfig> map = context.getSequenceConfig().getStepMap();
         for (Map.Entry<Integer, StepConfig> entry : map.entrySet()) {
@@ -296,6 +298,7 @@ public abstract class AbstractAuthenticationDataPublisher implements Authenticat
     }
 
     public boolean hasPreviousLocalEvent(AuthenticationContext context) {
+
         Map<String, AuthenticatedIdPData> previousAuthenticatedIDPs = context.getPreviousAuthenticatedIdPs();
         if (previousAuthenticatedIDPs.get(FrameworkConstants.LOCAL_IDP_NAME) != null) {
             return true;
@@ -354,6 +357,7 @@ public abstract class AbstractAuthenticationDataPublisher implements Authenticat
 
     @Override
     public boolean isEnabled(MessageContext messageContext) {
+
         IdentityEventListenerConfig identityEventListenerConfig = IdentityUtil.readEventListenerProperty
                 (AbstractIdentityMessageHandler.class.getName(), this.getClass().getName());
 
@@ -546,6 +550,7 @@ public abstract class AbstractAuthenticationDataPublisher implements Authenticat
     }
 
     private boolean convertToBoolean(Object object) {
+
         if (object != null) {
             return (Boolean) object;
         }

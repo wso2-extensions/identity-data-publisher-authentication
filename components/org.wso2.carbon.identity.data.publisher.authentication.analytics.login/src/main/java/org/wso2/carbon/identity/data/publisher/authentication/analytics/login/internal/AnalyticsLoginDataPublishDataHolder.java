@@ -24,18 +24,18 @@ import org.wso2.carbon.user.core.service.RealmService;
 
 public class AnalyticsLoginDataPublishDataHolder {
 
+    private static AnalyticsLoginDataPublishDataHolder analyticsLoginDataPublishDataHolder
+            = new AnalyticsLoginDataPublishDataHolder();
     private EventStreamService publisherService;
     private RealmService realmService;
     private RegistryService registryService;
 
-    private static AnalyticsLoginDataPublishDataHolder analyticsLoginDataPublishDataHolder
-            = new AnalyticsLoginDataPublishDataHolder();
-
-    private AnalyticsLoginDataPublishDataHolder(){
+    private AnalyticsLoginDataPublishDataHolder() {
 
     }
 
     public static AnalyticsLoginDataPublishDataHolder getInstance() {
+
         return analyticsLoginDataPublishDataHolder;
     }
 
