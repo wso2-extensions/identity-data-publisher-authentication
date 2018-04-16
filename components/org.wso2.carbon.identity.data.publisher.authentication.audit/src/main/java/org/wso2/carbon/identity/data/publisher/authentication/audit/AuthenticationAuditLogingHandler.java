@@ -152,6 +152,33 @@ public class AuthenticationAuditLogingHandler extends AbstractEventHandler {
                 "ApplicationAuthenticationFramework", auditData, FrameworkConstants.AUDIT_FAILED));
     }
 
+
+    protected void doPublishSessionTermination(AuthenticationContext context, String username,
+                                               String tenantDomain, String authenticatedIDPs) {
+
+        String auditData = "\"" + "ContextIdentifier" + "\" : \"" + context.getContextIdentifier()
+
+                + "\",\"" + "LoggedOutUser" + "\" : \"" + username
+                + "\",\"" + "LoggedOutUserTenantDomain" + "\" : \"" + tenantDomain
+                + "\",\"" + "ServiceProviderName" + "\" : \"" + context.getServiceProviderName()
+                + "\",\"" + "RequestType" + "\" : \"" + context.getRequestType()
+                + "\",\"" + "RelyingParty" + "\" : \"" + context.getRelyingParty()
+                + "\",\"" + "AuthenticatedIdPs" + "\" : \"" + authenticatedIDPs
+                + "\"";
+
+        String idpName = null;
+        ExternalIdPConfig externalIdPConfig = context.getExternalIdP();
+        if (externalIdPConfig != null) {
+            idpName = externalIdPConfig.getName();
+        }
+        AUDIT_LOG.info(String.format(
+                FrameworkConstants.AUDIT_MESSAGE,
+                username,
+                "Logout", idpName, auditData, FrameworkConstants.AUDIT_SUCCESS));
+    }
+
+
+
     protected void publishSessionTermination(Event event) {
 
         Map<String, Object> properties = event.getEventProperties();
@@ -182,24 +209,9 @@ public class AuthenticationAuditLogingHandler extends AbstractEventHandler {
             tenantDomain = authenticatedUser.getTenantDomain();
         }
 
-        String auditData = "\"" + "ContextIdentifier" + "\" : \"" + context.getContextIdentifier()
-                + "\",\"" + "LoggedOutUser" + "\" : \"" + username
-                + "\",\"" + "LoggedOutUserTenantDomain" + "\" : \"" + tenantDomain
-                + "\",\"" + "ServiceProviderName" + "\" : \"" + context.getServiceProviderName()
-                + "\",\"" + "RequestType" + "\" : \"" + context.getRequestType()
-                + "\",\"" + "RelyingParty" + "\" : \"" + context.getRelyingParty()
-                + "\",\"" + "AuthenticatedIdPs" + "\" : \"" + authenticatedIDPs
-                + "\"";
-
-        String idpName = null;
-        ExternalIdPConfig externalIdPConfig = context.getExternalIdP();
-        if (externalIdPConfig != null) {
-            idpName = externalIdPConfig.getName();
-        }
-        AUDIT_LOG.info(String.format(
-                FrameworkConstants.AUDIT_MESSAGE,
-                username,
-                "Logout", idpName, auditData, FrameworkConstants.AUDIT_SUCCESS));
+        doPublishSessionTermination(context, username, tenantDomain, authenticatedIDPs);
     }
+
+
 
 }
