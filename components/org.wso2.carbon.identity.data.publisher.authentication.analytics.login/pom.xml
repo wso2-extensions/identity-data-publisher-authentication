@@ -60,11 +60,6 @@
         </dependency>
     </dependencies>
 
-    <properties>
-        <osgi.framework.imp.pkg.version.range>[1.7.0, 2.0.0)</osgi.framework.imp.pkg.version.range>
-        <osgi.service.component.imp.pkg.version.range>[1.2.0, 2.0.0)</osgi.service.component.imp.pkg.version.range>
-    </properties>
-
     <build>
         <plugins>
             <plugin>
@@ -84,7 +79,7 @@
                             org.wso2.carbon.identity.data.publisher.authentication.analytics.login.internal,
                         </Private-Package>
                         <Import-Package>
-                            !org.wso2.carbon.identity.data.publisher.authentication.analytics.login.*,
+                            !org.wso2.carbon.identity.data.publisher.application.authentication.*,
                             org.wso2.carbon; version="${carbon.kernel.package.import.version.range}",
                             org.apache.commons.logging; version="${commons-logging.osgi.version.range}",
                             org.wso2.carbon.identity.application.authentication.framework.*;version="${carbon.identity.framework.package.import.version.range}",

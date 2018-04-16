@@ -43,7 +43,6 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class SessionDataPublisherUtil {
 
-    public static final String NOT_AVAILABLE = "NOT_AVAILABLE";
     private static final Log LOG = LogFactory.getLog(SessionDataPublisherUtil.class);
 
     /**
@@ -62,7 +61,7 @@ public class SessionDataPublisherUtil {
             }
         }
         if (StringUtils.isEmpty(value)) {
-            return SessionDataPublisherUtil.NOT_AVAILABLE;
+            return SessionDataPublisherConstants.NOT_AVAILABLE;
         }
         return value;
     }
@@ -137,14 +136,15 @@ public class SessionDataPublisherUtil {
 
         SessionData sessionData = new SessionData();
         Object userObj = params.get(FrameworkConstants.AnalyticsAttributes.USER);
-        String sessionId = (String) params.get(FrameworkConstants.AnalyticsAttributes.SESSION_ID);
         setUserDataToSessionObject(sessionData, userObj);
 
+        String sessionId = (String) params.get(FrameworkConstants.AnalyticsAttributes.SESSION_ID);
         sessionData.setSessionId(sessionId);
         sessionData.setSessionContext(sessionContext);
         sessionData.setIdentityProviders(getCommaSeparatedIDPs(sessionContext));
         sessionData.setUserAgent(request.getHeader(SessionDataPublisherConstants.USER_AGENT));
         setTenantDataToSessionObject(context, sessionData);
+
         if (sessionContext != null) {
             sessionData.setIsRememberMe(sessionContext.isRememberMe());
         }
@@ -155,12 +155,22 @@ public class SessionDataPublisherUtil {
             sessionData.setRemoteIP(IdentityUtil.getClientIpAddress(request));
         }
 
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("A Session data object created for event :" + event.getEventName());
+        }
+
         return sessionData;
     }
 
+    /**
+     * Populate the tenant details from authentication context
+     *
+     * @param context
+     * @param sessionData
+     */
     private static void setTenantDataToSessionObject(AuthenticationContext context, SessionData sessionData) {
 
-        if (context != null && context.getSequenceConfig() != null) {
+        if (context.getSequenceConfig() != null) {
             if (context.getSequenceConfig().getApplicationConfig().isSaaSApp()) {
                 sessionData.addParameter(SessionDataPublisherConstants.TENANT_ID, SessionDataPublisherUtil
                         .getTenantDomains(context.getTenantDomain(), sessionData.getTenantDomain()));
@@ -170,6 +180,12 @@ public class SessionDataPublisherUtil {
         }
     }
 
+    /**
+     * Populate user data from user object from paramerters
+     *
+     * @param sessionData
+     * @param userObj
+     */
     private static void setUserDataToSessionObject(SessionData sessionData, Object userObj) {
 
         String userName = null;
@@ -186,6 +202,12 @@ public class SessionDataPublisherUtil {
         sessionData.setTenantDomain(tenantDomain);
     }
 
+    /**
+     * Update the timestamps of the session in respect to the action
+     *
+     * @param sessionData
+     * @param actionId
+     */
     public static void updateTimeStamps(SessionData sessionData, int actionId) {
 
         SessionContext sessionContext = sessionData.getSessionContext();
@@ -218,7 +240,7 @@ public class SessionDataPublisherUtil {
 
     }
 
-    public static String getCommaSeparatedIDPs(SessionContext sessionContext) {
+    private static String getCommaSeparatedIDPs(SessionContext sessionContext) {
 
         if (LOG.isDebugEnabled()) {
             LOG.debug("Retrieving current IDPw for user ");

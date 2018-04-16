@@ -86,20 +86,19 @@ public class AnalyticsSessionDataPublishHandler extends AbstractEventHandler {
     protected void publishSessionData(SessionData sessionData, int actionId) {
 
         SessionDataPublisherUtil.updateTimeStamps(sessionData, actionId);
-        if (sessionData != null) {
-            try {
-                Object[] payloadData = createPayload(sessionData, actionId);
-                publishToAnalytics(sessionData, payloadData);
+        try {
+            Object[] payloadData = createPayload(sessionData, actionId);
+            publishToAnalytics(sessionData, payloadData);
 
-            } catch (IdentityRuntimeException e) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.error("Error while publishing session information", e);
-                }
+        } catch (IdentityRuntimeException e) {
+            if (LOG.isDebugEnabled()) {
+                LOG.error("Error while publishing session information", e);
             }
         }
+
     }
 
-    protected void publishToAnalytics(SessionData sessionData, Object[] payloadData) {
+    private void publishToAnalytics(SessionData sessionData, Object[] payloadData) {
 
         String[] publishingDomains = (String[]) sessionData.getParameter(SessionDataPublisherConstants.TENANT_ID);
         if (publishingDomains != null && publishingDomains.length > 0) {
@@ -122,7 +121,7 @@ public class AnalyticsSessionDataPublishHandler extends AbstractEventHandler {
         }
     }
 
-    protected Object[] createPayload(SessionData sessionData, int actionId) {
+    private Object[] createPayload(SessionData sessionData, int actionId) {
 
         Object[] payloadData = new Object[15];
         payloadData[0] = SessionDataPublisherUtil.replaceIfNotAvailable(SessionDataPublisherConstants.CONFIG_PREFIX +

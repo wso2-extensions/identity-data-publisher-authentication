@@ -38,12 +38,19 @@ import java.util.Map;
  */
 public class AuthenticationAuditLoggerUtils {
 
+    /**
+     * Create authentication data object from event for respective authentication step
+     *
+     * @param -        triggered event
+     * @param authType - authentication type
+     * @return populated AuthenticationAuditData object
+     */
     public static AuthenticationAuditData createAuthenticationAudiDataObject(Event event, String authType) {
 
         Map<String, Object> properties = event.getEventProperties();
         AuthenticationContext context = getAuthenticationContextFromProperties(properties);
         Map<String, Object> params = getParamsFromProperties(properties);
-        AuthenticatorStatus status = getAutheticatorStatusFromProperties(properties);
+        AuthenticatorStatus status = getAuthenticatorStatusFromProperties(properties);
 
         AuthenticationAuditData authenticationAuditData = new AuthenticationAuditData();
 
@@ -56,13 +63,13 @@ public class AuthenticationAuditLoggerUtils {
             authenticationAuditData.setAuthenticatedUser(getUserNameForAuthenticationStep(params));
             authenticationAuditData.setTenantDomain(getTenantDomainForAuthenticationStep(params));
             authenticationAuditData.setAuthenticatedIdps(getIdentityProviderForAuthenticationStep(context));
-            authenticationAuditData.setStepNo(getStepNoForAutheticationStep(context));
+            authenticationAuditData.setStepNo(getStepNoForAuthenticationStep(context));
 
         } else if (authType.equals(AuthenticationAuditLoggerConstants.AUDIT_AUTHENTICATION)) {
             authenticationAuditData.setAuthenticatedUser(getSubjectIdentifier(context, status));
             authenticationAuditData.setTenantDomain(getTenantDomainForAuthentication(context, params, status));
             authenticationAuditData.setStepNo(getStepNoForAuthentication(context, status));
-            authenticationAuditData.setAuthenticatedIdps(getIdenitityProviderList(context, status));
+            authenticationAuditData.setAuthenticatedIdps(getIdentityProviderList(context, status));
 
         }
 
@@ -157,7 +164,7 @@ public class AuthenticationAuditLoggerUtils {
         return idpProvider;
     }
 
-    private static int getStepNoForAutheticationStep(AuthenticationContext context) {
+    private static int getStepNoForAuthenticationStep(AuthenticationContext context) {
 
         return context.getCurrentStep();
     }
@@ -186,7 +193,7 @@ public class AuthenticationAuditLoggerUtils {
         return subjectIdentifier;
     }
 
-    private static String getIdenitityProviderList(AuthenticationContext context, AuthenticatorStatus status) {
+    private static String getIdentityProviderList(AuthenticationContext context, AuthenticatorStatus status) {
 
         String authenticatedIdps = null;
         if (status == AuthenticatorStatus.PASS) {
@@ -200,7 +207,7 @@ public class AuthenticationAuditLoggerUtils {
         return (AuthenticationContext) properties.get(IdentityEventConstants.EventProperty.CONTEXT);
     }
 
-    private static AuthenticatorStatus getAutheticatorStatusFromProperties(Map<String, Object> properties) {
+    private static AuthenticatorStatus getAuthenticatorStatusFromProperties(Map<String, Object> properties) {
 
         return (AuthenticatorStatus) properties.get(IdentityEventConstants.EventProperty.AUTHENTICATION_STATUS);
     }

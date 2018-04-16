@@ -195,8 +195,8 @@ public class AnalyticsLoginDataPublisherUtils {
     /**
      * Build authentication data object for authentication from event
      *
-     * @param event
-     * @return AuthenticationData
+     * @param event - triggerd event
+     * @return AuthenticationData - authentication data object
      */
     public static AuthenticationData buildAuthnDataForAuthentication(Event event) {
 
@@ -357,7 +357,7 @@ public class AnalyticsLoginDataPublisherUtils {
     /**
      * Get metadata array for different tenants with tenant domain
      *
-     * @param tenantDomain
+     * @param tenantDomain - tenant domain name
      * @return
      */
     public static Object[] getMetaDataArray(String tenantDomain) {
