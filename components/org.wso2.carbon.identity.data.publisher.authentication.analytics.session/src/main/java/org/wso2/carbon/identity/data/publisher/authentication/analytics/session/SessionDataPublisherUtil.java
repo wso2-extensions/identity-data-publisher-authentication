@@ -138,22 +138,13 @@ public class SessionDataPublisherUtil {
         SessionData sessionData = new SessionData();
         Object userObj = params.get(FrameworkConstants.AnalyticsAttributes.USER);
         String sessionId = (String) params.get(FrameworkConstants.AnalyticsAttributes.SESSION_ID);
-        String userName = null;
-        String userStoreDomain = null;
-        String tenantDomain = null;
-        if (userObj != null && userObj instanceof AuthenticatedUser) {
-            AuthenticatedUser user = (AuthenticatedUser) userObj;
-            userName = user.getUserName();
-            userStoreDomain = user.getUserStoreDomain();
-            tenantDomain = user.getTenantDomain();
-        }
-        sessionData.setSessionContext(sessionContext);
-        sessionData.setUser(userName);
-        sessionData.setUserStoreDomain(userStoreDomain);
-        sessionData.setTenantDomain(tenantDomain);
+        setUserDataToSessionObject(sessionData, userObj);
+
         sessionData.setSessionId(sessionId);
+        sessionData.setSessionContext(sessionContext);
         sessionData.setIdentityProviders(getCommaSeparatedIDPs(sessionContext));
         sessionData.setUserAgent(request.getHeader(SessionDataPublisherConstants.USER_AGENT));
+        setTenantDataToSessionObject(context, sessionData);
         if (sessionContext != null) {
             sessionData.setIsRememberMe(sessionContext.isRememberMe());
         }
@@ -163,6 +154,12 @@ public class SessionDataPublisherUtil {
         if (request != null) {
             sessionData.setRemoteIP(IdentityUtil.getClientIpAddress(request));
         }
+
+        return sessionData;
+    }
+
+    private static void setTenantDataToSessionObject(AuthenticationContext context, SessionData sessionData) {
+
         if (context != null && context.getSequenceConfig() != null) {
             if (context.getSequenceConfig().getApplicationConfig().isSaaSApp()) {
                 sessionData.addParameter(SessionDataPublisherConstants.TENANT_ID, SessionDataPublisherUtil
@@ -171,8 +168,22 @@ public class SessionDataPublisherUtil {
                 sessionData.addParameter(SessionDataPublisherConstants.TENANT_ID, new String[]{sessionData.getTenantDomain()});
             }
         }
+    }
 
-        return sessionData;
+    private static void setUserDataToSessionObject(SessionData sessionData, Object userObj) {
+
+        String userName = null;
+        String userStoreDomain = null;
+        String tenantDomain = null;
+        if (userObj != null && userObj instanceof AuthenticatedUser) {
+            AuthenticatedUser user = (AuthenticatedUser) userObj;
+            userName = user.getUserName();
+            userStoreDomain = user.getUserStoreDomain();
+            tenantDomain = user.getTenantDomain();
+        }
+        sessionData.setUser(userName);
+        sessionData.setUserStoreDomain(userStoreDomain);
+        sessionData.setTenantDomain(tenantDomain);
     }
 
     public static void updateTimeStamps(SessionData sessionData, int actionId) {

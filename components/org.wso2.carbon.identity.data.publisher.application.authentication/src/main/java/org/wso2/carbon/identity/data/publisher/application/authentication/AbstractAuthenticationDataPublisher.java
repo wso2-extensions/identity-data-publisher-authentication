@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -368,40 +368,26 @@ public abstract class AbstractAuthenticationDataPublisher implements Authenticat
         return Boolean.parseBoolean(identityEventListenerConfig.getEnable());
     }
 
+    /**
+     * Build authentication data for authentication step
+     *
+     * @param request - Http Request
+     * @param context - Authentication context
+     * @param params  - parameters
+     * @param status  - Authentication status
+     * @return AuthenticationData object
+     */
     private AuthenticationData buildAuthnDataForAuthnStep(HttpServletRequest request, AuthenticationContext context,
                                                           Map<String, Object> params, AuthenticatorStatus status) {
 
         AuthenticationData authenticationData = new AuthenticationData();
-        int step = context.getCurrentStep();
-        if (context.getExternalIdP() == null) {
-            authenticationData.setIdentityProvider(FrameworkConstants.LOCAL_IDP_NAME);
-        } else {
-            authenticationData.setIdentityProvider(context.getExternalIdP().getIdPName());
-        }
+        setIdentityProviderForAuthnStep(context, authenticationData);
+
         Object userObj = params.get(FrameworkConstants.AnalyticsAttributes.USER);
-        if (userObj instanceof User) {
-            User user = (User) userObj;
-            authenticationData.setTenantDomain(user.getTenantDomain());
-            authenticationData.setUserStoreDomain(user.getUserStoreDomain());
-            authenticationData.setUsername(user.getUserName());
-        }
-        if (userObj instanceof AuthenticatedUser) {
-            AuthenticatedUser user = (AuthenticatedUser) userObj;
-            if (StringUtils.isEmpty(user.getUserName())) {
-                authenticationData.setUsername(user.getAuthenticatedSubjectIdentifier());
-            }
-        }
+        setUserDataForAuthnStep(authenticationData, userObj);
 
         Object isFederatedObj = params.get(FrameworkConstants.AnalyticsAttributes.IS_FEDERATED);
-        if (isFederatedObj != null) {
-            boolean isFederated = (Boolean) isFederatedObj;
-            if (isFederated) {
-                authenticationData.setIdentityProviderType(FrameworkConstants.FEDERATED_IDP_NAME);
-            } else {
-                authenticationData.setIdentityProviderType(FrameworkConstants.LOCAL_IDP_NAME);
-                authenticationData.setLocalUsername(authenticationData.getUsername());
-            }
-        }
+        setIdentityProviderTypeForAuthnStep(authenticationData, isFederatedObj);
         authenticationData.setContextId(context.getContextIdentifier());
         authenticationData.setEventId(UUID.randomUUID().toString());
         authenticationData.setEventType(AuthPublisherConstants.STEP_EVENT);
@@ -415,7 +401,16 @@ public abstract class AbstractAuthenticationDataPublisher implements Authenticat
         authenticationData.setInitialLogin(false);
         authenticationData.setAuthenticator(context.getCurrentAuthenticator());
         authenticationData.setSuccess(AuthenticatorStatus.PASS == status);
-        authenticationData.setStepNo(step);
+        authenticationData.setStepNo(context.getCurrentStep());
+
+        setTenantDomainForAuthnStep(context, status, authenticationData);
+        authenticationData.addParameter(AuthPublisherConstants.RELYING_PARTY, context.getRelyingParty());
+
+        return authenticationData;
+    }
+
+    private void setTenantDomainForAuthnStep(AuthenticationContext context, AuthenticatorStatus status,
+                                             AuthenticationData authenticationData) {
 
         if (AuthenticatorStatus.PASS == status) {
             authenticationData.addParameter(AuthPublisherConstants.TENANT_ID, AuthnDataPublisherUtils
@@ -431,30 +426,88 @@ public abstract class AbstractAuthenticationDataPublisher implements Authenticat
                 authenticationData.addParameter(AuthPublisherConstants.TENANT_ID, AuthnDataPublisherUtils
                         .getTenantDomains(context.getTenantDomain(), null));
             }
-
         }
-
-        authenticationData.addParameter(AuthPublisherConstants.RELYING_PARTY, context.getRelyingParty());
-        return authenticationData;
     }
 
+    private void setIdentityProviderTypeForAuthnStep(AuthenticationData authenticationData, Object isFederatedObj) {
+
+        if (isFederatedObj != null) {
+            boolean isFederated = (Boolean) isFederatedObj;
+            if (isFederated) {
+                authenticationData.setIdentityProviderType(FrameworkConstants.FEDERATED_IDP_NAME);
+            } else {
+                authenticationData.setIdentityProviderType(FrameworkConstants.LOCAL_IDP_NAME);
+                authenticationData.setLocalUsername(authenticationData.getUsername());
+            }
+        }
+    }
+
+    private void setUserDataForAuthnStep(AuthenticationData authenticationData, Object userObj) {
+
+        if (userObj instanceof User) {
+            User user = (User) userObj;
+            authenticationData.setTenantDomain(user.getTenantDomain());
+            authenticationData.setUserStoreDomain(user.getUserStoreDomain());
+            authenticationData.setUsername(user.getUserName());
+        }
+        if (userObj instanceof AuthenticatedUser) {
+            AuthenticatedUser user = (AuthenticatedUser) userObj;
+            if (StringUtils.isEmpty(user.getUserName())) {
+                authenticationData.setUsername(user.getAuthenticatedSubjectIdentifier());
+            }
+        }
+    }
+
+    private void setIdentityProviderForAuthnStep(AuthenticationContext context, AuthenticationData authenticationData) {
+
+        if (context.getExternalIdP() == null) {
+            authenticationData.setIdentityProvider(FrameworkConstants.LOCAL_IDP_NAME);
+        } else {
+            authenticationData.setIdentityProvider(context.getExternalIdP().getIdPName());
+        }
+    }
+
+    /**
+     * Build authentication data object for full authentication
+     * @param request - http request
+     * @param context - authentication context
+     * @param params - parameters
+     * @param status - authentication status
+     * @return Authentication data
+     */
     private AuthenticationData buildAuthnDataForAuthentication(HttpServletRequest request, AuthenticationContext context,
                                                                Map<String, Object> params, AuthenticatorStatus status) {
 
         AuthenticationData authenticationData = new AuthenticationData();
         Object userObj = params.get(FrameworkConstants.AnalyticsAttributes.USER);
-        if (userObj instanceof AuthenticatedUser) {
-            AuthenticatedUser user = (AuthenticatedUser) userObj;
-            authenticationData.setUsername(user.getUserName());
-            if (status == AuthenticatorStatus.FAIL) {
-                authenticationData.setTenantDomain(user.getTenantDomain());
-                authenticationData.setUserStoreDomain(user.getUserStoreDomain());
-            }
-        }
+        setUserDataForAuthentication(status, authenticationData, userObj);
 
-        boolean isInitialLogin = false;
+        authenticationData = setIdpDataForAuthentication(context, status, authenticationData);
+
+        authenticationData.setEventType(AuthPublisherConstants.OVERALL_EVENT);
+        authenticationData.setContextId(context.getContextIdentifier());
+        authenticationData.setEventId(UUID.randomUUID().toString());
+        authenticationData.setAuthnSuccess(true);
+        authenticationData.setRemoteIp(IdentityUtil.getClientIpAddress(request));
+        authenticationData.setServiceProvider(context.getServiceProviderName());
+        authenticationData.setInboundProtocol(context.getRequestType());
+        authenticationData.setRememberMe(context.isRememberMe());
+        authenticationData.setForcedAuthn(context.isForceAuthenticate());
+        authenticationData.setPassive(context.isPassiveAuthenticate());
+
+
+        setTenantDataForAuthentication(context, status, authenticationData);
+
+        authenticationData.addParameter(AuthPublisherConstants.RELYING_PARTY, context.getRelyingParty());
+
+        return authenticationData;
+    }
+
+    private AuthenticationData setIdpDataForAuthentication(AuthenticationContext context, AuthenticatorStatus status,
+                                                           AuthenticationData authenticationData) {
 
         if (status == AuthenticatorStatus.PASS) {
+            boolean isInitialLogin = false;
             Object hasFederatedStepObj = context.getProperty(FrameworkConstants.AnalyticsAttributes.HAS_FEDERATED_STEP);
             Object hasLocalStepObj = context.getProperty(FrameworkConstants.AnalyticsAttributes.HAS_LOCAL_STEP);
             Object isInitialLoginObj = context.getProperty(FrameworkConstants.AnalyticsAttributes.IS_INITIAL_LOGIN);
@@ -476,20 +529,14 @@ public abstract class AbstractAuthenticationDataPublisher implements Authenticat
             authenticationData.setIdentityProvider(AuthnDataPublisherUtils.getSubjectStepIDP(context));
             authenticationData.setSuccess(true);
             authenticationData = fillLocalEvent(authenticationData, context);
+            authenticationData.setInitialLogin(isInitialLogin);
 
         }
+        return authenticationData;
+    }
 
-        authenticationData.setEventType(AuthPublisherConstants.OVERALL_EVENT);
-        authenticationData.setContextId(context.getContextIdentifier());
-        authenticationData.setEventId(UUID.randomUUID().toString());
-        authenticationData.setAuthnSuccess(true);
-        authenticationData.setRemoteIp(IdentityUtil.getClientIpAddress(request));
-        authenticationData.setServiceProvider(context.getServiceProviderName());
-        authenticationData.setInboundProtocol(context.getRequestType());
-        authenticationData.setRememberMe(context.isRememberMe());
-        authenticationData.setForcedAuthn(context.isForceAuthenticate());
-        authenticationData.setPassive(context.isPassiveAuthenticate());
-        authenticationData.setInitialLogin(isInitialLogin);
+    private void setTenantDataForAuthentication(AuthenticationContext context, AuthenticatorStatus status,
+                                                AuthenticationData authenticationData) {
 
         if (status == AuthenticatorStatus.PASS) {
             authenticationData.addParameter(AuthPublisherConstants.TENANT_ID, AuthnDataPublisherUtils
@@ -510,10 +557,19 @@ public abstract class AbstractAuthenticationDataPublisher implements Authenticat
                         .getTenantDomains(context.getTenantDomain(), null));
             }
         }
+    }
 
-        authenticationData.addParameter(AuthPublisherConstants.RELYING_PARTY, context.getRelyingParty());
+    private void setUserDataForAuthentication(AuthenticatorStatus status, AuthenticationData authenticationData,
+                                              Object userObj) {
 
-        return authenticationData;
+        if (userObj instanceof AuthenticatedUser) {
+            AuthenticatedUser user = (AuthenticatedUser) userObj;
+            authenticationData.setUsername(user.getUserName());
+            if (status == AuthenticatorStatus.FAIL) {
+                authenticationData.setTenantDomain(user.getTenantDomain());
+                authenticationData.setUserStoreDomain(user.getUserStoreDomain());
+            }
+        }
     }
 
     private SessionData buildSessionData(HttpServletRequest request, AuthenticationContext context, SessionContext

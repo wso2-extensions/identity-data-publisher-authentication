@@ -108,8 +108,9 @@ public class AnalyticsSessionDataPublishHandler extends AbstractEventHandler {
                 for (String publishingDomain : publishingDomains) {
                     Object[] metadataArray = SessionDataPublisherUtil.getMetaDataArray(publishingDomain);
                     org.wso2.carbon.databridge.commons.Event event =
-                            new org.wso2.carbon.databridge.commons.Event(SessionDataPublisherConstants.SESSION_DATA_STREAM_NAME, System
-                                    .currentTimeMillis(), metadataArray, null, payloadData);
+                            new org.wso2.carbon.databridge.commons.Event(SessionDataPublisherConstants.
+                                    SESSION_DATA_STREAM_NAME, System.currentTimeMillis(),
+                                    metadataArray, null, payloadData);
                     SessionDataPublishServiceHolder.getInstance().getPublisherService().publish(event);
                     if (LOG.isDebugEnabled() && event != null) {
                         LOG.debug("Sending out event : " + event.toString());
