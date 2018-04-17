@@ -22,8 +22,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import org.wso2.carbon.event.stream.core.EventStreamService;
-import org.wso2.carbon.identity.data.publisher.authentication.analytics.login.AnalyticsLoginDataPublishHanlder;
+import org.wso2.carbon.identity.data.publisher.authentication.analytics.login.AnalyticsLoginDataPublishHandler;
 import org.wso2.carbon.identity.event.handler.AbstractEventHandler;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -32,29 +38,21 @@ import org.wso2.carbon.user.core.service.RealmService;
  * Service component for registering the services to bundle
  */
 
-/**
- * @scr.component name="identity.data.publisher.authentication.analytics.login" immediate="true"
- * @scr.reference name="registry.service"
- * interface="org.wso2.carbon.registry.core.service.RegistryService"
- * cardinality="1..1" policy="dynamic" bind="setRegistryService"
- * unbind="unsetRegistryService"
- * @scr.reference name="realm.service" interface="org.wso2.carbon.user.core.service.RealmService"
- * cardinality="1..1" policy="dynamic" bind="setRealmService"
- * unbind="unsetRealmService"
- * @scr.reference name="eventStreamManager.service"
- * interface="org.wso2.carbon.event.stream.core.EventStreamService" cardinality="1..1"
- * policy="dynamic" bind="setEventStreamService" unbind="unsetEventStreamService"
- */
+@Component(
+        name = "identity.data.publisher.authentication.analytics.login",
+        immediate = true
+)
 public class AnalyticsLoginDataPublishServiceComponent {
 
     private static Log log = LogFactory.getLog(AnalyticsLoginDataPublishServiceComponent.class);
 
+    @Activate
     protected void activate(ComponentContext context) {
 
         try {
             BundleContext bundleContext = context.getBundleContext();
             bundleContext.registerService(AbstractEventHandler.class,
-                    new AnalyticsLoginDataPublishHanlder(), null);
+                    new AnalyticsLoginDataPublishHandler(), null);
 
             if (log.isDebugEnabled()) {
                 log.debug("org.wso2.carbon.identity.data.publisher.authentication.analytics.login" +
@@ -66,6 +64,21 @@ public class AnalyticsLoginDataPublishServiceComponent {
         }
     }
 
+    @Deactivate
+    protected void deactivate(ComponentContext context) {
+
+        if (log.isDebugEnabled()) {
+            log.debug(" org.wso2.carbon.identity.data.publisher.authentication.analytics.login bundle is deactivated");
+        }
+    }
+
+    @Reference(
+            name = "RealmService",
+            service = RealmService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetRealmService"
+    )
     protected void setRealmService(RealmService realmService) {
 
         if (log.isDebugEnabled()) {
@@ -82,6 +95,13 @@ public class AnalyticsLoginDataPublishServiceComponent {
         AnalyticsLoginDataPublishDataHolder.getInstance().setRealmService(null);
     }
 
+    @Reference(
+            name = "RegistryService",
+            service = RegistryService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetRegistryService"
+    )
     protected void setRegistryService(RegistryService registryService) {
 
         if (log.isDebugEnabled()) {
@@ -98,6 +118,13 @@ public class AnalyticsLoginDataPublishServiceComponent {
         AnalyticsLoginDataPublishDataHolder.getInstance().setRegistryService(null);
     }
 
+    @Reference(
+            name = "EventStreamService",
+            service = EventStreamService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetEventStreamService"
+    )
     protected void setEventStreamService(EventStreamService eventStreamService) {
 
         if (log.isDebugEnabled()) {

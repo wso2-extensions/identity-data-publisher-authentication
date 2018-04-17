@@ -34,7 +34,7 @@ import org.wso2.carbon.identity.event.event.Event;
 import java.util.Map;
 
 /*
- * Utiltities for authentication audit logger
+ * Utilities for authentication audit logger
  */
 public class AuthenticationAuditLoggerUtils {
 

@@ -18,27 +18,58 @@
 
 package org.wso2.carbon.identity.data.publisher.application.authentication.internal;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import org.wso2.carbon.identity.application.authentication.framework.AuthenticationDataPublisher;
 import org.wso2.carbon.identity.data.publisher.application.authentication.AuthnDataPublisherProxy;
 import org.wso2.carbon.identity.event.services.IdentityEventService;
 
-/**
- * @scr.component name="org.wso2.carbon.identity.data.publisher.authn" immediate="true"
- * @scr.reference name="IdentityEventService"
- * interface="org.wso2.carbon.identity.event.services.IdentityEventService" cardinality="1..1"
- * policy="dynamic" bind="setIdentityEventService" unbind="unsetIdentityEventService"
- */
+@Component(
+        name = "identity.data.publisher.authn",
+        immediate = true
+)
 public class AuthenticationDataPublisherServiceComponent {
 
+    private static Log log = LogFactory.getLog(AuthenticationDataPublisherServiceComponent.class);
+
+    @Activate
     protected void activate(ComponentContext context) {
 
-        BundleContext bundleContext = context.getBundleContext();
-        bundleContext
-                .registerService(AuthenticationDataPublisher.class.getName(), new AuthnDataPublisherProxy(), null);
+        try {
+            BundleContext bundleContext = context.getBundleContext();
+            bundleContext
+                    .registerService(AuthenticationDataPublisher.class.getName(), new AuthnDataPublisherProxy(), null);
+            if (log.isDebugEnabled()) {
+                log.debug("org.wso2.carbon.identity.data.publisher.application.authentication bundle is activated");
+            }
+        } catch (Exception e) {
+            log.error("Error while activating org.wso2.carbon.identity.data.publisher.application.authentication bundle", e);
+        }
     }
 
+    @Deactivate
+    protected void deactivate(ComponentContext context) {
+
+        if (log.isDebugEnabled()) {
+            log.debug("org.wso2.carbon.identity.data.publisher.application.authentication bundle is deactivated");
+        }
+    }
+
+    @Reference(
+            name = "IdentityEventService",
+            service = IdentityEventService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetIdentityEventService"
+    )
     protected void setIdentityEventService(IdentityEventService eventService) {
 
         AuthenticationDataPublisherDataHolder.getInstance().setIdentityEventService(eventService);

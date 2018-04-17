@@ -30,6 +30,8 @@ import org.wso2.carbon.identity.event.event.Event;
 import org.wso2.carbon.identity.event.handler.AbstractEventHandler;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
+import java.util.Arrays;
+
 /*
  * Handle data publishing for analytics
  */
@@ -60,26 +62,17 @@ public class AnalyticsSessionDataPublishHandler extends AbstractEventHandler {
 
     protected void doPublishSessionCreation(SessionData sessionData) {
 
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Publishing session creation to DAS");
-        }
         publishSessionData(sessionData, SessionDataPublisherConstants.SESSION_CREATION_STATUS);
     }
 
     protected void doPublishSessionTermination(SessionData sessionData) {
 
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Publishing session termination to DAS");
-        }
         publishSessionData(sessionData, SessionDataPublisherConstants.SESSION_TERMINATION_STATUS);
 
     }
 
     protected void doPublishSessionUpdate(SessionData sessionData) {
 
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Publishing session update to DAS");
-        }
         publishSessionData(sessionData, SessionDataPublisherConstants.SESSION_UPDATE_STATUS);
     }
 
@@ -112,7 +105,8 @@ public class AnalyticsSessionDataPublishHandler extends AbstractEventHandler {
                                     metadataArray, null, payloadData);
                     SessionDataPublishServiceHolder.getInstance().getPublisherService().publish(event);
                     if (LOG.isDebugEnabled() && event != null) {
-                        LOG.debug("Sending out event : " + event.toString());
+                        LOG.debug("Sending out to publishing domain:" + publishingDomain + " \n event : "
+                                + event.toString());
                     }
                 }
             } finally {
@@ -143,14 +137,8 @@ public class AnalyticsSessionDataPublishHandler extends AbstractEventHandler {
         payloadData[13] = sessionData.getUserAgent();
         payloadData[14] = System.currentTimeMillis();
 
-        if (LOG.isDebugEnabled()) {
-            for (int i = 0; i < 14; i++) {
-                if (payloadData[i] != null) {
-                    LOG.debug("Payload data for entry " + i + " " + payloadData[i].toString());
-                } else {
-                    LOG.debug("Payload data for entry " + i + " is null");
-                }
-            }
+        if(LOG.isDebugEnabled()){
+            LOG.debug("The created payload :" + Arrays.asList(payloadData));
         }
         return payloadData;
     }

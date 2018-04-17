@@ -17,7 +17,8 @@
   ~ under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <parent>
         <groupId>org.wso2.carbon.identity.datapublisher.authentication</groupId>
@@ -45,10 +46,6 @@
         <dependency>
             <groupId>org.wso2.carbon.identity.framework</groupId>
             <artifactId>org.wso2.carbon.identity.base</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.analytics-common</groupId>
-            <artifactId>org.wso2.carbon.event.stream.core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.identity.framework</groupId>
@@ -79,16 +76,31 @@
                             org.wso2.carbon.identity.data.publisher.application.authentication.internal,
                         </Private-Package>
                         <Import-Package>
-                            !org.wso2.carbon.identity.data.publisher.application.authentication.*,
+                            org.osgi.framework; version="${osgi.framework.imp.pkg.version.range}",
+                            org.osgi.service.component.*; version="${osgi.service.component.imp.pkg.version.range}",
                             org.wso2.carbon; version="${carbon.kernel.package.import.version.range}",
-                            org.apache.commons.logging; version="${commons-logging.osgi.version.range}",
                             org.wso2.carbon.identity.application.authentication.framework.*;version="${carbon.identity.framework.package.import.version.range}",
-                            org.wso2.carbon.databridge.commons; version="${carbon.analytics-common.version}",
-                            *;resolution:=optional
+
+                            org.apache.commons.lang,
+                            org.apache.commons.logging,
+                            org.wso2.carbon.identity.application.common.model,
+                            org.wso2.carbon.identity.core.bean.context,
+                            org.wso2.carbon.identity.core.handler,
+                            org.wso2.carbon.identity.core.model,
+                            org.wso2.carbon.identity.core.util,
+                            org.wso2.carbon.identity.event.*,
+                            org.apache.axiom.om.util,
+                            org.wso2.carbon.base,
+                            org.wso2.carbon.idp.mgt.util,
+                            org.wso2.carbon.user.core,
+                            org.wso2.carbon.user.core.util,
+                            javax.servlet.http
+
                         </Import-Package>
                         <Export-Package>
                             !org.wso2.carbon.identity.data.publisher.application.authentication.internal,
-                            org.wso2.carbon.identity.data.publisher.application.authentication.*;version="${carbon.identity.data.publisher.package.export.version}"
+                            org.wso2.carbon.identity.data.publisher.application.authentication.*;
+                            version="${carbon.identity.data.publisher.package.export.version}"
                         </Export-Package>
                     </instructions>
                 </configuration>

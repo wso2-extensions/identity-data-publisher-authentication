@@ -22,6 +22,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.wso2.carbon.identity.data.publisher.authentication.audit.AuthenticationAuditLogingHandler;
 import org.wso2.carbon.identity.event.handler.AbstractEventHandler;
 
@@ -29,13 +32,15 @@ import org.wso2.carbon.identity.event.handler.AbstractEventHandler;
  * Service Component for authentication audit logger
  */
 
-/**
- * @scr.component name="identity.data.publisher.authentication.authentication.audit" immediate="true"
- */
+@Component(
+        name = "identity.data.publisher.authentication.audit",
+        immediate = true
+)
 public class AuthenticationAudiLoggingServiceComponenet {
 
     private static Log log = LogFactory.getLog(AuthenticationAudiLoggingServiceComponenet.class);
 
+    @Activate
     protected void activate(ComponentContext context) {
 
         try {
@@ -50,6 +55,14 @@ public class AuthenticationAudiLoggingServiceComponenet {
         } catch (Exception e) {
             log.error("Error while activating org.wso2.carbon.identity.data.publisher.authentication" +
                     ".audit", e);
+        }
+    }
+
+    @Deactivate
+    protected void deactivate(ComponentContext context) {
+
+        if (log.isDebugEnabled()) {
+            log.debug("org.wso2.carbon.identity.data.publisher.authentication.audit bundle is deactivated");
         }
     }
 

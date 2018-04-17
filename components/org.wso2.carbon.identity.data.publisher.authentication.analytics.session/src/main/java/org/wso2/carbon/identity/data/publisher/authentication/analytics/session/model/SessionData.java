@@ -21,7 +21,6 @@ package org.wso2.carbon.identity.data.publisher.authentication.analytics.session
 import org.wso2.carbon.identity.application.authentication.framework.context.SessionContext;
 import org.wso2.carbon.identity.base.IdentityRuntimeException;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 

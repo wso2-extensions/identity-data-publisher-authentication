@@ -31,6 +31,7 @@ import org.wso2.carbon.identity.data.publisher.authentication.analytics.login.in
 import org.wso2.carbon.identity.data.publisher.authentication.analytics.login.model.AuthenticationData;
 import org.wso2.carbon.identity.event.IdentityEventConstants;
 import org.wso2.carbon.identity.event.IdentityEventException;
+import org.wso2.carbon.identity.event.event.Event;
 import org.wso2.carbon.identity.event.handler.AbstractEventHandler;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -38,15 +39,16 @@ import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
 /*
  * Publish authentication login data to analytics server
  */
-public class AnalyticsLoginDataPublishHanlder extends AbstractEventHandler {
+public class AnalyticsLoginDataPublishHandler extends AbstractEventHandler {
 
-    private static final Log LOG = LogFactory.getLog(AnalyticsLoginDataPublishHanlder.class);
+    private static final Log LOG = LogFactory.getLog(AnalyticsLoginDataPublishHandler.class);
 
     @Override
     public String getName() {
@@ -55,7 +57,7 @@ public class AnalyticsLoginDataPublishHanlder extends AbstractEventHandler {
     }
 
     @Override
-    public void handleEvent(org.wso2.carbon.identity.event.event.Event event) throws IdentityEventException {
+    public void handleEvent(Event event) throws IdentityEventException {
 
         if (event.getEventName().equals(IdentityEventConstants.EventName.AUTHENTICATION_STEP_SUCCESS.name()) ||
                 event.getEventName().equals(IdentityEventConstants.EventName.AUTHENTICATION_STEP_FAILURE.name())) {
@@ -129,37 +131,33 @@ public class AnalyticsLoginDataPublishHanlder extends AbstractEventHandler {
         payloadData[21] = authenticationData.getIdentityProviderType();
         payloadData[22] = System.currentTimeMillis();
 
-        if (LOG.isDebugEnabled()) {
-            for (int i = 0; i < 23; i++) {
-                if (payloadData[i] != null) {
-                    LOG.debug("Payload data for entry " + i + " " + payloadData[i].toString());
-                } else {
-                    LOG.debug("Payload data for entry " + i + " is null");
-                }
-
-            }
+        if(LOG.isDebugEnabled()){
+            LOG.debug("The created payload :" + Arrays.asList(payloadData));
         }
+
         return payloadData;
     }
 
     private void publishEvent(Object[] payloadData, AuthenticationData authenticationData) {
 
-        String[] publishingDomains = (String[]) authenticationData.getParameter(AnalyticsLoginDataPublishConstants.TENANT_ID);
+        String[] publishingDomains = (String[]) authenticationData
+                .getParameter(AnalyticsLoginDataPublishConstants.TENANT_DOMAIN_NAMES);
         if (publishingDomains != null && publishingDomains.length > 0) {
 
             try {
                 FrameworkUtils.startTenantFlow(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
                 for (String publishingDomain : publishingDomains) {
                     Object[] metadataArray = AnalyticsLoginDataPublisherUtils.getMetaDataArray(publishingDomain);
+                    payloadData[1] = UUID.randomUUID().toString();
 
                     org.wso2.carbon.databridge.commons.Event event = new org.wso2.carbon.databridge.commons
                             .Event(AnalyticsLoginDataPublishConstants.AUTHN_DATA_STREAM_NAME, System.currentTimeMillis(),
                             metadataArray, null, payloadData);
                     AnalyticsLoginDataPublishDataHolder.getInstance().getPublisherService().publish(event);
                     if (LOG.isDebugEnabled() && event != null) {
-                        LOG.debug("Sending out event : " + event.toString());
+                        LOG.debug("Sending out to publishing domain:" + publishingDomain + " \n event : "
+                                + event.toString());
                     }
-                    payloadData[1] = UUID.randomUUID().toString();
 
                 }
             } finally {

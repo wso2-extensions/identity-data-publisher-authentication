@@ -210,7 +210,10 @@ public class SessionDataPublisherUtil {
      */
     public static void updateTimeStamps(SessionData sessionData, int actionId) {
 
-        SessionContext sessionContext = sessionData.getSessionContext();
+        SessionContext sessionContext = null;
+        if(sessionData!=null) {
+            sessionContext = sessionData.getSessionContext();
+        }
         Long createdTime = null;
         Long terminationTime = null;
         Long updatedTime = null;
@@ -233,6 +236,9 @@ public class SessionDataPublisherUtil {
                 terminationTime = currentTime;
                 updatedTime = currentTime;
             }
+
+        }
+        if(sessionData!=null) {
             sessionData.setCreatedTimestamp(createdTime);
             sessionData.setUpdatedTimestamp(updatedTime);
             sessionData.setTerminationTimestamp(terminationTime);

@@ -137,17 +137,17 @@ public class AnalyticsLoginDataPublisherUtils {
     private static void setTenantDataForIdpStep(AuthenticationContext context, AuthenticatorStatus status, AuthenticationData authenticationData) {
 
         if (AuthenticatorStatus.PASS == status) {
-            authenticationData.addParameter(AnalyticsLoginDataPublishConstants.TENANT_ID,
+            authenticationData.addParameter(AnalyticsLoginDataPublishConstants.TENANT_DOMAIN_NAMES,
                     getTenantDomains(context.getTenantDomain(), authenticationData.getTenantDomain()));
         } else {
             // Should publish the event to both SP tenant domain and the tenant domain of the user who did the login
             // attempt
             if (context.getSequenceConfig() != null && context.getSequenceConfig().getApplicationConfig() != null && context
                     .getSequenceConfig().getApplicationConfig().isSaaSApp()) {
-                authenticationData.addParameter(AnalyticsLoginDataPublishConstants.TENANT_ID,
+                authenticationData.addParameter(AnalyticsLoginDataPublishConstants.TENANT_DOMAIN_NAMES,
                         getTenantDomains(context.getTenantDomain(), authenticationData.getTenantDomain()));
             } else {
-                authenticationData.addParameter(AnalyticsLoginDataPublishConstants.TENANT_ID,
+                authenticationData.addParameter(AnalyticsLoginDataPublishConstants.TENANT_DOMAIN_NAMES,
                         getTenantDomains(context.getTenantDomain(), null));
             }
 
@@ -234,7 +234,7 @@ public class AnalyticsLoginDataPublisherUtils {
                                                        AuthenticationData authenticationData) {
 
         if (status == AuthenticatorStatus.PASS) {
-            authenticationData.addParameter(AnalyticsLoginDataPublishConstants.TENANT_ID,
+            authenticationData.addParameter(AnalyticsLoginDataPublishConstants.TENANT_DOMAIN_NAMES,
                     getTenantDomains(context.getTenantDomain(), authenticationData.getTenantDomain()));
             authenticationData.addParameter(AnalyticsLoginDataPublishConstants.SUBJECT_IDENTIFIER,
                     context.getSequenceConfig().getAuthenticatedUser().getAuthenticatedSubjectIdentifier());
@@ -245,10 +245,10 @@ public class AnalyticsLoginDataPublisherUtils {
             // attempt
             if (context.getSequenceConfig() != null && context.getSequenceConfig().getApplicationConfig
                     () != null && context.getSequenceConfig().getApplicationConfig().isSaaSApp()) {
-                authenticationData.addParameter(AnalyticsLoginDataPublishConstants.TENANT_ID,
+                authenticationData.addParameter(AnalyticsLoginDataPublishConstants.TENANT_DOMAIN_NAMES,
                         getTenantDomains(context.getTenantDomain(), authenticationData.getTenantDomain()));
             } else {
-                authenticationData.addParameter(AnalyticsLoginDataPublishConstants.TENANT_ID,
+                authenticationData.addParameter(AnalyticsLoginDataPublishConstants.TENANT_DOMAIN_NAMES,
                         getTenantDomains(context.getTenantDomain(), null));
             }
         }

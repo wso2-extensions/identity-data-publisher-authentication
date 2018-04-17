@@ -33,7 +33,7 @@ public class AnalyticsLoginDataPublishConstants {
     public static final String SERVICE_PROVIDER = "serviceprovider";
     public static final String IDENTITY_PROVIDER = "identityProvider";
     public static final String USER_STORE_DOMAIN = "userStoreDomain";
-    public static final String TENANT_ID = "tenantId";
+    public static final String TENANT_DOMAIN_NAMES = "tenantDomainNames";
     public static final String RELYING_PARTY = "relyingParty";
     public static final String SUBJECT_IDENTIFIER = "subjectIdentifier";
     public static final String AUTHENTICATED_IDPS = "authenticatedIDPs";

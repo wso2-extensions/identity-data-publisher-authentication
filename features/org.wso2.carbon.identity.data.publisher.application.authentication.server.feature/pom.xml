@@ -36,11 +36,6 @@
     <dependencies>
         <dependency>
             <groupId>org.wso2.carbon.identity.datapublisher.authentication</groupId>
-            <artifactId>org.wso2.carbon.identity.data.publisher.application.authentication</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.identity.datapublisher.authentication</groupId>
             <artifactId>org.wso2.carbon.identity.data.publisher.authentication.analytics.login</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -52,6 +47,11 @@
         <dependency>
             <groupId>org.wso2.carbon.identity.datapublisher.authentication</groupId>
             <artifactId>org.wso2.carbon.identity.data.publisher.authentication.audit</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.identity.datapublisher.authentication</groupId>
+            <artifactId>org.wso2.carbon.identity.data.publisher.application.authentication</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

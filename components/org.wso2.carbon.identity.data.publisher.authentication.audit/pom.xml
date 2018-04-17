@@ -75,11 +75,15 @@
                             org.wso2.carbon.identity.data.publisher.authentication.audit.internal,
                         </Private-Package>
                         <Import-Package>
-                            !org.wso2.carbon.identity.data.publisher.authentication.audit.*,
+                            org.osgi.framework; version="${osgi.framework.imp.pkg.version.range}",
+                            org.osgi.service.component.*; version="${osgi.service.component.imp.pkg.version.range}",
                             org.wso2.carbon; version="${carbon.kernel.package.import.version.range}",
-                            org.apache.commons.logging; version="${commons-logging.osgi.version.range}",
                             org.wso2.carbon.identity.application.authentication.framework.*;version="${carbon.identity.framework.package.import.version.range}",
-                            *;resolution:=optional
+
+                            org.apache.commons.lang,
+                            org.apache.commons.logging,
+                            org.wso2.carbon.identity.event.*,
+                            org.wso2.carbon.identity.application.common.model,
                         </Import-Package>
                         <Export-Package>
                             !org.wso2.carbon.identity.data.publisher.authentication.audit.internal,
