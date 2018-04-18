@@ -131,7 +131,7 @@ public class AnalyticsLoginDataPublishHandler extends AbstractEventHandler {
         payloadData[21] = authenticationData.getIdentityProviderType();
         payloadData[22] = System.currentTimeMillis();
 
-        if(LOG.isDebugEnabled()){
+        if (LOG.isDebugEnabled()) {
             LOG.debug("The created payload :" + Arrays.asList(payloadData));
         }
 
