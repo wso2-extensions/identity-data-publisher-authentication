@@ -42,16 +42,13 @@ import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * The data publishers will be change as Event Handlers from version 6.0.0.
- * So the current data publishers were changed as event handlers which extends
- * AbstractEventHandler in identity-framework.
- * <p>
- * Until this removes completely, the AuthnDataPublisherProxy will support both
- * iterative data publishing and invoking event handlers
+ * The data publishers which implements {@link AbstractAuthenticationDataPublisher} changed to
+ * implement AbstractEventHandler with this release.
+ * So its recommended to use implementation of AbstractEventHandlers for new data publishers.
  *
- * @deprecated The future data publishers will extends AbstractEventHandler
- * AbstractAuthenticationDataPublisher Replaced by
- * {@link org.wso2.carbon.identity.event.handler.AbstractEventHandler} \}
+ * @since 5.1.9
+ *
+ * @deprecated to use {@link org.wso2.carbon.identity.event.handler.AbstractEventHandler} \}
  */
 @Deprecated
 public abstract class AbstractAuthenticationDataPublisher implements
