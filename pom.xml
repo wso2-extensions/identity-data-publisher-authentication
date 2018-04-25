@@ -248,7 +248,7 @@
     <properties>
         <carbon.kernel.version>4.4.7</carbon.kernel.version>
         <carbon.kernel.package.import.version.range>[4.4.0, 5.0.0)</carbon.kernel.package.import.version.range>
-        <carbon.identity.framework.version>5.11.162-SNAPSHOT</carbon.identity.framework.version>
+        <carbon.identity.framework.version>5.11.189</carbon.identity.framework.version>
         <carbon.identity.data.publisher.package.export.version>${project.version}</carbon.identity.data.publisher.package.export.version>
         <carbon.identity.data.publisher.package.import.version.range>[5.0.0, 6.0.0)</carbon.identity.data.publisher.package.import.version.range>
         <carbon.identity.framework.package.import.version.range>[5.0.0, 6.0.0)</carbon.identity.framework.package.import.version.range>
