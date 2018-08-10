@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -16,11 +16,11 @@
  * under the License.
  */
 
-package org.wso2.carbon.identity.data.publisher.application.authentication.model;
+package org.wso2.carbon.identity.data.publisher.authentication.analytics.session.model;
 
+import org.wso2.carbon.identity.application.authentication.framework.context.SessionContext;
 import org.wso2.carbon.identity.base.IdentityRuntimeException;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,6 +39,17 @@ public class SessionData<T1 extends Object, T2 extends Object> {
     private boolean isRememberMe;
     private String remoteIP;
     private String userAgent;
+    private SessionContext sessionContext;
+
+    public SessionContext getSessionContext() {
+
+        return sessionContext;
+    }
+
+    public void setSessionContext(SessionContext sessionContext) {
+
+        this.sessionContext = sessionContext;
+    }
 
     public String getServiceProvider() {
 
@@ -167,21 +178,6 @@ public class SessionData<T1 extends Object, T2 extends Object> {
                     key);
         }
         parameters.put(key, value);
-    }
-
-    public void addParameters(Map<T1, T2> parameters) {
-
-        for (Map.Entry<T1, T2> parameter : parameters.entrySet()) {
-            if (this.parameters.containsKey(parameter.getKey())) {
-                throw IdentityRuntimeException.error("Parameters map trying to override existing key " + parameter.getKey());
-            }
-            parameters.put(parameter.getKey(), parameter.getValue());
-        }
-    }
-
-    public Map<T1, T2> getParameters() {
-
-        return Collections.unmodifiableMap(parameters);
     }
 
     public T2 getParameter(T1 key) {

@@ -18,87 +18,65 @@
 
 package org.wso2.carbon.identity.data.publisher.application.authentication.internal;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
-import org.wso2.carbon.event.stream.core.EventStreamService;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import org.wso2.carbon.identity.application.authentication.framework.AuthenticationDataPublisher;
-import org.wso2.carbon.identity.application.authentication.framework.internal.FrameworkServiceDataHolder;
 import org.wso2.carbon.identity.data.publisher.application.authentication.AuthnDataPublisherProxy;
-import org.wso2.carbon.identity.data.publisher.application.authentication.impl.AuthenticationAuditLogger;
-import org.wso2.carbon.identity.data.publisher.application.authentication.impl.DASLoginDataPublisherImpl;
-import org.wso2.carbon.identity.data.publisher.application.authentication.impl.DASSessionDataPublisherImpl;
-import org.wso2.carbon.identity.event.handler.AbstractEventHandler;
 import org.wso2.carbon.identity.event.services.IdentityEventService;
-import org.wso2.carbon.registry.core.service.RegistryService;
-import org.wso2.carbon.user.core.service.RealmService;
 
-/**
- * @scr.component name="org.wso2.carbon.identity.data.publisher.authn" immediate="true"
- * @scr.reference name="registry.service"
- * interface="org.wso2.carbon.registry.core.service.RegistryService"
- * cardinality="1..1" policy="dynamic" bind="setRegistryService"
- * unbind="unsetRegistryService"
- * @scr.reference name="realm.service" interface="org.wso2.carbon.user.core.service.RealmService"
- * cardinality="1..1" policy="dynamic" bind="setRealmService"
- * unbind="unsetRealmService"
- * @scr.reference name="eventStreamManager.service"
- * interface="org.wso2.carbon.event.stream.core.EventStreamService" cardinality="1..1"
- * policy="dynamic" bind="setEventStreamService" unbind="unsetEventStreamService"
- * unbind="unsetEventStreamService"
- * @scr.reference name="IdentityEventService"
- * interface="org.wso2.carbon.identity.event.services.IdentityEventService" cardinality="1..1"
- * policy="dynamic" bind="setIdentityEventService" unbind="unsetIdentityEventService"
- */
+@Component(
+        name = "identity.data.publisher.authn",
+        immediate = true
+)
 public class AuthenticationDataPublisherServiceComponent {
 
+    private static Log log = LogFactory.getLog(AuthenticationDataPublisherServiceComponent.class);
+
+    @Activate
     protected void activate(ComponentContext context) {
 
-        BundleContext bundleContext = context.getBundleContext();
-        bundleContext
-                .registerService(AbstractEventHandler.class.getName(), new DASLoginDataPublisherImpl(), null);
-        bundleContext
-                .registerService(AbstractEventHandler.class.getName(), new DASSessionDataPublisherImpl(), null);
-        bundleContext
-                .registerService(AbstractEventHandler.class.getName(), new AuthenticationAuditLogger(), null);
-        bundleContext
-                .registerService(AuthenticationDataPublisher.class.getName(), new AuthnDataPublisherProxy(), null);
+        try {
+            BundleContext bundleContext = context.getBundleContext();
+            bundleContext
+                    .registerService(AuthenticationDataPublisher.class.getName(), new AuthnDataPublisherProxy(), null);
+            if (log.isDebugEnabled()) {
+                log.debug("org.wso2.carbon.identity.data.publisher.application.authentication bundle is activated");
+            }
+        } catch (Exception e) {
+            log.error("Error while activating org.wso2.carbon.identity.data.publisher.application.authentication bundle", e);
+        }
     }
 
-    protected void setEventStreamService(EventStreamService publisherService) {
+    @Deactivate
+    protected void deactivate(ComponentContext context) {
 
-        AuthenticationDataPublisherDataHolder.getInstance().setPublisherService(publisherService);
+        if (log.isDebugEnabled()) {
+            log.debug("org.wso2.carbon.identity.data.publisher.application.authentication bundle is deactivated");
+        }
     }
 
-    protected void unsetEventStreamService(EventStreamService publisherService) {
-
-        AuthenticationDataPublisherDataHolder.getInstance().setPublisherService(null);
-    }
-
-    protected void setRealmService(RealmService realmService) {
-
-        AuthenticationDataPublisherDataHolder.getInstance().setRealmService(realmService);
-    }
-
-    protected void unsetRealmService(RealmService realmService) {
-
-        AuthenticationDataPublisherDataHolder.getInstance().setRealmService(null);
-    }
-
-    protected void setRegistryService(RegistryService registryService) {
-
-        AuthenticationDataPublisherDataHolder.getInstance().setRegistryService(registryService);
-    }
-
-    protected void unsetRegistryService(RegistryService registryService) {
-
-        AuthenticationDataPublisherDataHolder.getInstance().setRegistryService(null);
-    }
-
+    @Reference(
+            name = "IdentityEventService",
+            service = IdentityEventService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetIdentityEventService"
+    )
     protected void setIdentityEventService(IdentityEventService eventService) {
+
         AuthenticationDataPublisherDataHolder.getInstance().setIdentityEventService(eventService);
     }
 
     protected void unsetIdentityEventService(IdentityEventService eventService) {
+
         AuthenticationDataPublisherDataHolder.getInstance().setIdentityEventService(null);
     }
 

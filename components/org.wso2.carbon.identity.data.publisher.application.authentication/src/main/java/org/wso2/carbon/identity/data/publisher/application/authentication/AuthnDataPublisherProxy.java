@@ -21,6 +21,7 @@ package org.wso2.carbon.identity.data.publisher.application.authentication;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.identity.application.authentication.framework.AuthenticationDataPublisher;
+import org.wso2.carbon.identity.application.authentication.framework.AuthenticatorStatus;
 import org.wso2.carbon.identity.application.authentication.framework.context.AuthenticationContext;
 import org.wso2.carbon.identity.application.authentication.framework.context.SessionContext;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkConstants;
@@ -32,12 +33,23 @@ import org.wso2.carbon.identity.event.IdentityEventException;
 import org.wso2.carbon.identity.event.event.Event;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
+/**
+ * The iterative data publishing and invoking event handlers correspond to triggered
+ * event are undertaken by this class.
+ * <p>
+ * The iterative data publishing will be removed in a next major release because the
+ * existing data publishers are transformed into event handlers.
+ */
 public class AuthnDataPublisherProxy extends AbstractIdentityMessageHandler implements
         AuthenticationDataPublisher {
+
     private static final Log log = LogFactory.getLog(AuthnDataPublisherProxy.class);
+    private List<AuthenticationDataPublisher> dataPublishers = AuthenticationDataPublisherDataHolder.getInstance()
+            .getDataPublishers();
 
     /**
      * Publish authentication success after managing handler operations
@@ -48,8 +60,20 @@ public class AuthnDataPublisherProxy extends AbstractIdentityMessageHandler impl
      */
     public void publishAuthenticationStepSuccess(HttpServletRequest request, AuthenticationContext context,
                                                  Map<String, Object> params) {
+
         Event event = createEvent(request, context, null, params, EventName.AUTHENTICATION_STEP_SUCCESS);
+        event.addEventProperty(EventProperty.AUTHENTICATION_STATUS, AuthenticatorStatus.PASS);
         doPublishEvent(event);
+        for (AuthenticationDataPublisher publisher : dataPublishers) {
+            if (isPublisherEnabledAndCanHandleContext(context, publisher)) {
+                publisher.publishAuthenticationStepSuccess(request, context, params);
+            }
+        }
+    }
+
+    private boolean isPublisherEnabledAndCanHandleContext(AuthenticationContext context, AuthenticationDataPublisher publisher) {
+
+        return publisher != null && publisher.isEnabled(context) && publisher.canHandle(context);
     }
 
     /**
@@ -61,8 +85,15 @@ public class AuthnDataPublisherProxy extends AbstractIdentityMessageHandler impl
      */
     public void publishAuthenticationStepFailure(HttpServletRequest request, AuthenticationContext context,
                                                  Map<String, Object> unmodifiableMap) {
+
         Event event = createEvent(request, context, null, unmodifiableMap, EventName.AUTHENTICATION_STEP_FAILURE);
+        event.addEventProperty(EventProperty.AUTHENTICATION_STATUS, AuthenticatorStatus.FAIL);
         doPublishEvent(event);
+        for (AuthenticationDataPublisher publisher : dataPublishers) {
+            if (isPublisherEnabledAndCanHandleContext(context, publisher)) {
+                publisher.publishAuthenticationStepFailure(request, context, unmodifiableMap);
+            }
+        }
     }
 
     /**
@@ -74,8 +105,15 @@ public class AuthnDataPublisherProxy extends AbstractIdentityMessageHandler impl
      */
     public void publishAuthenticationSuccess(HttpServletRequest request, AuthenticationContext context,
                                              Map<String, Object> unmodifiableMap) {
+
         Event event = createEvent(request, context, null, unmodifiableMap, EventName.AUTHENTICATION_SUCCESS);
+        event.addEventProperty(EventProperty.AUTHENTICATION_STATUS, AuthenticatorStatus.PASS);
         doPublishEvent(event);
+        for (AuthenticationDataPublisher publisher : dataPublishers) {
+            if (isPublisherEnabledAndCanHandleContext(context, publisher)) {
+                publisher.publishAuthenticationSuccess(request, context, unmodifiableMap);
+            }
+        }
     }
 
     /**
@@ -87,8 +125,15 @@ public class AuthnDataPublisherProxy extends AbstractIdentityMessageHandler impl
      */
     public void publishAuthenticationFailure(HttpServletRequest request, AuthenticationContext context,
                                              Map<String, Object> unmodifiableMap) {
+
         Event event = createEvent(request, context, null, unmodifiableMap, EventName.AUTHENTICATION_FAILURE);
+        event.addEventProperty(EventProperty.AUTHENTICATION_STATUS, AuthenticatorStatus.FAIL);
         doPublishEvent(event);
+        for (AuthenticationDataPublisher publisher : dataPublishers) {
+            if (isPublisherEnabledAndCanHandleContext(context, publisher)) {
+                publisher.publishAuthenticationFailure(request, context, unmodifiableMap);
+            }
+        }
     }
 
     /**
@@ -101,8 +146,14 @@ public class AuthnDataPublisherProxy extends AbstractIdentityMessageHandler impl
      */
     public void publishSessionCreation(HttpServletRequest request, AuthenticationContext context, SessionContext
             sessionContext, Map<String, Object> unmodifiableMap) {
+
         Event event = createEvent(request, context, sessionContext, unmodifiableMap, EventName.SESSION_CREATE);
         doPublishEvent(event);
+        for (AuthenticationDataPublisher publisher : dataPublishers) {
+            if (isPublisherEnabledAndCanHandleContext(context, publisher)) {
+                publisher.publishSessionCreation(request, context, sessionContext, unmodifiableMap);
+            }
+        }
     }
 
     /**
@@ -113,11 +164,16 @@ public class AuthnDataPublisherProxy extends AbstractIdentityMessageHandler impl
      * @param sessionContext  Session context
      * @param unmodifiableMap Other relevant parameters which needs to be published
      */
-
     public void publishSessionUpdate(HttpServletRequest request, AuthenticationContext context, SessionContext
             sessionContext, Map<String, Object> unmodifiableMap) {
+
         Event event = createEvent(request, context, sessionContext, unmodifiableMap, EventName.SESSION_UPDATE);
         doPublishEvent(event);
+        for (AuthenticationDataPublisher publisher : dataPublishers) {
+            if (isPublisherEnabledAndCanHandleContext(context, publisher)) {
+                publisher.publishSessionUpdate(request, context, sessionContext, unmodifiableMap);
+            }
+        }
     }
 
     /**
@@ -131,17 +187,25 @@ public class AuthnDataPublisherProxy extends AbstractIdentityMessageHandler impl
 
     public void publishSessionTermination(HttpServletRequest request, AuthenticationContext context,
                                           SessionContext sessionContext, Map<String, Object> unmodifiableMap) {
+
         Event event = createEvent(request, context, sessionContext, unmodifiableMap, EventName.SESSION_TERMINATE);
         doPublishEvent(event);
+        for (AuthenticationDataPublisher publisher : dataPublishers) {
+            if (isPublisherEnabledAndCanHandleContext(context, publisher)) {
+                publisher.publishSessionTermination(request, context, sessionContext, unmodifiableMap);
+            }
+        }
     }
 
     @Override
     public String getName() {
+
         return FrameworkConstants.AnalyticsAttributes.AUTHN_DATA_PUBLISHER_PROXY;
     }
 
     private Event createEvent(HttpServletRequest request, AuthenticationContext context, SessionContext
             sessionContext, Map<String, Object> params, EventName eventName) {
+
         Map<String, Object> eventProperties = new HashMap<>();
         eventProperties.put(EventProperty.REQUEST, request);
         eventProperties.put(EventProperty.CONTEXT, context);
@@ -154,10 +218,11 @@ public class AuthnDataPublisherProxy extends AbstractIdentityMessageHandler impl
     }
 
     private void doPublishEvent(Event event) {
+
         try {
             AuthenticationDataPublisherDataHolder.getInstance().getIdentityEventService().handleEvent(event);
         } catch (IdentityEventException e) {
-            log.error("Error is caught while handling the event: " + event.getEventName() + ".", e);
+            log.error("Error while publishing the event: " + event.getEventName() + ".", e);
         }
     }
 }

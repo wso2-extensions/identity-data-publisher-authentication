@@ -22,7 +22,7 @@
         <groupId>org.wso2.carbon.identity.datapublisher.authentication</groupId>
         <artifactId>identity-data-publisher-authentication</artifactId>
         <relativePath>../../pom.xml</relativePath>
-        <version>5.1.7-SNAPSHOT</version>
+        <version>5.1.9-SNAPSHOT</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -34,6 +34,21 @@
         DAS</description>
 
     <dependencies>
+        <dependency>
+            <groupId>org.wso2.carbon.identity.datapublisher.authentication</groupId>
+            <artifactId>org.wso2.carbon.identity.data.publisher.authentication.analytics.login</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.identity.datapublisher.authentication</groupId>
+            <artifactId>org.wso2.carbon.identity.data.publisher.authentication.analytics.session</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.identity.datapublisher.authentication</groupId>
+            <artifactId>org.wso2.carbon.identity.data.publisher.authentication.audit</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.wso2.carbon.identity.datapublisher.authentication</groupId>
             <artifactId>org.wso2.carbon.identity.data.publisher.application.authentication</artifactId>
@@ -86,6 +101,9 @@
                             <propertiesFile>../etc/feature.properties</propertiesFile>
                             <bundles>
                                 <bundleDef>org.wso2.carbon.identity.datapublisher.authentication:org.wso2.carbon.identity.data.publisher.application.authentication</bundleDef>
+                                <bundleDef>org.wso2.carbon.identity.datapublisher.authentication:org.wso2.carbon.identity.data.publisher.authentication.analytics.login</bundleDef>
+                                <bundleDef>org.wso2.carbon.identity.datapublisher.authentication:org.wso2.carbon.identity.data.publisher.authentication.analytics.session</bundleDef>
+                                <bundleDef>org.wso2.carbon.identity.datapublisher.authentication:org.wso2.carbon.identity.data.publisher.authentication.audit</bundleDef>
                             </bundles>
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.core:compatible:${carbon.kernel.version}</importFeatureDef>

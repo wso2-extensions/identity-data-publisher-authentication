@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+  ~ Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
   ~
   ~ WSO2 Inc. licenses this file to you under the Apache License,
   ~ Version 2.0 (the "License"); you may not use this file except
@@ -17,8 +17,7 @@
   ~ under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <parent>
         <groupId>org.wso2.carbon.identity.datapublisher.authentication</groupId>
@@ -28,10 +27,10 @@
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>org.wso2.carbon.identity.data.publisher.application.authentication</artifactId>
+    <artifactId>org.wso2.carbon.identity.data.publisher.authentication.audit</artifactId>
     <packaging>bundle</packaging>
-    <name>WSO2 Carbon - Authentication Data Publisher</name>
-    <description>Carbon - Authentication Data Publisher</description>
+    <name>WSO2 Carbon - Authentication Audit Logger</name>
+    <description>Carbon - Authentication Audit Logger</description>
     <url>http://wso2.org</url>
 
     <dependencies>
@@ -73,7 +72,7 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Private-Package>
-                            org.wso2.carbon.identity.data.publisher.application.authentication.internal,
+                            org.wso2.carbon.identity.data.publisher.authentication.audit.internal,
                         </Private-Package>
                         <Import-Package>
                             org.osgi.framework; version="${osgi.framework.imp.pkg.version.range}",
@@ -83,24 +82,12 @@
 
                             org.apache.commons.lang,
                             org.apache.commons.logging,
-                            org.wso2.carbon.identity.application.common.model,
-                            org.wso2.carbon.identity.core.bean.context,
-                            org.wso2.carbon.identity.core.handler,
-                            org.wso2.carbon.identity.core.model,
-                            org.wso2.carbon.identity.core.util,
                             org.wso2.carbon.identity.event.*,
-                            org.apache.axiom.om.util,
-                            org.wso2.carbon.base,
-                            org.wso2.carbon.idp.mgt.util,
-                            org.wso2.carbon.user.core,
-                            org.wso2.carbon.user.core.util,
-                            javax.servlet.http
-
+                            org.wso2.carbon.identity.application.common.model,
                         </Import-Package>
                         <Export-Package>
-                            !org.wso2.carbon.identity.data.publisher.application.authentication.internal,
-                            org.wso2.carbon.identity.data.publisher.application.authentication.*;
-                            version="${carbon.identity.data.publisher.package.export.version}"
+                            !org.wso2.carbon.identity.data.publisher.authentication.audit.internal,
+                            org.wso2.carbon.identity.data.publisher.authentication.audit.*;version="${carbon.identity.data.publisher.package.export.version}"
                         </Export-Package>
                     </instructions>
                 </configuration>
