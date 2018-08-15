@@ -28,6 +28,8 @@ import org.wso2.carbon.identity.application.authentication.framework.model.Authe
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkConstants;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
+import org.wso2.carbon.identity.data.publisher.application.authentication.AuthPublisherConstants;
+import org.wso2.carbon.identity.data.publisher.application.authentication.AuthnDataPublisherUtils;
 import org.wso2.carbon.identity.data.publisher.authentication.analytics.session.model.SessionData;
 import org.wso2.carbon.identity.event.IdentityEventConstants;
 import org.wso2.carbon.identity.event.event.Event;
@@ -38,90 +40,15 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import javax.servlet.http.HttpServletRequest;
 
-/*
- * Utils for Analytics session data publish handler
+/**
+ * Utils for Analytics session data publish handler.
  */
 public class SessionDataPublisherUtil {
 
     private static final Log LOG = LogFactory.getLog(SessionDataPublisherUtil.class);
 
     /**
-     * Add default values if the values coming in are null or empty
-     *
-     * @param name  Name of the property configured in identity.xml
-     * @param value In coming value
-     * @return
-     */
-    public static String replaceIfNotAvailable(String name, String value) {
-
-        if (StringUtils.isNotEmpty(name) && StringUtils.isEmpty(value)) {
-            String defaultValue = IdentityUtil.getProperty(name);
-            if (defaultValue != null) {
-                return defaultValue;
-            }
-        }
-        if (StringUtils.isEmpty(value)) {
-            return SessionDataPublisherConstants.NOT_AVAILABLE;
-        }
-        return value;
-    }
-
-    /**
-     * Get the expiration time of the session
-     *
-     * @param createdTime  Created time of the session
-     * @param updatedTime  Updated time of the session
-     * @param tenantDomain Tenant Domain
-     * @param isRememberMe Whether remember me is enabled
-     * @return Session expiration time
-     */
-    public static long getSessionExpirationTime(long createdTime, long updatedTime, String tenantDomain,
-                                                boolean isRememberMe) {
-        // If remember me is enabled, Session termination time will be fixed
-        if (isRememberMe) {
-            long rememberMeTimeout = TimeUnit.SECONDS.toMillis(IdPManagementUtil.getRememberMeTimeout(tenantDomain));
-            return createdTime + rememberMeTimeout;
-        }
-        long idleSessionTimeOut = TimeUnit.SECONDS.toMillis(IdPManagementUtil.getIdleSessionTimeOut(tenantDomain));
-        return idleSessionTimeOut + updatedTime;
-    }
-
-    public static String[] getTenantDomains(String spTenantDomain, String userTenantDomain) {
-
-        if (StringUtils.isBlank(userTenantDomain) || userTenantDomain.equalsIgnoreCase(SessionDataPublisherConstants
-                .NOT_AVAILABLE)) {
-            return new String[]{spTenantDomain};
-        }
-        if (StringUtils.isBlank(spTenantDomain) || userTenantDomain.equalsIgnoreCase(SessionDataPublisherConstants
-                .NOT_AVAILABLE)) {
-            return new String[]{userTenantDomain};
-        }
-        if (spTenantDomain.equalsIgnoreCase(userTenantDomain)) {
-            return new String[]{userTenantDomain};
-        } else {
-            return new String[]{userTenantDomain, spTenantDomain};
-        }
-    }
-
-    /**
-     * Get metadata array for different tenants with tenant domain
-     *
-     * @param tenantDomain
-     * @return
-     */
-    public static Object[] getMetaDataArray(String tenantDomain) {
-
-        Object[] metaData = new Object[1];
-        if (StringUtils.isBlank(tenantDomain)) {
-            metaData[0] = MultitenantConstants.SUPER_TENANT_ID;
-        } else {
-            metaData[0] = IdentityTenantUtil.getTenantId(tenantDomain);
-        }
-        return metaData;
-    }
-
-    /**
-     * Create the session data object to pupulate payload of event
+     * Create the session data object to pupulate payload of event.
      *
      * @param event - triggered event object from framework
      * @return
@@ -131,8 +58,10 @@ public class SessionDataPublisherUtil {
         Map<String, Object> properties = event.getEventProperties();
         HttpServletRequest request = (HttpServletRequest) properties.get(IdentityEventConstants.EventProperty.REQUEST);
         Map<String, Object> params = (Map<String, Object>) properties.get(IdentityEventConstants.EventProperty.PARAMS);
-        SessionContext sessionContext = (SessionContext) properties.get(IdentityEventConstants.EventProperty.SESSION_CONTEXT);
-        AuthenticationContext context = (AuthenticationContext) properties.get(IdentityEventConstants.EventProperty.CONTEXT);
+        SessionContext sessionContext = (SessionContext) properties.get(IdentityEventConstants.EventProperty.
+                SESSION_CONTEXT);
+        AuthenticationContext context = (AuthenticationContext) properties.get(IdentityEventConstants.EventProperty.
+                CONTEXT);
 
         SessionData sessionData = new SessionData();
         Object userObj = params.get(FrameworkConstants.AnalyticsAttributes.USER);
@@ -142,7 +71,7 @@ public class SessionDataPublisherUtil {
         sessionData.setSessionId(sessionId);
         sessionData.setSessionContext(sessionContext);
         sessionData.setIdentityProviders(getCommaSeparatedIDPs(sessionContext));
-        sessionData.setUserAgent(request.getHeader(SessionDataPublisherConstants.USER_AGENT));
+        sessionData.setUserAgent(request.getHeader(AuthPublisherConstants.USER_AGENT));
         setTenantDataToSessionObject(context, sessionData);
 
         if (sessionContext != null) {
@@ -163,7 +92,7 @@ public class SessionDataPublisherUtil {
     }
 
     /**
-     * Populate the tenant details from authentication context
+     * Populate the tenant details from authentication context.
      *
      * @param context
      * @param sessionData
@@ -172,16 +101,17 @@ public class SessionDataPublisherUtil {
 
         if (context.getSequenceConfig() != null) {
             if (context.getSequenceConfig().getApplicationConfig().isSaaSApp()) {
-                sessionData.addParameter(SessionDataPublisherConstants.TENANT_ID, SessionDataPublisherUtil
+                sessionData.addParameter(AuthPublisherConstants.TENANT_ID, AuthnDataPublisherUtils
                         .getTenantDomains(context.getTenantDomain(), sessionData.getTenantDomain()));
             } else {
-                sessionData.addParameter(SessionDataPublisherConstants.TENANT_ID, new String[]{sessionData.getTenantDomain()});
+                sessionData.addParameter(AuthPublisherConstants.TENANT_ID, new String[]{sessionData.
+                        getTenantDomain()});
             }
         }
     }
 
     /**
-     * Populate user data from user object from paramerters
+     * Populate user data from user object from paramerters.
      *
      * @param sessionData
      * @param userObj
@@ -203,7 +133,7 @@ public class SessionDataPublisherUtil {
     }
 
     /**
-     * Update the timestamps of the session in respect to the action
+     * Update the timestamps of the session in respect to the action.
      *
      * @param sessionData
      * @param actionId
@@ -211,7 +141,7 @@ public class SessionDataPublisherUtil {
     public static void updateTimeStamps(SessionData sessionData, int actionId) {
 
         SessionContext sessionContext = null;
-        if(sessionData!=null) {
+        if (sessionData != null) {
             sessionContext = sessionData.getSessionContext();
         }
         Long createdTime = null;
@@ -221,13 +151,13 @@ public class SessionDataPublisherUtil {
             Object createdTimeObj = sessionContext.getProperty(FrameworkConstants.CREATED_TIMESTAMP);
             createdTime = (Long) createdTimeObj;
             if (actionId == SessionDataPublisherConstants.SESSION_CREATION_STATUS) {
-                terminationTime = SessionDataPublisherUtil.getSessionExpirationTime(createdTime, createdTime,
+                terminationTime = AuthnDataPublisherUtils.getSessionExpirationTime(createdTime, createdTime,
                         sessionData.getTenantDomain(), sessionContext.isRememberMe());
                 updatedTime = createdTime;
 
             } else if (actionId == SessionDataPublisherConstants.SESSION_UPDATE_STATUS) {
                 Long currentTime = System.currentTimeMillis();
-                terminationTime = SessionDataPublisherUtil.getSessionExpirationTime(createdTime, createdTime,
+                terminationTime = AuthnDataPublisherUtils.getSessionExpirationTime(createdTime, createdTime,
                         sessionData.getTenantDomain(), sessionContext.isRememberMe());
                 updatedTime = currentTime;
 
@@ -238,7 +168,7 @@ public class SessionDataPublisherUtil {
             }
 
         }
-        if(sessionData!=null) {
+        if (sessionData != null) {
             sessionData.setCreatedTimestamp(createdTime);
             sessionData.setUpdatedTimestamp(updatedTime);
             sessionData.setTerminationTimestamp(terminationTime);

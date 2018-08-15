@@ -18,8 +18,8 @@
 
 package org.wso2.carbon.identity.data.publisher.authentication.analytics.session;
 
-/*
- * Constants for session DataPublisher
+/**
+ * Constants for session DataPublisher.
  */
 public class SessionDataPublisherConstants {
 
@@ -27,19 +27,12 @@ public class SessionDataPublisherConstants {
 
     public static final String SESSION_DATA_STREAM_NAME = "org.wso2.is.analytics.stream.OverallSession:1.0.0";
 
-    public static final String NOT_AVAILABLE = "NOT_AVAILABLE";
-    public static final String CONFIG_PREFIX = "ISAnalytics.DefaultValues.";
-    public static final String SESSION_ID = "sessionId";
-    public static final String USERNAME = "userName";
-    public static final String USER_STORE_DOMAIN = "userStoreDomain";
-    public static final String USER_AGENT = "User-Agent";
-    public static final String TENANT_ID = "tenantId";
-
     // Session status codes
     public static final int SESSION_CREATION_STATUS = 1;
     public static final int SESSION_TERMINATION_STATUS = 0;
     public static final int SESSION_UPDATE_STATUS = 2;
 
+    public static final String ANALYTICS_SESSION_DATA_PUBLISHER_ENABLED = "analyticsSessionDataPublisher.enable";
 
     private SessionDataPublisherConstants(){
 

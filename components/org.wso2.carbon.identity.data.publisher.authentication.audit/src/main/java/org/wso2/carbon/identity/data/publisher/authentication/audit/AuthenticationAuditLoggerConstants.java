@@ -18,8 +18,8 @@
 
 package org.wso2.carbon.identity.data.publisher.authentication.audit;
 
-/*
- * Constants of authentication audit logger
+/**
+ * Constants of authentication audit logger.
  */
 public class AuthenticationAuditLoggerConstants {
 
@@ -27,6 +27,8 @@ public class AuthenticationAuditLoggerConstants {
 
     public static final String AUDIT_AUTHENTICATION_STEP = "audtStep";
     public static final String AUDIT_AUTHENTICATION = "auditAuth";
+
+    public static final String AUTHENTICATION_AUDIT_LOGGER_ENABLED = "authenticationAuditLogger.enable";
 
     private AuthenticationAuditLoggerConstants(){
 

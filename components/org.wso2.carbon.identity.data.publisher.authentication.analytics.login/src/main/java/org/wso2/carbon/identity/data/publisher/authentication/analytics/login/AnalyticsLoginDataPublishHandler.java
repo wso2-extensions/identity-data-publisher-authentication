@@ -27,6 +27,12 @@ import org.wso2.carbon.core.util.AnonymousSessionUtil;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkConstants;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkUtils;
 import org.wso2.carbon.identity.base.IdentityRuntimeException;
+import org.wso2.carbon.identity.core.bean.context.MessageContext;
+import org.wso2.carbon.identity.core.handler.AbstractIdentityMessageHandler;
+import org.wso2.carbon.identity.core.model.IdentityEventListenerConfig;
+import org.wso2.carbon.identity.core.util.IdentityUtil;
+import org.wso2.carbon.identity.data.publisher.application.authentication.AuthPublisherConstants;
+import org.wso2.carbon.identity.data.publisher.application.authentication.AuthnDataPublisherUtils;
 import org.wso2.carbon.identity.data.publisher.authentication.analytics.login.internal.AnalyticsLoginDataPublishDataHolder;
 import org.wso2.carbon.identity.data.publisher.authentication.analytics.login.model.AuthenticationData;
 import org.wso2.carbon.identity.event.IdentityEventConstants;
@@ -39,12 +45,10 @@ import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
-/*
- * Publish authentication login data to analytics server
+/**
+ * Publish authentication login data to analytics server.
  */
 public class AnalyticsLoginDataPublishHandler extends AbstractEventHandler {
 
@@ -59,13 +63,20 @@ public class AnalyticsLoginDataPublishHandler extends AbstractEventHandler {
     @Override
     public void handleEvent(Event event) throws IdentityEventException {
 
-        if (event.getEventName().equals(IdentityEventConstants.EventName.AUTHENTICATION_STEP_SUCCESS.name()) ||
-                event.getEventName().equals(IdentityEventConstants.EventName.AUTHENTICATION_STEP_FAILURE.name())) {
+        boolean isEnabled = isAnalyticsLoginDataPublishingEnabled(event);
+
+        if (!isEnabled) {
+            return;
+        }
+
+        if (IdentityEventConstants.EventName.AUTHENTICATION_STEP_SUCCESS.name().equals(event.getEventName()) ||
+                IdentityEventConstants.EventName.AUTHENTICATION_STEP_FAILURE.name().equals(event.getEventName())) {
             AuthenticationData authenticationData = AnalyticsLoginDataPublisherUtils.buildAuthnDataForAuthnStep(event);
             publishAuthenticationData(authenticationData);
-        } else if (event.getEventName().equals(IdentityEventConstants.EventName.AUTHENTICATION_SUCCESS.name()) ||
-                event.getEventName().equals(IdentityEventConstants.EventName.AUTHENTICATION_FAILURE.name())) {
-            AuthenticationData authenticationData = AnalyticsLoginDataPublisherUtils.buildAuthnDataForAuthentication(event);
+        } else if (IdentityEventConstants.EventName.AUTHENTICATION_SUCCESS.name().equals(event.getEventName()) ||
+                IdentityEventConstants.EventName.AUTHENTICATION_FAILURE.name().equals(event.getEventName())) {
+            AuthenticationData authenticationData = AnalyticsLoginDataPublisherUtils.
+                    buildAuthnDataForAuthentication(event);
             publishAuthenticationData(authenticationData);
         } else {
             LOG.error("Event " + event.getEventName() + " cannot be handled");
@@ -88,7 +99,7 @@ public class AnalyticsLoginDataPublishHandler extends AbstractEventHandler {
 
     }
 
-    private Object[] populatePayloadData(AuthenticationData authenticationData) {
+    protected Object[] populatePayloadData(AuthenticationData authenticationData) {
 
         String roleList = null;
         if (FrameworkConstants.LOCAL_IDP_NAME.equalsIgnoreCase(authenticationData.getIdentityProviderType())) {
@@ -104,27 +115,31 @@ public class AnalyticsLoginDataPublishHandler extends AbstractEventHandler {
         payloadData[1] = authenticationData.getEventId();
         payloadData[2] = authenticationData.getEventType();
         payloadData[3] = authenticationData.isAuthnSuccess();
-        payloadData[4] = AnalyticsLoginDataPublisherUtils.replaceIfNotAvailable(AnalyticsLoginDataPublishConstants.CONFIG_PREFIX +
-                AnalyticsLoginDataPublishConstants.USERNAME, authenticationData.getUsername());
-        payloadData[5] = AnalyticsLoginDataPublisherUtils.replaceIfNotAvailable(AnalyticsLoginDataPublishConstants.CONFIG_PREFIX +
-                AnalyticsLoginDataPublishConstants.USERNAME, authenticationData.getLocalUsername());
-        payloadData[6] = AnalyticsLoginDataPublisherUtils.replaceIfNotAvailable(AnalyticsLoginDataPublishConstants.CONFIG_PREFIX +
-                AnalyticsLoginDataPublishConstants.USER_STORE_DOMAIN, authenticationData.getUserStoreDomain());
+        payloadData[4] = AuthnDataPublisherUtils.replaceIfNotAvailable(
+                AuthPublisherConstants.CONFIG_PREFIX + AuthPublisherConstants.USERNAME,
+                authenticationData.getUsername());
+        payloadData[5] = AuthnDataPublisherUtils.replaceIfNotAvailable(
+                AuthPublisherConstants.CONFIG_PREFIX + AuthPublisherConstants.USERNAME,
+                authenticationData.getLocalUsername());
+        payloadData[6] = AuthnDataPublisherUtils.replaceIfNotAvailable(
+                AuthPublisherConstants.CONFIG_PREFIX + AuthPublisherConstants.USER_STORE_DOMAIN,
+                authenticationData.getUserStoreDomain());
         payloadData[7] = authenticationData.getTenantDomain();
         payloadData[8] = authenticationData.getRemoteIp();
-        payloadData[9] = AnalyticsLoginDataPublishConstants.NOT_AVAILABLE;
+        payloadData[9] = AuthPublisherConstants.NOT_AVAILABLE;
         payloadData[10] = authenticationData.getInboundProtocol();
-        payloadData[11] = AnalyticsLoginDataPublisherUtils.replaceIfNotAvailable(AnalyticsLoginDataPublishConstants.CONFIG_PREFIX +
-                AnalyticsLoginDataPublishConstants.SERVICE_PROVIDER, authenticationData
-                .getServiceProvider());
+        payloadData[11] = AuthnDataPublisherUtils.replaceIfNotAvailable(
+                AuthPublisherConstants.CONFIG_PREFIX + AuthPublisherConstants.SERVICE_PROVIDER,
+                authenticationData.getServiceProvider());
         payloadData[12] = authenticationData.isRememberMe();
         payloadData[13] = authenticationData.isForcedAuthn();
         payloadData[14] = authenticationData.isPassive();
-        payloadData[15] = AnalyticsLoginDataPublisherUtils.replaceIfNotAvailable(AnalyticsLoginDataPublishConstants.CONFIG_PREFIX +
-                AnalyticsLoginDataPublishConstants.ROLES, roleList);
+        payloadData[15] = AuthnDataPublisherUtils.replaceIfNotAvailable(
+                AuthPublisherConstants.CONFIG_PREFIX + AuthPublisherConstants.ROLES, roleList);
         payloadData[16] = String.valueOf(authenticationData.getStepNo());
-        payloadData[17] = AnalyticsLoginDataPublisherUtils.replaceIfNotAvailable(AnalyticsLoginDataPublishConstants.CONFIG_PREFIX +
-                AnalyticsLoginDataPublishConstants.IDENTITY_PROVIDER, authenticationData.getIdentityProvider());
+        payloadData[17] = AuthnDataPublisherUtils.replaceIfNotAvailable(
+                AuthPublisherConstants.CONFIG_PREFIX + AuthPublisherConstants.IDENTITY_PROVIDER,
+                authenticationData.getIdentityProvider());
         payloadData[18] = authenticationData.isSuccess();
         payloadData[19] = authenticationData.getAuthenticator();
         payloadData[20] = authenticationData.isInitialLogin();
@@ -138,7 +153,7 @@ public class AnalyticsLoginDataPublishHandler extends AbstractEventHandler {
         return payloadData;
     }
 
-    private void publishEvent(Object[] payloadData, AuthenticationData authenticationData) {
+    protected void publishEvent(Object[] payloadData, AuthenticationData authenticationData) {
 
         String[] publishingDomains = (String[]) authenticationData
                 .getParameter(AnalyticsLoginDataPublishConstants.TENANT_DOMAIN_NAMES);
@@ -147,12 +162,12 @@ public class AnalyticsLoginDataPublishHandler extends AbstractEventHandler {
             try {
                 FrameworkUtils.startTenantFlow(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
                 for (String publishingDomain : publishingDomains) {
-                    Object[] metadataArray = AnalyticsLoginDataPublisherUtils.getMetaDataArray(publishingDomain);
+                    Object[] metadataArray = AuthnDataPublisherUtils.getMetaDataArray(publishingDomain);
                     payloadData[1] = UUID.randomUUID().toString();
 
                     org.wso2.carbon.databridge.commons.Event event = new org.wso2.carbon.databridge.commons
-                            .Event(AnalyticsLoginDataPublishConstants.AUTHN_DATA_STREAM_NAME, System.currentTimeMillis(),
-                            metadataArray, null, payloadData);
+                            .Event(AnalyticsLoginDataPublishConstants.AUTHN_DATA_STREAM_NAME,
+                            System.currentTimeMillis(), metadataArray, null, payloadData);
                     AnalyticsLoginDataPublishDataHolder.getInstance().getPublisherService().publish(event);
                     if (LOG.isDebugEnabled() && event != null) {
                         LOG.debug("Sending out to publishing domain:" + publishingDomain + " \n event : "
@@ -189,7 +204,7 @@ public class AnalyticsLoginDataPublishHandler extends AbstractEventHandler {
                 if (userstore.isExistingUser(userName)) {
                     String[] newRoles = userstore.getRoleListOfUser(userName);
                     StringBuilder sb = new StringBuilder();
-                    List<String> externalRoles = AnalyticsLoginDataPublisherUtils.filterRoles(newRoles);
+                    List<String> externalRoles = AuthnDataPublisherUtils.filterRoles(newRoles);
                     for (String role : externalRoles) {
                         sb.append(",").append(role);
                     }
@@ -217,4 +232,26 @@ public class AnalyticsLoginDataPublishHandler extends AbstractEventHandler {
         return StringUtils.EMPTY;
     }
 
+    @Override
+    public boolean isEnabled(MessageContext messageContext) {
+        IdentityEventListenerConfig identityEventListenerConfig = IdentityUtil.readEventListenerProperty
+                (AbstractIdentityMessageHandler.class.getName(), this.getClass().getName());
+
+        if (identityEventListenerConfig == null) {
+            return false;
+        }
+
+        return Boolean.parseBoolean(identityEventListenerConfig.getEnable());
+    }
+
+    private boolean isAnalyticsLoginDataPublishingEnabled(Event event) throws IdentityEventException {
+
+        boolean isEnabled = false;
+
+        String handlerEnabled = this.configs.getModuleProperties().getProperty(AnalyticsLoginDataPublishConstants.
+                ANALYTICS_LOGIN_DATA_PUBLISHER_ENABLED);
+        isEnabled = Boolean.parseBoolean(handlerEnabled);
+
+        return isEnabled;
+    }
 }

@@ -25,11 +25,11 @@ import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
-import org.wso2.carbon.identity.data.publisher.authentication.audit.AuthenticationAuditLogingHandler;
+import org.wso2.carbon.identity.data.publisher.authentication.audit.AuthenticationAuditLoggingHandler;
 import org.wso2.carbon.identity.event.handler.AbstractEventHandler;
 
-/*
- * Service Component for authentication audit logger
+/**
+ * Service Component for authentication audit logger.
  */
 
 @Component(
@@ -46,13 +46,13 @@ public class AuthenticationAudiLoggingServiceComponenet {
         try {
             BundleContext bundleContext = context.getBundleContext();
             bundleContext.registerService(AbstractEventHandler.class,
-                    new AuthenticationAuditLogingHandler(), null);
+                    new AuthenticationAuditLoggingHandler(), null);
 
             if (log.isDebugEnabled()) {
                 log.debug("org.wso2.carbon.identity.data.publisher.authentication.audit" +
                         " bundle is activated");
             }
-        } catch (Exception e) {
+        } catch (Throwable e) {
             log.error("Error while activating org.wso2.carbon.identity.data.publisher.authentication" +
                     ".audit", e);
         }

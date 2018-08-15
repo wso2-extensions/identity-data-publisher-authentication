@@ -18,8 +18,8 @@
 
 package org.wso2.carbon.identity.data.publisher.authentication.audit.model;
 
-/*
- * Data object class for authentication audit logger
+/**
+ * Data object class for authentication audit logger.
  */
 public class AuthenticationAuditData {
 

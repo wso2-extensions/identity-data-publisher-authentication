@@ -34,8 +34,8 @@ import org.wso2.carbon.identity.event.handler.AbstractEventHandler;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
 
-/*
- * Service component for registering the services to bundle
+/**
+ * Service component for registering the services to bundle.
  */
 
 @Component(

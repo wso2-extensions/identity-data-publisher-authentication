@@ -19,10 +19,10 @@
 package org.wso2.carbon.identity.data.publisher.authentication.analytics.session.internal;
 
 import org.wso2.carbon.event.stream.core.EventStreamService;
-/*
- * Holds the services needed for session data publisher for analytics
- */
 
+/**
+ * Holds the services needed for session data publisher for analytics.
+ */
 public class SessionDataPublishServiceHolder {
 
     private static SessionDataPublishServiceHolder sessionDataPublishServiceHolder =

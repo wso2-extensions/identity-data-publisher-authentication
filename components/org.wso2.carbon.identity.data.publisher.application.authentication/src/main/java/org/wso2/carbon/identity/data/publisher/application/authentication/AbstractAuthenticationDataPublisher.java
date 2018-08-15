@@ -42,8 +42,8 @@ import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * The data publishers which implements {@link AbstractAuthenticationDataPublisher} changed to
- * implement AbstractEventHandler with this release.
+ * The data publishers which implement {@link AbstractAuthenticationDataPublisher} changed to implement
+ * AbstractEventHandler with this release.
  * So its recommended to use implementation of AbstractEventHandlers for new data publishers.
  *
  * @since 5.1.9
@@ -51,7 +51,7 @@ import javax.servlet.http.HttpServletRequest;
  * @deprecated to use {@link org.wso2.carbon.identity.event.handler.AbstractEventHandler} \}
  */
 @Deprecated
-public abstract class AbstractAuthenticationDataPublisher implements
+public abstract class AbstractAuthenticationDataPublisher extends AbstractIdentityMessageHandler implements
         AuthenticationDataPublisher {
 
     private static final Log log = LogFactory.getLog(AbstractAuthenticationDataPublisher.class);

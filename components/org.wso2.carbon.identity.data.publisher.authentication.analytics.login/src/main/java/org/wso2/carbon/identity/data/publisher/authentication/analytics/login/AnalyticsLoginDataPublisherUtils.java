@@ -31,6 +31,8 @@ import org.wso2.carbon.identity.application.authentication.framework.util.Framew
 import org.wso2.carbon.identity.application.common.model.User;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
+import org.wso2.carbon.identity.data.publisher.application.authentication.AuthPublisherConstants;
+import org.wso2.carbon.identity.data.publisher.application.authentication.AuthnDataPublisherUtils;
 import org.wso2.carbon.identity.data.publisher.authentication.analytics.login.model.AuthenticationData;
 import org.wso2.carbon.identity.event.IdentityEventConstants;
 import org.wso2.carbon.identity.event.event.Event;
@@ -43,8 +45,8 @@ import java.util.Map;
 import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 
-/*
- * Utils for Analytics Login data publisher
+/**
+ * Utils for Analytics Login data publisher.
  */
 public class AnalyticsLoginDataPublisherUtils {
 
@@ -53,46 +55,7 @@ public class AnalyticsLoginDataPublisherUtils {
     private static final String INTERNAL_EVERYONE_ROLE = "Internal/everyone";
 
     /**
-     * Returns the IDP name of IDP which is used to get the subject identifier.
-     *
-     * @param context Authentication context.
-     * @return Name of the identity provider.
-     */
-    public static String getSubjectStepIDP(AuthenticationContext context) {
-
-        SequenceConfig sequenceConfig = context.getSequenceConfig();
-        for (Map.Entry<Integer, StepConfig> entry : sequenceConfig.getStepMap().entrySet()) {
-            StepConfig stepConfig = entry.getValue();
-            if (stepConfig.isSubjectIdentifierStep() && StringUtils.isNotEmpty(stepConfig.getAuthenticatedIdP())) {
-                return stepConfig.getAuthenticatedIdP();
-            }
-        }
-        return AnalyticsLoginDataPublishConstants.NOT_AVAILABLE;
-    }
-
-    /**
-     * Add default values if the values coming in are null or empty
-     *
-     * @param name  Name of the property configured in identity.xml
-     * @param value In coming value
-     * @return
-     */
-    public static String replaceIfNotAvailable(String name, String value) {
-
-        if (StringUtils.isNotEmpty(name) && StringUtils.isEmpty(value)) {
-            String defaultValue = IdentityUtil.getProperty(name);
-            if (defaultValue != null) {
-                return defaultValue;
-            }
-        }
-        if (StringUtils.isEmpty(value)) {
-            return AnalyticsLoginDataPublishConstants.NOT_AVAILABLE;
-        }
-        return value;
-    }
-
-    /**
-     * Build authentication data object for authentication step from event
+     * Build authentication data object for authentication step from event.
      *
      * @param event
      * @return Authentication data object
@@ -102,8 +65,10 @@ public class AnalyticsLoginDataPublisherUtils {
         Map<String, Object> properties = event.getEventProperties();
         HttpServletRequest request = (HttpServletRequest) properties.get(IdentityEventConstants.EventProperty.REQUEST);
         Map<String, Object> params = (Map<String, Object>) properties.get(IdentityEventConstants.EventProperty.PARAMS);
-        AuthenticationContext context = (AuthenticationContext) properties.get(IdentityEventConstants.EventProperty.CONTEXT);
-        AuthenticatorStatus status = (AuthenticatorStatus) properties.get(IdentityEventConstants.EventProperty.AUTHENTICATION_STATUS);
+        AuthenticationContext context = (AuthenticationContext) properties.get(IdentityEventConstants.EventProperty.
+                CONTEXT);
+        AuthenticatorStatus status = (AuthenticatorStatus) properties.get(IdentityEventConstants.EventProperty.
+                AUTHENTICATION_STATUS);
 
         AuthenticationData authenticationData = new AuthenticationData();
         setIdpForAuthnStep(context, authenticationData);
@@ -130,25 +95,28 @@ public class AnalyticsLoginDataPublisherUtils {
 
         setTenantDataForIdpStep(context, status, authenticationData);
 
-        authenticationData.addParameter(AnalyticsLoginDataPublishConstants.RELYING_PARTY, context.getRelyingParty());
+        authenticationData.addParameter(AuthPublisherConstants.RELYING_PARTY, context.getRelyingParty());
         return authenticationData;
     }
 
-    private static void setTenantDataForIdpStep(AuthenticationContext context, AuthenticatorStatus status, AuthenticationData authenticationData) {
+    private static void setTenantDataForIdpStep(AuthenticationContext context, AuthenticatorStatus status,
+                                                AuthenticationData authenticationData) {
 
         if (AuthenticatorStatus.PASS == status) {
             authenticationData.addParameter(AnalyticsLoginDataPublishConstants.TENANT_DOMAIN_NAMES,
-                    getTenantDomains(context.getTenantDomain(), authenticationData.getTenantDomain()));
+                    AuthnDataPublisherUtils.getTenantDomains(context.getTenantDomain(), authenticationData.
+                            getTenantDomain()));
         } else {
             // Should publish the event to both SP tenant domain and the tenant domain of the user who did the login
             // attempt
-            if (context.getSequenceConfig() != null && context.getSequenceConfig().getApplicationConfig() != null && context
-                    .getSequenceConfig().getApplicationConfig().isSaaSApp()) {
+            if (context.getSequenceConfig() != null && context.getSequenceConfig().getApplicationConfig() != null
+                    && context.getSequenceConfig().getApplicationConfig().isSaaSApp()) {
                 authenticationData.addParameter(AnalyticsLoginDataPublishConstants.TENANT_DOMAIN_NAMES,
-                        getTenantDomains(context.getTenantDomain(), authenticationData.getTenantDomain()));
+                        AuthnDataPublisherUtils.getTenantDomains(context.getTenantDomain(), authenticationData.
+                                getTenantDomain()));
             } else {
                 authenticationData.addParameter(AnalyticsLoginDataPublishConstants.TENANT_DOMAIN_NAMES,
-                        getTenantDomains(context.getTenantDomain(), null));
+                        AuthnDataPublisherUtils.getTenantDomains(context.getTenantDomain(), null));
             }
 
         }
@@ -193,7 +161,7 @@ public class AnalyticsLoginDataPublisherUtils {
     }
 
     /**
-     * Build authentication data object for authentication from event
+     * Build authentication data object for authentication from event.
      *
      * @param event - triggerd event
      * @return AuthenticationData - authentication data object
@@ -203,8 +171,10 @@ public class AnalyticsLoginDataPublisherUtils {
         Map<String, Object> properties = event.getEventProperties();
         HttpServletRequest request = (HttpServletRequest) properties.get(IdentityEventConstants.EventProperty.REQUEST);
         Map<String, Object> params = (Map<String, Object>) properties.get(IdentityEventConstants.EventProperty.PARAMS);
-        AuthenticationContext context = (AuthenticationContext) properties.get(IdentityEventConstants.EventProperty.CONTEXT);
-        AuthenticatorStatus status = (AuthenticatorStatus) properties.get(IdentityEventConstants.EventProperty.AUTHENTICATION_STATUS);
+        AuthenticationContext context = (AuthenticationContext) properties.get(IdentityEventConstants.EventProperty.
+                CONTEXT);
+        AuthenticatorStatus status = (AuthenticatorStatus) properties.get(IdentityEventConstants.EventProperty.
+                AUTHENTICATION_STATUS);
 
         AuthenticationData authenticationData = new AuthenticationData();
         Object userObj = params.get(FrameworkConstants.AnalyticsAttributes.USER);
@@ -225,7 +195,7 @@ public class AnalyticsLoginDataPublisherUtils {
 
         setTenantDataForAuthentication(context, status, authenticationData);
 
-        authenticationData.addParameter(AnalyticsLoginDataPublishConstants.RELYING_PARTY, context.getRelyingParty());
+        authenticationData.addParameter(AuthPublisherConstants.RELYING_PARTY, context.getRelyingParty());
 
         return authenticationData;
     }
@@ -235,10 +205,11 @@ public class AnalyticsLoginDataPublisherUtils {
 
         if (status == AuthenticatorStatus.PASS) {
             authenticationData.addParameter(AnalyticsLoginDataPublishConstants.TENANT_DOMAIN_NAMES,
-                    getTenantDomains(context.getTenantDomain(), authenticationData.getTenantDomain()));
-            authenticationData.addParameter(AnalyticsLoginDataPublishConstants.SUBJECT_IDENTIFIER,
+                    AuthnDataPublisherUtils.getTenantDomains(context.getTenantDomain(), authenticationData.
+                            getTenantDomain()));
+            authenticationData.addParameter(AuthPublisherConstants.SUBJECT_IDENTIFIER,
                     context.getSequenceConfig().getAuthenticatedUser().getAuthenticatedSubjectIdentifier());
-            authenticationData.addParameter(AnalyticsLoginDataPublishConstants.AUTHENTICATED_IDPS,
+            authenticationData.addParameter(AuthPublisherConstants.AUTHENTICATED_IDPS,
                     context.getSequenceConfig().getAuthenticatedIdPs());
         } else {
             // Should publish the event to both SP tenant domain and the tenant domain of the user who did the login
@@ -246,10 +217,11 @@ public class AnalyticsLoginDataPublisherUtils {
             if (context.getSequenceConfig() != null && context.getSequenceConfig().getApplicationConfig
                     () != null && context.getSequenceConfig().getApplicationConfig().isSaaSApp()) {
                 authenticationData.addParameter(AnalyticsLoginDataPublishConstants.TENANT_DOMAIN_NAMES,
-                        getTenantDomains(context.getTenantDomain(), authenticationData.getTenantDomain()));
+                        AuthnDataPublisherUtils.getTenantDomains(context.getTenantDomain(), authenticationData.
+                                getTenantDomain()));
             } else {
                 authenticationData.addParameter(AnalyticsLoginDataPublishConstants.TENANT_DOMAIN_NAMES,
-                        getTenantDomains(context.getTenantDomain(), null));
+                        AuthnDataPublisherUtils.getTenantDomains(context.getTenantDomain(), null));
             }
         }
     }
@@ -278,7 +250,7 @@ public class AnalyticsLoginDataPublisherUtils {
             } else if (hasFederated) {
                 authenticationData.setIdentityProviderType(FrameworkConstants.FEDERATED_IDP_NAME);
             }
-            authenticationData.setIdentityProvider(getSubjectStepIDP(context));
+            authenticationData.setIdentityProvider(AuthnDataPublisherUtils.getSubjectStepIDP(context));
             authenticationData.setSuccess(true);
             authenticationData = fillLocalEvent(authenticationData, context);
 
@@ -301,7 +273,8 @@ public class AnalyticsLoginDataPublisherUtils {
         }
     }
 
-    private static AuthenticationData fillLocalEvent(AuthenticationData authenticationData, AuthenticationContext context) {
+    private static AuthenticationData fillLocalEvent(AuthenticationData authenticationData,
+                                                     AuthenticationContext context) {
 
         AuthenticatedIdPData localIDPData = null;
         Map<String, AuthenticatedIdPData> previousAuthenticatedIDPs = context.getPreviousAuthenticatedIdPs();
@@ -353,70 +326,4 @@ public class AnalyticsLoginDataPublisherUtils {
         }
         return stepNo;
     }
-
-    /**
-     * Get metadata array for different tenants with tenant domain
-     *
-     * @param tenantDomain - tenant domain name
-     * @return
-     */
-    public static Object[] getMetaDataArray(String tenantDomain) {
-
-        Object[] metaData = new Object[1];
-        if (StringUtils.isBlank(tenantDomain)) {
-            metaData[0] = MultitenantConstants.SUPER_TENANT_ID;
-        } else {
-            metaData[0] = IdentityTenantUtil.getTenantId(tenantDomain);
-        }
-        return metaData;
-    }
-
-    public static String[] getTenantDomains(String spTenantDomain, String userTenantDomain) {
-
-        if (StringUtils.isBlank(userTenantDomain) || userTenantDomain.equalsIgnoreCase(AnalyticsLoginDataPublishConstants
-                .NOT_AVAILABLE)) {
-            return new String[]{spTenantDomain};
-        }
-        if (StringUtils.isBlank(spTenantDomain) || userTenantDomain.equalsIgnoreCase(AnalyticsLoginDataPublishConstants
-                .NOT_AVAILABLE)) {
-            return new String[]{userTenantDomain};
-        }
-        if (spTenantDomain.equalsIgnoreCase(userTenantDomain)) {
-            return new String[]{userTenantDomain};
-        } else {
-            return new String[]{userTenantDomain, spTenantDomain};
-        }
-    }
-
-    /**
-     * Filter roles so that they don't have Internal roles except Internal/Everyone and all application roles
-     *
-     * @param roleList All roles
-     * @return All external roles and Internal roles except internal everyone and application roles.
-     */
-    public static List<String> filterRoles(String[] roleList) {
-
-        List<String> externalRoles = new ArrayList<String>();
-        if (roleList != null) {
-            int index;
-            for (String role : roleList) {
-                if (StringUtils.isNotBlank(role)) {
-                    index = role.indexOf(CarbonConstants.DOMAIN_SEPARATOR);
-                    if (index > 0) {
-                        String domain = role.substring(0, index);
-                        if (UserCoreConstants.INTERNAL_DOMAIN.equalsIgnoreCase(domain)
-                                && INTERNAL_EVERYONE_ROLE.equalsIgnoreCase(role.trim())) {
-                            continue;
-                        } else if (APPLICATION_DOMAIN.equalsIgnoreCase(domain)
-                                || WORKFLOW_DOMAIN.equalsIgnoreCase(domain)) {
-                            continue;
-                        }
-                    }
-                    externalRoles.add(UserCoreUtil.removeDomainFromName(role));
-                }
-            }
-        }
-        return externalRoles;
-    }
-
 }

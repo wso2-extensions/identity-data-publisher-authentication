@@ -32,8 +32,8 @@ import org.wso2.carbon.event.stream.core.EventStreamService;
 import org.wso2.carbon.identity.data.publisher.authentication.analytics.session.AnalyticsSessionDataPublishHandler;
 import org.wso2.carbon.identity.event.handler.AbstractEventHandler;
 
-/*
- * Service registering class for session data publish of analytics
+/**
+ * Service registering class for session data publish of analytics.
  */
 @Component(
         name = "identity.data.publisher.authentication.analytics.session",
@@ -55,7 +55,7 @@ public class SessionDataPublishServiceComponent {
                 log.debug("org.wso2.carbon.identity.data.publisher.authentication.analytics.session" +
                         " bundle is activated");
             }
-        } catch (Exception e) {
+        } catch (Throwable e) {
             log.error("Error while activating org.wso2.carbon.identity.data.publisher.authentication" +
                     ".analytics.session", e);
         }

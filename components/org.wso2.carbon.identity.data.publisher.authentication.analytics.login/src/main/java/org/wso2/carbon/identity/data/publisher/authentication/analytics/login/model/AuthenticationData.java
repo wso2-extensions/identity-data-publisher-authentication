@@ -24,6 +24,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Data object class for AnalyticsLoginDataPublishHandler.
+ */
 public class AuthenticationData<T1 extends Object, T2 extends Object> {
 
     protected Map<T1, T2> parameters = new HashMap<>();
@@ -261,7 +264,8 @@ public class AuthenticationData<T1 extends Object, T2 extends Object> {
 
         for (Map.Entry<T1, T2> parameter : parameters.entrySet()) {
             if (this.parameters.containsKey(parameter.getKey())) {
-                throw IdentityRuntimeException.error("Parameters map trying to override existing key " + parameter.getKey());
+                throw IdentityRuntimeException.error("Parameters map trying to override existing key " +
+                        parameter.getKey());
             }
             parameters.put(parameter.getKey(), parameter.getValue());
         }

@@ -55,6 +55,10 @@
             <groupId>org.wso2.carbon.identity.framework</groupId>
             <artifactId>org.wso2.carbon.identity.event</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.analytics-common</groupId>
+            <artifactId>org.wso2.carbon.event.stream.core</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -81,20 +85,30 @@
                             org.wso2.carbon; version="${carbon.kernel.package.import.version.range}",
                             org.wso2.carbon.identity.application.authentication.framework.*;version="${carbon.identity.framework.package.import.version.range}",
 
-                            org.apache.commons.lang,
-                            org.apache.commons.logging,
-                            org.wso2.carbon.identity.application.common.model,
-                            org.wso2.carbon.identity.core.bean.context,
-                            org.wso2.carbon.identity.core.handler,
-                            org.wso2.carbon.identity.core.model,
-                            org.wso2.carbon.identity.core.util,
-                            org.wso2.carbon.identity.event.*,
-                            org.apache.axiom.om.util,
-                            org.wso2.carbon.base,
-                            org.wso2.carbon.idp.mgt.util,
-                            org.wso2.carbon.user.core,
-                            org.wso2.carbon.user.core.util,
-                            javax.servlet.http
+                            org.apache.commons.lang; version="${commons-lang.wso2.osgi.version.range}",
+                            org.apache.commons.logging; version="${commons-logging.osgi.version.range}",
+                            org.wso2.carbon.identity.application.common.model; version="${carbon.identity.framework.imp.pkg.version.range}",
+                            org.wso2.carbon.identity.core.bean.context; version="${carbon.identity.package.import.version.range}",
+                            org.wso2.carbon.identity.core.handler; version="${carbon.identity.package.import.version.range}",
+                            org.wso2.carbon.identity.core.model; version="${carbon.identity.package.import.version.range}",
+                            org.wso2.carbon.identity.core.util; version="${carbon.identity.package.import.version.range}",
+                            org.wso2.carbon.identity.event; version="${carbon.identity.package.import.version.range}",
+                            org.wso2.carbon.identity.event.event; version="${carbon.identity.package.import.version.range}",
+                            org.wso2.carbon.identity.event.handler; version="${carbon.identity.package.import.version.range}",
+                            org.wso2.carbon.identity.event.services; version="${carbon.identity.package.import.version.range}",
+                            org.wso2.carbon.identity.base; version="${carbon.identity.package.import.version.range}",
+                            org.apache.axiom.om.util; version="${axiom.osgi.version.range}",
+                            org.wso2.carbon.base; version="${carbon.base.imp.pkg.version.range}",
+                            org.wso2.carbon.idp.mgt.util; version="${carbon.identity.package.import.version.range}",
+                            org.wso2.carbon.user.core; version="${carbon.kernel.package.import.version.range}",
+                            org.wso2.carbon.user.core.util; version="${carbon.kernel.package.import.version.range}",
+                            org.wso2.carbon.user.api; version="${carbon.user.api.imp.pkg.version.range}",
+                            javax.servlet.http; version="${imp.pkg.version.javax.servlet}",
+                            org.wso2.carbon.registry.core.service; version="${carbon.kernel.registry.imp.pkg.version}",
+                            org.wso2.carbon.user.core.service; version="${carbon.kernel.package.import.version.range}",
+                            org.wso2.carbon.event.stream.core; version="${carbon.analytics-common.version}",
+                            org.wso2.carbon.core.util; version="${carbon.kernel.package.import.version.range}",
+                            org.wso2.carbon.databridge.commons; version="${carbon.analytics-common.version}",
 
                         </Import-Package>
                         <Export-Package>
@@ -107,6 +121,5 @@
             </plugin>
         </plugins>
     </build>
-
 </project>
 

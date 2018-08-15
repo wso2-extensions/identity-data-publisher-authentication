@@ -33,15 +33,15 @@ import org.wso2.carbon.identity.event.event.Event;
 
 import java.util.Map;
 
-/*
- * Utilities for authentication audit logger
+/**
+ * Utilities for authentication audit logger.
  */
 public class AuthenticationAuditLoggerUtils {
 
     /**
-     * Create authentication data object from event for respective authentication step
+     * Create authentication data object from event for respective authentication step.
      *
-     * @param -        triggered event
+     * @param event - triggered event
      * @param authType - authentication type
      * @return populated AuthenticationAuditData object
      */
@@ -59,13 +59,13 @@ public class AuthenticationAuditLoggerUtils {
         authenticationAuditData.setInboundProtocol(getInboundProtocol(context));
         authenticationAuditData.setRelyingParty(getRelyingParty(context));
 
-        if (authType.equals(AuthenticationAuditLoggerConstants.AUDIT_AUTHENTICATION_STEP)) {
+        if (AuthenticationAuditLoggerConstants.AUDIT_AUTHENTICATION_STEP.equals(authType)) {
             authenticationAuditData.setAuthenticatedUser(getUserNameForAuthenticationStep(params));
             authenticationAuditData.setTenantDomain(getTenantDomainForAuthenticationStep(params));
             authenticationAuditData.setAuthenticatedIdps(getIdentityProviderForAuthenticationStep(context));
             authenticationAuditData.setStepNo(getStepNoForAuthenticationStep(context));
 
-        } else if (authType.equals(AuthenticationAuditLoggerConstants.AUDIT_AUTHENTICATION)) {
+        } else if (AuthenticationAuditLoggerConstants.AUDIT_AUTHENTICATION.equals(authType)) {
             authenticationAuditData.setAuthenticatedUser(getSubjectIdentifier(context, status));
             authenticationAuditData.setTenantDomain(getTenantDomainForAuthentication(context, params, status));
             authenticationAuditData.setStepNo(getStepNoForAuthentication(context, status));

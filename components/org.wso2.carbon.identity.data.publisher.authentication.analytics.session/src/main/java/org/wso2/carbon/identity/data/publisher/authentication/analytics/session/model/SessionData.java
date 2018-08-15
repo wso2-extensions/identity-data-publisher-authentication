@@ -24,6 +24,9 @@ import org.wso2.carbon.identity.base.IdentityRuntimeException;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Data object class for AnalyticsSessionDataPublishHandler.
+ */
 public class SessionData<T1 extends Object, T2 extends Object> {
 
     protected Map<T1, T2> parameters = new HashMap<>();

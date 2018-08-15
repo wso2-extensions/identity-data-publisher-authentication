@@ -22,6 +22,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkUtils;
 import org.wso2.carbon.identity.base.IdentityRuntimeException;
+import org.wso2.carbon.identity.core.bean.context.MessageContext;
+import org.wso2.carbon.identity.core.handler.AbstractIdentityMessageHandler;
+import org.wso2.carbon.identity.core.model.IdentityEventListenerConfig;
+import org.wso2.carbon.identity.core.util.IdentityUtil;
+import org.wso2.carbon.identity.data.publisher.application.authentication.AuthPublisherConstants;
+import org.wso2.carbon.identity.data.publisher.application.authentication.AuthnDataPublisherUtils;
 import org.wso2.carbon.identity.data.publisher.authentication.analytics.session.internal.SessionDataPublishServiceHolder;
 import org.wso2.carbon.identity.data.publisher.authentication.analytics.session.model.SessionData;
 import org.wso2.carbon.identity.event.IdentityEventConstants;
@@ -32,8 +38,8 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.util.Arrays;
 
-/*
- * Handle data publishing for analytics
+/**
+ * Handle data publishing for analytics.
  */
 public class AnalyticsSessionDataPublishHandler extends AbstractEventHandler {
 
@@ -48,12 +54,18 @@ public class AnalyticsSessionDataPublishHandler extends AbstractEventHandler {
     @Override
     public void handleEvent(Event event) throws IdentityEventException {
 
+        boolean isEnabled = isAnalyticsSessionDataPublishingEnabled(event);
+
+        if (!isEnabled) {
+            return;
+        }
+
         SessionData sessionData = SessionDataPublisherUtil.buildSessionData(event);
-        if (event.getEventName().equals(IdentityEventConstants.EventName.SESSION_CREATE.name())) {
+        if (IdentityEventConstants.EventName.SESSION_CREATE.name().equals(event.getEventName())) {
             doPublishSessionCreation(sessionData);
-        } else if (event.getEventName().equals(IdentityEventConstants.EventName.SESSION_TERMINATE.name())) {
+        } else if (IdentityEventConstants.EventName.SESSION_TERMINATE.name().equals(event.getEventName())) {
             doPublishSessionTermination(sessionData);
-        } else if (event.getEventName().equals(IdentityEventConstants.EventName.SESSION_UPDATE.name())) {
+        } else if (IdentityEventConstants.EventName.SESSION_UPDATE.name().equals(event.getEventName())) {
             doPublishSessionUpdate(sessionData);
         } else {
             LOG.error("Event " + event.getEventName() + " cannot be handled");
@@ -93,12 +105,12 @@ public class AnalyticsSessionDataPublishHandler extends AbstractEventHandler {
 
     private void publishToAnalytics(SessionData sessionData, Object[] payloadData) {
 
-        String[] publishingDomains = (String[]) sessionData.getParameter(SessionDataPublisherConstants.TENANT_ID);
+        String[] publishingDomains = (String[]) sessionData.getParameter(AuthPublisherConstants.TENANT_ID);
         if (publishingDomains != null && publishingDomains.length > 0) {
             try {
                 FrameworkUtils.startTenantFlow(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
                 for (String publishingDomain : publishingDomains) {
-                    Object[] metadataArray = SessionDataPublisherUtil.getMetaDataArray(publishingDomain);
+                    Object[] metadataArray = AuthnDataPublisherUtils.getMetaDataArray(publishingDomain);
                     org.wso2.carbon.databridge.commons.Event event =
                             new org.wso2.carbon.databridge.commons.Event(SessionDataPublisherConstants.
                                     SESSION_DATA_STREAM_NAME, System.currentTimeMillis(),
@@ -118,18 +130,18 @@ public class AnalyticsSessionDataPublishHandler extends AbstractEventHandler {
     private Object[] createPayload(SessionData sessionData, int actionId) {
 
         Object[] payloadData = new Object[15];
-        payloadData[0] = SessionDataPublisherUtil.replaceIfNotAvailable(SessionDataPublisherConstants.CONFIG_PREFIX +
-                SessionDataPublisherConstants.SESSION_ID, sessionData.getSessionId());
+        payloadData[0] = AuthnDataPublisherUtils.replaceIfNotAvailable(AuthPublisherConstants.CONFIG_PREFIX +
+                AuthPublisherConstants.SESSION_ID, sessionData.getSessionId());
         payloadData[1] = sessionData.getCreatedTimestamp();
         payloadData[2] = sessionData.getUpdatedTimestamp();
         payloadData[3] = sessionData.getTerminationTimestamp();
         payloadData[4] = actionId;
-        payloadData[5] = SessionDataPublisherUtil.replaceIfNotAvailable(SessionDataPublisherConstants.CONFIG_PREFIX +
-                SessionDataPublisherConstants.USERNAME, sessionData.getUser());
-        payloadData[6] = SessionDataPublisherUtil.replaceIfNotAvailable(SessionDataPublisherConstants.CONFIG_PREFIX +
-                SessionDataPublisherConstants.USER_STORE_DOMAIN, sessionData.getUserStoreDomain());
+        payloadData[5] = AuthnDataPublisherUtils.replaceIfNotAvailable(AuthPublisherConstants.CONFIG_PREFIX +
+                AuthPublisherConstants.USERNAME, sessionData.getUser());
+        payloadData[6] = AuthnDataPublisherUtils.replaceIfNotAvailable(AuthPublisherConstants.CONFIG_PREFIX +
+                AuthPublisherConstants.USER_STORE_DOMAIN, sessionData.getUserStoreDomain());
         payloadData[7] = sessionData.getRemoteIP();
-        payloadData[8] = SessionDataPublisherConstants.NOT_AVAILABLE;
+        payloadData[8] = AuthPublisherConstants.NOT_AVAILABLE;
         payloadData[9] = sessionData.getTenantDomain();
         payloadData[10] = sessionData.getServiceProvider();
         payloadData[11] = sessionData.getIdentityProviders();
@@ -137,10 +149,32 @@ public class AnalyticsSessionDataPublishHandler extends AbstractEventHandler {
         payloadData[13] = sessionData.getUserAgent();
         payloadData[14] = System.currentTimeMillis();
 
-        if(LOG.isDebugEnabled()){
+        if (LOG.isDebugEnabled()) {
             LOG.debug("The created payload :" + Arrays.asList(payloadData));
         }
         return payloadData;
     }
 
+    @Override
+    public boolean isEnabled(MessageContext messageContext) {
+        IdentityEventListenerConfig identityEventListenerConfig = IdentityUtil.readEventListenerProperty
+                (AbstractIdentityMessageHandler.class.getName(), this.getClass().getName());
+
+        if (identityEventListenerConfig == null) {
+            return false;
+        }
+
+        return Boolean.parseBoolean(identityEventListenerConfig.getEnable());
+    }
+
+    private boolean isAnalyticsSessionDataPublishingEnabled(Event event) throws IdentityEventException {
+
+        boolean isEnabled = false;
+
+        String handlerEnabled = this.configs.getModuleProperties().getProperty(SessionDataPublisherConstants.
+                ANALYTICS_SESSION_DATA_PUBLISHER_ENABLED);
+        isEnabled = Boolean.parseBoolean(handlerEnabled);
+
+        return isEnabled;
+    }
 }
