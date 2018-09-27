@@ -114,7 +114,7 @@ public class AuthenticationAuditLogger extends AbstractAuthenticationDataPublish
 
         AUDIT_LOG.info(String.format(
                 FrameworkConstants.AUDIT_MESSAGE,
-                null,
+                authenticationData.getUsername(),
                 "Login",
                 "ApplicationAuthenticationFramework", auditData, FrameworkConstants.AUDIT_FAILED));
     }
