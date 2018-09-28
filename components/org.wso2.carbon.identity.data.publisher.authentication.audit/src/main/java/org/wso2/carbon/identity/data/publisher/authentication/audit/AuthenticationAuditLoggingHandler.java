@@ -117,7 +117,7 @@ public class AuthenticationAuditLoggingHandler extends AbstractEventHandler {
 
         AUDIT_LOG.info(String.format(
                 FrameworkConstants.AUDIT_MESSAGE,
-                null,
+                authenticationData.getAuthenticatedUser(),
                 "Login",
                 "ApplicationAuthenticationFramework", auditData, FrameworkConstants.AUDIT_FAILED));
     }
@@ -153,7 +153,7 @@ public class AuthenticationAuditLoggingHandler extends AbstractEventHandler {
 
         AUDIT_LOG.info(String.format(
                 FrameworkConstants.AUDIT_MESSAGE,
-                null,
+                authenticationData.getAuthenticatedUser(),
                 "Login",
                 "ApplicationAuthenticationFramework", auditData, FrameworkConstants.AUDIT_FAILED));
     }
