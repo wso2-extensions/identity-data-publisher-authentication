@@ -22,11 +22,20 @@ import org.wso2.carbon.identity.data.publisher.application.authentication.model.
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
+/**
+ * AuthenticationAuditLogger is changed to act as an event handler for its' subscribed event in
+ * {@link AuthenticationAuditLoggingHandler} with this release.
+ *
+ * @since 5.8.0
+ *
+ * @deprecated to use
+ * {@link org.wso2.carbon.identity.data.publisher.authentication.audit.AuthenticationAuditLoggingHandler} \}
+ */
+@Deprecated
 public class AuthenticationAuditLogger extends AbstractAuthenticationDataPublisher {
 
     private static final Log AUDIT_LOG = CarbonConstants.AUDIT_LOG;
     public static final Log LOG = LogFactory.getLog(AuthenticationAuditLogger.class);
-
 
     @Override
     public String getName() {
@@ -187,7 +196,7 @@ public class AuthenticationAuditLogger extends AbstractAuthenticationDataPublish
                 (AbstractIdentityMessageHandler.class.getName(), this.getClass().getName());
 
         if (identityEventListenerConfig == null) {
-            return true;
+            return false;
         }
 
         return Boolean.parseBoolean(identityEventListenerConfig.getEnable());

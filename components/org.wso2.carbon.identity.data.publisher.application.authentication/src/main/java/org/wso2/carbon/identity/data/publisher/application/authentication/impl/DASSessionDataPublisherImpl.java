@@ -35,6 +35,16 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
+/**
+ * DASSessionDataPublisherImpl is changed to act as an event handler for its' subscribed event in
+ * {@link AnalyticsSessionDataPublishHandler} with this release.
+ *
+ * @since 5.8.0
+ *
+ * @deprecated to use
+ * {@link org.wso2.carbon.identity.data.publisher.authentication.analytics.session.AnalyticsSessionDataPublishHandler}\}
+ */
+@Deprecated
 public class DASSessionDataPublisherImpl extends AbstractAuthenticationDataPublisher {
 
     public static final Log LOG = LogFactory.getLog(DASSessionDataPublisherImpl.class);

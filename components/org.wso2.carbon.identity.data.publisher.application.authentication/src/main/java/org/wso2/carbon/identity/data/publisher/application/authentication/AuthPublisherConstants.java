@@ -20,21 +20,15 @@ package org.wso2.carbon.identity.data.publisher.application.authentication;
 
 public class AuthPublisherConstants {
 
-    private AuthPublisherConstants() {
-
-    }
     // Stream definition names
     public static final String AUTHN_DATA_STREAM_NAME = "org.wso2.is.analytics.stream.OverallAuthentication:1.0.0";
     public static final String SESSION_DATA_STREAM_NAME = "org.wso2.is.analytics.stream.OverallSession:1.0.0";
-
     // Event types
     public static final String STEP_EVENT = "step";
     public static final String OVERALL_EVENT = "overall";
-
     // Publisher names
-    public static final String DAS_LOGIN_PUBLISHER_NAME = "DAS_LOGIN_DATA_PUBLISHER";
-    public static final String DAS_SESSION_PUBLISHER_NAME = "DAS_SESSION_DATA_PUBLISHER";
-
+    public static final String DAS_LOGIN_PUBLISHER_NAME = "DASLoginDataPublisher";
+    public static final String DAS_SESSION_PUBLISHER_NAME = "DASSessionDataPublisher";
     public static final String CONFIG_PREFIX = "ISAnalytics.DefaultValues.";
     public static final String USERNAME = "userName";
     public static final String SESSION_ID = "sessionId";
@@ -50,10 +44,13 @@ public class AuthPublisherConstants {
     public static final String SHA_256 = "SHA-256";
     public static final String USER_AGENT = "User-Agent";
     public static final String AUTHENTICATOR_NAME = "authenticatorName";
-
     // Session status codes
     public static final int SESSION_CREATION_STATUS = 1;
     public static final int SESSION_TERMINATION_STATUS = 0;
     public static final int SESSION_UPDATE_STATUS = 2;
+
+    private AuthPublisherConstants() {
+
+    }
 
 }

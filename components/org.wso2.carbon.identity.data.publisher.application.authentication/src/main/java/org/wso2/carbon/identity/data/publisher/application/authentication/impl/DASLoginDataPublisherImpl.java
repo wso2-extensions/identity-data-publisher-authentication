@@ -47,6 +47,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * DASLoginDataPublisherImpl is changed to act as an event handler for its' subscribed event in
+ * {@link AnalyticsLoginDataPublishHandler} with this release.
+ *
+ * @since 5.8.0
+ *
+ * @deprecated to use
+ * {@link org.wso2.carbon.identity.data.publisher.authentication.analytics.login.AnalyticsLoginDataPublishHandler} \}
+ */
+@Deprecated
 public class DASLoginDataPublisherImpl extends AbstractAuthenticationDataPublisher {
 
     public static final Log LOG = LogFactory.getLog(DASLoginDataPublisherImpl.class);

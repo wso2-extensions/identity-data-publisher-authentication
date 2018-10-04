@@ -36,11 +36,21 @@ import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.data.publisher.application.authentication.model.AuthenticationData;
 import org.wso2.carbon.identity.data.publisher.application.authentication.model.SessionData;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
+import javax.servlet.http.HttpServletRequest;
 
+/**
+ * The data publishers which implement {@link AbstractAuthenticationDataPublisher} changed to implement
+ * AbstractEventHandler with this release.
+ * So its recommended to use implementation of AbstractEventHandlers for new data publishers.
+ *
+ * @since 5.1.9
+ *
+ * @deprecated to use {@link org.wso2.carbon.identity.event.handler.AbstractEventHandler} \}
+ */
+@Deprecated
 public abstract class AbstractAuthenticationDataPublisher extends AbstractIdentityMessageHandler implements
         AuthenticationDataPublisher {
 
@@ -142,7 +152,7 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
             AuthenticatedUser user = (AuthenticatedUser) userObj;
             authenticationData.setTenantDomain(user.getTenantDomain());
             authenticationData.setUserStoreDomain(user.getUserStoreDomain());
-            if(StringUtils.isNotEmpty(user.getUserName())) {
+            if (StringUtils.isNotEmpty(user.getUserName())) {
                 authenticationData.setUsername(user.getUserName());
             } else {
                 authenticationData.setUsername(user.getAuthenticatedSubjectIdentifier());
@@ -474,7 +484,7 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
             sessionData.addParameter(AuthPublisherConstants.TENANT_ID,
                     AuthnDataPublisherUtils.getTenantDomains(context.getTenantDomain(), sessionData.getTenantDomain()));
         } else {
-            sessionData.addParameter(AuthPublisherConstants.TENANT_ID, new String[] { sessionData.getTenantDomain() });
+            sessionData.addParameter(AuthPublisherConstants.TENANT_ID, new String[]{sessionData.getTenantDomain()});
         }
         if (request != null) {
             sessionData.setRemoteIP(IdentityUtil.getClientIpAddress(request));
@@ -508,6 +518,7 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
     }
 
     protected AuthenticationData fillLocalEvent(AuthenticationData authenticationData, AuthenticationContext context) {
+
         AuthenticatedIdPData localIDPData = null;
         Map<String, AuthenticatedIdPData> previousAuthenticatedIDPs = context.getPreviousAuthenticatedIdPs();
         Map<String, AuthenticatedIdPData> currentAuthenticatedIDPs = context.getCurrentAuthenticatedIdPs();
@@ -528,12 +539,12 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
     }
 
     protected int getLocalStepNo(AuthenticationContext context) {
+
         int stepNo = 0;
         Map<Integer, StepConfig> map = context.getSequenceConfig().getStepMap();
-        for (Map.Entry<Integer, StepConfig> entry : map.entrySet())
-        {
-            StepConfig stepConfig= entry.getValue();
-            if(stepConfig != null && FrameworkConstants.LOCAL_IDP_NAME.equalsIgnoreCase(stepConfig
+        for (Map.Entry<Integer, StepConfig> entry : map.entrySet()) {
+            StepConfig stepConfig = entry.getValue();
+            if (stepConfig != null && FrameworkConstants.LOCAL_IDP_NAME.equalsIgnoreCase(stepConfig
                     .getAuthenticatedIdP())) {
                 stepNo = entry.getKey();
                 return stepNo;
@@ -543,6 +554,7 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
     }
 
     public boolean hasPreviousLocalEvent(AuthenticationContext context) {
+
         Map<String, AuthenticatedIdPData> previousAuthenticatedIDPs = context.getPreviousAuthenticatedIdPs();
         if (previousAuthenticatedIDPs.get(FrameworkConstants.LOCAL_IDP_NAME) != null) {
             return true;
@@ -601,11 +613,13 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
 
     @Override
     public boolean canHandle(MessageContext messageContext) {
+
         return true;
     }
 
     @Override
     public boolean isEnabled(MessageContext messageContext) {
+
         IdentityEventListenerConfig identityEventListenerConfig = IdentityUtil.readEventListenerProperty
                 (AbstractIdentityMessageHandler.class.getName(), this.getClass().getName());
 

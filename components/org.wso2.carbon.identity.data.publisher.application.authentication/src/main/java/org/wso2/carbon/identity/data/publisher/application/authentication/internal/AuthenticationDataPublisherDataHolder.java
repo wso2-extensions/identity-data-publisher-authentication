@@ -20,6 +20,7 @@ package org.wso2.carbon.identity.data.publisher.application.authentication.inter
 
 import org.wso2.carbon.event.stream.core.EventStreamService;
 import org.wso2.carbon.identity.application.authentication.framework.AuthenticationDataPublisher;
+import org.wso2.carbon.identity.event.services.IdentityEventService;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
 
@@ -28,13 +29,13 @@ import java.util.List;
 
 public class AuthenticationDataPublisherDataHolder {
 
-    private EventStreamService publisherService;
-    private RealmService realmService;
-    private RegistryService registryService;
-    private List<AuthenticationDataPublisher> dataPublishers = new ArrayList<>();
-
     private static AuthenticationDataPublisherDataHolder
             serviceHolder = new AuthenticationDataPublisherDataHolder();
+    private List<AuthenticationDataPublisher> dataPublishers = new ArrayList<>();
+    private IdentityEventService identityEventService;
+    private EventStreamService eventStreamService;
+    private RegistryService registryService;
+    private RealmService realmService;
 
     private AuthenticationDataPublisherDataHolder() {
 
@@ -45,19 +46,34 @@ public class AuthenticationDataPublisherDataHolder {
         return serviceHolder;
     }
 
+    public List<AuthenticationDataPublisher> getDataPublishers() {
+
+        return dataPublishers;
+    }
+
+    public IdentityEventService getIdentityEventService() {
+
+        return identityEventService;
+    }
+
+    public void setIdentityEventService(IdentityEventService identityEventService) {
+
+        this.identityEventService = identityEventService;
+    }
+
     public EventStreamService getPublisherService() {
 
-        return publisherService;
+        return eventStreamService;
     }
 
-    public void setPublisherService(EventStreamService publisherService) {
+    public void setPublisherService(EventStreamService eventStreamService) {
 
-        this.publisherService = publisherService;
+        this.eventStreamService = eventStreamService;
     }
 
-    public void setRealmService(RealmService realmService) {
+    public RegistryService getRegistryService() {
 
-        this.realmService = realmService;
+        return registryService;
     }
 
     public void setRegistryService(RegistryService registryService) {
@@ -70,13 +86,8 @@ public class AuthenticationDataPublisherDataHolder {
         return realmService;
     }
 
-    public RegistryService getRegistryService() {
+    public void setRealmService(RealmService realmService) {
 
-        return registryService;
-    }
-
-    public List<AuthenticationDataPublisher> getDataPublishers() {
-
-        return dataPublishers;
+        this.realmService = realmService;
     }
 }
