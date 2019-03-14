@@ -28,6 +28,7 @@ import org.wso2.carbon.identity.data.publisher.application.authentication.AuthnD
 import org.wso2.carbon.identity.data.publisher.application.authentication.impl.AuthenticationAuditLogger;
 import org.wso2.carbon.identity.data.publisher.application.authentication.impl.DASLoginDataPublisherImpl;
 import org.wso2.carbon.identity.data.publisher.application.authentication.impl.DASSessionDataPublisherImpl;
+import org.wso2.carbon.identity.data.publisher.application.authentication.impl.ExtendedDASSessionDataPublisherImpl;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
 
@@ -58,6 +59,13 @@ public class AuthenticationDataPublisherServiceComponent {
         BundleContext bundleContext = context.getBundleContext();
         bundleContext
                 .registerService(AuthenticationDataPublisher.class.getName(), new DASLoginDataPublisherImpl(), null);
+        bundleContext
+                .registerService(
+                        AuthenticationDataPublisher.class.getName(),
+                        new ExtendedDASSessionDataPublisherImpl(),
+                        null
+                );
+
         bundleContext
                 .registerService(AuthenticationDataPublisher.class.getName(), new DASSessionDataPublisherImpl(), null);
         bundleContext
