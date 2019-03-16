@@ -219,12 +219,12 @@ public class AuthenticationAuditLoggingHandler extends AbstractEventHandler {
 
     private boolean isAuthenticationAuditLoggingEnabled(Event event) throws IdentityEventException {
 
-        boolean isEnabled = false;
+        if (this.configs.getModuleProperties() != null) {
+            String handlerEnabled = this.configs.getModuleProperties().getProperty(AuthenticationAuditLoggerConstants.
+                    AUTHENTICATION_AUDIT_LOGGER_ENABLED);
+            return Boolean.parseBoolean(handlerEnabled);
+        }
 
-        String handlerEnabled = this.configs.getModuleProperties().getProperty(AuthenticationAuditLoggerConstants.
-                AUTHENTICATION_AUDIT_LOGGER_ENABLED);
-        isEnabled = Boolean.parseBoolean(handlerEnabled);
-
-        return isEnabled;
+        return false;
     }
 }
