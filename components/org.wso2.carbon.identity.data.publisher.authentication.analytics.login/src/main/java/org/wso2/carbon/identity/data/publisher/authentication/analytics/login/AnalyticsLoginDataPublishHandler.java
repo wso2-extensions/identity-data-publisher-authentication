@@ -232,26 +232,14 @@ public class AnalyticsLoginDataPublishHandler extends AbstractEventHandler {
         return StringUtils.EMPTY;
     }
 
-    @Override
-    public boolean isEnabled(MessageContext messageContext) {
-        IdentityEventListenerConfig identityEventListenerConfig = IdentityUtil.readEventListenerProperty
-                (AbstractIdentityMessageHandler.class.getName(), this.getClass().getName());
-
-        if (identityEventListenerConfig == null) {
-            return false;
-        }
-
-        return Boolean.parseBoolean(identityEventListenerConfig.getEnable());
-    }
-
     private boolean isAnalyticsLoginDataPublishingEnabled(Event event) throws IdentityEventException {
 
-        boolean isEnabled = false;
+        if (this.configs.getModuleProperties() != null) {
+            String handlerEnabled = this.configs.getModuleProperties()
+                    .getProperty(AnalyticsLoginDataPublishConstants.ANALYTICS_LOGIN_DATA_PUBLISHER_ENABLED);
+            return Boolean.parseBoolean(handlerEnabled);
+        }
 
-        String handlerEnabled = this.configs.getModuleProperties().getProperty(AnalyticsLoginDataPublishConstants.
-                ANALYTICS_LOGIN_DATA_PUBLISHER_ENABLED);
-        isEnabled = Boolean.parseBoolean(handlerEnabled);
-
-        return isEnabled;
+        return false;
     }
 }
