@@ -71,16 +71,16 @@ public class SessionDataPublisherUtil {
         sessionData.setSessionId(sessionId);
         sessionData.setSessionContext(sessionContext);
         sessionData.setIdentityProviders(getCommaSeparatedIDPs(sessionContext));
-        sessionData.setUserAgent(request.getHeader(AuthPublisherConstants.USER_AGENT));
-        setTenantDataToSessionObject(context, sessionData);
 
         if (sessionContext != null) {
             sessionData.setIsRememberMe(sessionContext.isRememberMe());
         }
         if (context != null) {
+            setTenantDataToSessionObject(context, sessionData);
             sessionData.setServiceProvider(context.getServiceProviderName());
         }
         if (request != null) {
+            sessionData.setUserAgent(request.getHeader(AuthPublisherConstants.USER_AGENT));
             sessionData.setRemoteIP(IdentityUtil.getClientIpAddress(request));
         }
 
