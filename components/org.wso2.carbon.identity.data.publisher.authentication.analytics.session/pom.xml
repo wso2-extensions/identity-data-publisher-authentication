@@ -78,6 +78,10 @@
             <artifactId>org.wso2.carbon.identity.data.publisher.application.authentication</artifactId>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>org.ops4j.pax.logging</groupId>
+            <artifactId>pax-logging-api</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
