@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.wso2</groupId>
         <artifactId>wso2</artifactId>
-        <version>1</version>
+        <version>1.2</version>
     </parent>
 
     <groupId>org.wso2.carbon.identity.datapublisher.authentication</groupId>
@@ -112,6 +112,12 @@
                 <artifactId>powermock-module-testng-common</artifactId>
                 <version>${org.powermock.version}</version>
                 <scope>test</scope>
+            </dependency>
+            <!-- Pax Logging -->
+            <dependency>
+                <groupId>org.ops4j.pax.logging</groupId>
+                <artifactId>pax-logging-api</artifactId>
+                <version>${pax.logging.api.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -204,21 +210,8 @@
             <plugins>
                 <plugin>
                     <groupId>org.apache.felix</groupId>
-                    <artifactId>maven-scr-plugin</artifactId>
-                    <version>1.24.0</version>
-                    <executions>
-                        <execution>
-                            <id>generate-scr-scrdescriptor</id>
-                            <goals>
-                                <goal>scr</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.felix</groupId>
                     <artifactId>maven-bundle-plugin</artifactId>
-                    <version>2.4.0</version>
+                    <version>3.2.0</version>
                     <extensions>true</extensions>
                     <configuration>
                         <obrRepository>NONE</obrRepository>
@@ -273,6 +266,25 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>buildnumber-maven-plugin</artifactId>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <configuration>
+                            <!--This parameter disables doclint-->
+                            <doclint>none</doclint>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
@@ -284,13 +296,13 @@
         <module>features/org.wso2.carbon.identity.data.publisher.application.authentication.server.feature</module>
     </modules>
     <properties>
-        <carbon.kernel.version>4.5.0-m1</carbon.kernel.version>
+        <carbon.kernel.version>4.5.0-m3</carbon.kernel.version>
         <carbon.kernel.package.import.version.range>[4.5.0, 5.0.0)</carbon.kernel.package.import.version.range>
-        <carbon.identity.framework.version>5.13.5</carbon.identity.framework.version>
+        <carbon.identity.framework.version>5.14.0</carbon.identity.framework.version>
         <carbon.identity.data.publisher.package.export.version>${project.version}</carbon.identity.data.publisher.package.export.version>
-        <carbon.identity.data.publisher.package.import.version.range>[5.2.0, 6.0.0)</carbon.identity.data.publisher.package.import.version.range>
-        <carbon.identity.framework.package.import.version.range>[5.13.0, 6.0.0)</carbon.identity.framework.package.import.version.range>
-        <carbon.analytics-common.version>5.2.1</carbon.analytics-common.version>
+        <carbon.identity.data.publisher.package.import.version.range>[5.3.0, 6.0.0)</carbon.identity.data.publisher.package.import.version.range>
+        <carbon.identity.framework.package.import.version.range>[5.14.0, 6.0.0)</carbon.identity.framework.package.import.version.range>
+        <carbon.analytics-common.version>5.2.2</carbon.analytics-common.version>
         <carbon.analytics-common.imp.pkg.version.range>[5.2.0,6.0.0)</carbon.analytics-common.imp.pkg.version.range>
         <carbon.p2.plugin.version>1.5.3</carbon.p2.plugin.version>
         <maven.buildnumber.plugin.version>1.4</maven.buildnumber.plugin.version>
@@ -305,7 +317,7 @@
         <org.powermock.version>1.6.6</org.powermock.version>
 
         <commons-lang.wso2.osgi.version.range>[2.6.0,3.0.0)</commons-lang.wso2.osgi.version.range>
-        <carbon.identity.framework.imp.pkg.version.range>[5.13.0, 6.0.0)</carbon.identity.framework.imp.pkg.version.range>
+        <carbon.identity.framework.imp.pkg.version.range>[5.14.0, 6.0.0)</carbon.identity.framework.imp.pkg.version.range>
         <carbon.identity.package.import.version.range>[5.0.0, 6.0.0)</carbon.identity.package.import.version.range>
         <axiom.osgi.version.range>[1.2.11, 2.0.0)</axiom.osgi.version.range>
         <carbon.base.imp.pkg.version.range>[1.0.0, 2.0.0)</carbon.base.imp.pkg.version.range>
@@ -313,6 +325,8 @@
         <carbon.kernel.registry.imp.pkg.version>[1.0.1, 2.0.0)</carbon.kernel.registry.imp.pkg.version>
         <carbon.user.api.imp.pkg.version.range>[1.0.1, 2.0.0)</carbon.user.api.imp.pkg.version.range>
         <imp.pkg.version.data.publisher.authentication>[5.0.0, 6.0.0)</imp.pkg.version.data.publisher.authentication>
+        <!-- Pax Logging Version -->
+        <pax.logging.api.version>1.10.1</pax.logging.api.version>
     </properties>
 
 </project>
