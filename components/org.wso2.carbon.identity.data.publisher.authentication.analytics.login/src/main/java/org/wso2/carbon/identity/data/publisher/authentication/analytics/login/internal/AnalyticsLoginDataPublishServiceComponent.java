@@ -44,7 +44,7 @@ import org.wso2.carbon.user.core.service.RealmService;
 )
 public class AnalyticsLoginDataPublishServiceComponent {
 
-    private static Log log = LogFactory.getLog(AnalyticsLoginDataPublishServiceComponent.class);
+    private static final Log log = LogFactory.getLog(AnalyticsLoginDataPublishServiceComponent.class);
 
     @Activate
     protected void activate(ComponentContext context) {
