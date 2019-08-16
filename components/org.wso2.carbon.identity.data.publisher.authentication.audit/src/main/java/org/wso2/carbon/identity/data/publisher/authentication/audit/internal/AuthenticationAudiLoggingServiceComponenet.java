@@ -38,7 +38,7 @@ import org.wso2.carbon.identity.event.handler.AbstractEventHandler;
 )
 public class AuthenticationAudiLoggingServiceComponenet {
 
-    private static Log log = LogFactory.getLog(AuthenticationAudiLoggingServiceComponenet.class);
+    private static final Log log = LogFactory.getLog(AuthenticationAudiLoggingServiceComponenet.class);
 
     @Activate
     protected void activate(ComponentContext context) {

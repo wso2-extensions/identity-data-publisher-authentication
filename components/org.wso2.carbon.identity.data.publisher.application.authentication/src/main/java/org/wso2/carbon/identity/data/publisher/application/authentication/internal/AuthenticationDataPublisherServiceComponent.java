@@ -48,7 +48,7 @@ import java.util.Collections;
 )
 public class AuthenticationDataPublisherServiceComponent {
 
-    private static Log log = LogFactory.getLog(AuthenticationDataPublisherServiceComponent.class);
+    private static final Log log = LogFactory.getLog(AuthenticationDataPublisherServiceComponent.class);
 
     @Activate
     protected void activate(ComponentContext context) {
