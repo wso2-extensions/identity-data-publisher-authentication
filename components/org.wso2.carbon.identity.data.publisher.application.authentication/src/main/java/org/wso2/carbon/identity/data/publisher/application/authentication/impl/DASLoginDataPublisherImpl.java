@@ -130,9 +130,15 @@ public class DASLoginDataPublisherImpl extends AbstractAuthenticationDataPublish
 
         try {
             String roleList = null;
-            if (FrameworkConstants.LOCAL_IDP_NAME.equalsIgnoreCase(authenticationData.getIdentityProviderType())) {
-                roleList = getCommaSeparatedUserRoles(authenticationData.getUserStoreDomain() + "/" + authenticationData
-                        .getUsername(), authenticationData.getTenantDomain());
+            //User roleList retrieved as empty String when there is a previous authentication session available
+            // (different tab in the same browser). When there is a previous local authentication session,
+            //authenticationData.getIdentityProviderType() will be null.
+            if (FrameworkConstants.LOCAL_IDP_NAME.equalsIgnoreCase(authenticationData.getIdentityProviderType()) || (
+                    authenticationData.getIdentityProviderType() == null && FrameworkConstants.LOCAL_IDP_NAME
+                            .equalsIgnoreCase(authenticationData.getIdentityProvider()))) {
+                roleList = getCommaSeparatedUserRoles(
+                        authenticationData.getUserStoreDomain() + "/" + authenticationData.getUsername(),
+                        authenticationData.getTenantDomain());
             } else if (StringUtils.isNotEmpty(authenticationData.getLocalUsername())) {
                 roleList = getCommaSeparatedUserRoles(authenticationData.getUserStoreDomain() + "/" + authenticationData
                         .getLocalUsername(), authenticationData.getTenantDomain());
