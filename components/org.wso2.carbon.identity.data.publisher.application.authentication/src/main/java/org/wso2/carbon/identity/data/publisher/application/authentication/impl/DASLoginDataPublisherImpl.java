@@ -276,6 +276,7 @@ public class DASLoginDataPublisherImpl extends AbstractAuthenticationDataPublish
      */
     private boolean hasLocalIdpUsedForAuthentication(AuthenticationData authenticationData) {
 
+        //The condition after OR operator  checks for authentication which took place using an existing local session.
         return FrameworkConstants.LOCAL_IDP_NAME.equalsIgnoreCase(authenticationData.getIdentityProviderType()) || (
                 authenticationData.getIdentityProviderType() == null && FrameworkConstants.LOCAL_IDP_NAME
                         .equalsIgnoreCase(authenticationData.getIdentityProvider()));
