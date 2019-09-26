@@ -133,9 +133,7 @@ public class DASLoginDataPublisherImpl extends AbstractAuthenticationDataPublish
             //User roleList retrieved as empty String when there is a previous authentication session available
             // (different tab in the same browser). When there is a previous local authentication session,
             //authenticationData.getIdentityProviderType() will be null.
-            if (FrameworkConstants.LOCAL_IDP_NAME.equalsIgnoreCase(authenticationData.getIdentityProviderType()) || (
-                    authenticationData.getIdentityProviderType() == null && FrameworkConstants.LOCAL_IDP_NAME
-                            .equalsIgnoreCase(authenticationData.getIdentityProvider()))) {
+            if (hasLocalIdpUsedForAuthentication(authenticationData)) {
                 roleList = getCommaSeparatedUserRoles(
                         authenticationData.getUserStoreDomain() + "/" + authenticationData.getUsername(),
                         authenticationData.getTenantDomain());
@@ -269,6 +267,18 @@ public class DASLoginDataPublisherImpl extends AbstractAuthenticationDataPublish
             LOG.debug("No roles found. Returning empty string");
         }
         return StringUtils.EMPTY;
+    }
+
+    /**
+     * Method to check if local idp was used for authentication.
+     * @param authenticationData
+     * @return boolean value to indicate if authenticated idp is local idp.
+     */
+    private boolean hasLocalIdpUsedForAuthentication(AuthenticationData authenticationData) {
+
+        return FrameworkConstants.LOCAL_IDP_NAME.equalsIgnoreCase(authenticationData.getIdentityProviderType()) || (
+                authenticationData.getIdentityProviderType() == null && FrameworkConstants.LOCAL_IDP_NAME
+                        .equalsIgnoreCase(authenticationData.getIdentityProvider()));
     }
 
 }
