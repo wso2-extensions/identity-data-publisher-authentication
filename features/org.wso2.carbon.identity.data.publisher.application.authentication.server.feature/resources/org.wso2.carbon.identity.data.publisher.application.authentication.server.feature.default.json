@@ -1,8 +1,0 @@
-{
-  "event_publisher.authentication_data.username":"admin",
-  "event_publisher.authentication_data.publish_url":"tcp://localhost:7612",
-  "event_publisher.authentication_data.password":"admin",
-  "event_publisher.session_data.username": "admin",
-  "event_publisher.session_data.publish_url":"tcp://localhost:7612",
-  "event_publisher.session_data.password": "admin"
-}
