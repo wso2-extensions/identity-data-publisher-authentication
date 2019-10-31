@@ -27,10 +27,6 @@ import org.wso2.carbon.core.util.AnonymousSessionUtil;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkConstants;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkUtils;
 import org.wso2.carbon.identity.base.IdentityRuntimeException;
-import org.wso2.carbon.identity.core.bean.context.MessageContext;
-import org.wso2.carbon.identity.core.handler.AbstractIdentityMessageHandler;
-import org.wso2.carbon.identity.core.model.IdentityEventListenerConfig;
-import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.data.publisher.application.authentication.AuthPublisherConstants;
 import org.wso2.carbon.identity.data.publisher.application.authentication.AuthnDataPublisherUtils;
 import org.wso2.carbon.identity.data.publisher.authentication.analytics.login.internal.AnalyticsLoginDataPublishDataHolder;
@@ -81,33 +77,29 @@ public class AnalyticsLoginDataPublishHandler extends AbstractEventHandler {
         } else {
             LOG.error("Event " + event.getEventName() + " cannot be handled");
         }
-
     }
 
     protected void publishAuthenticationData(AuthenticationData authenticationData) {
 
         try {
             Object[] payloadData = populatePayloadData(authenticationData);
-
             publishEvent(payloadData, authenticationData);
-
         } catch (IdentityRuntimeException e) {
             if (LOG.isDebugEnabled()) {
                 LOG.error("Error while publishing authentication data", e);
             }
         }
-
     }
 
     protected Object[] populatePayloadData(AuthenticationData authenticationData) {
 
         String roleList = null;
         if (FrameworkConstants.LOCAL_IDP_NAME.equalsIgnoreCase(authenticationData.getIdentityProviderType())) {
-            roleList = getCommaSeparatedUserRoles(authenticationData.getUserStoreDomain() + "/" + authenticationData
-                    .getUsername(), authenticationData.getTenantDomain());
+            roleList = getCommaSeparatedUserRoles(authenticationData.getUserStoreDomain() + "/" +
+                    authenticationData.getUsername(), authenticationData.getTenantDomain());
         } else if (StringUtils.isNotEmpty(authenticationData.getLocalUsername())) {
-            roleList = getCommaSeparatedUserRoles(authenticationData.getUserStoreDomain() + "/" + authenticationData
-                    .getLocalUsername(), authenticationData.getTenantDomain());
+            roleList = getCommaSeparatedUserRoles(authenticationData.getUserStoreDomain() + "/" +
+                    authenticationData.getLocalUsername(), authenticationData.getTenantDomain());
         }
 
         Object[] payloadData = new Object[23];
@@ -147,7 +139,7 @@ public class AnalyticsLoginDataPublishHandler extends AbstractEventHandler {
         payloadData[22] = System.currentTimeMillis();
 
         if (LOG.isDebugEnabled()) {
-            LOG.debug("The created payload :" + Arrays.asList(payloadData));
+            LOG.debug("The created payload: " + Arrays.asList(payloadData));
         }
 
         return payloadData;
@@ -173,7 +165,6 @@ public class AnalyticsLoginDataPublishHandler extends AbstractEventHandler {
                         LOG.debug("Sending out to publishing domain:" + publishingDomain + " \n event : "
                                 + event.toString());
                     }
-
                 }
             } finally {
                 FrameworkUtils.endTenantFlow();
@@ -214,7 +205,6 @@ public class AnalyticsLoginDataPublishHandler extends AbstractEventHandler {
                         }
                         return sb.substring(1); //remove the first comma
                     }
-
                 }
             } else {
                 if (LOG.isDebugEnabled()) {
