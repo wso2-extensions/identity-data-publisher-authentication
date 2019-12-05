@@ -178,7 +178,7 @@ public class AnalyticsLoginDataPublisherUtils {
 
         AuthenticationData authenticationData = new AuthenticationData();
         Object userObj = params.get(FrameworkConstants.AnalyticsAttributes.USER);
-        setUserDataForAuthentication(status, authenticationData, userObj);
+        setUserDataForAuthentication(authenticationData, userObj);
 
         authenticationData = setIdpDataAndStepForAuthentication(context, status, authenticationData);
 
@@ -260,16 +260,14 @@ public class AnalyticsLoginDataPublisherUtils {
         return authenticationData;
     }
 
-    private static void setUserDataForAuthentication(AuthenticatorStatus status, AuthenticationData authenticationData,
-                                                     Object userObj) {
+    private static void setUserDataForAuthentication(AuthenticationData authenticationData,
+            Object userObj) {
 
         if (userObj instanceof AuthenticatedUser) {
             AuthenticatedUser user = (AuthenticatedUser) userObj;
             authenticationData.setUsername(user.getUserName());
-            if (status == AuthenticatorStatus.FAIL) {
-                authenticationData.setTenantDomain(user.getTenantDomain());
-                authenticationData.setUserStoreDomain(user.getUserStoreDomain());
-            }
+            authenticationData.setTenantDomain(user.getTenantDomain());
+            authenticationData.setUserStoreDomain(user.getUserStoreDomain());
         }
     }
 
