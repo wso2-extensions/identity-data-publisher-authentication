@@ -82,7 +82,7 @@ public class AnalyticsLoginDataPublisherUtils {
         authenticationData.setEventId(UUID.randomUUID().toString());
         authenticationData.setEventType(AnalyticsLoginDataPublishConstants.STEP_EVENT);
         authenticationData.setAuthnSuccess(false);
-        authenticationData.setRemoteIp(IdentityUtil.getClientIpAddress(request));
+        authenticationData.setRemoteIp(getRemoteIP(request));
         authenticationData.setServiceProvider(context.getServiceProviderName());
         authenticationData.setInboundProtocol(context.getRequestType());
         authenticationData.setRememberMe(context.isRememberMe());
@@ -185,8 +185,12 @@ public class AnalyticsLoginDataPublisherUtils {
         authenticationData.setEventType(AnalyticsLoginDataPublishConstants.OVERALL_EVENT);
         authenticationData.setContextId(context.getContextIdentifier());
         authenticationData.setEventId(UUID.randomUUID().toString());
-        authenticationData.setAuthnSuccess(true);
-        authenticationData.setRemoteIp(IdentityUtil.getClientIpAddress(request));
+        if (AuthenticatorStatus.PASS.equals(status)) {
+            authenticationData.setAuthnSuccess(true);
+        } else if (AuthenticatorStatus.FAIL.equals(status)) {
+            authenticationData.setAuthnSuccess(false);
+        }
+        authenticationData.setRemoteIp(getRemoteIP(request));
         authenticationData.setServiceProvider(context.getServiceProviderName());
         authenticationData.setInboundProtocol(context.getRequestType());
         authenticationData.setRememberMe(context.isRememberMe());
@@ -323,5 +327,14 @@ public class AnalyticsLoginDataPublisherUtils {
             }
         }
         return stepNo;
+    }
+
+    private static String getRemoteIP(HttpServletRequest request) {
+
+        if (request != null) {
+            return IdentityUtil.getClientIpAddress(request);
+        } else {
+            return AuthPublisherConstants.NOT_AVAILABLE;
+        }
     }
 }

@@ -101,7 +101,11 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
         authenticationData.setEventId(UUID.randomUUID().toString());
         authenticationData.setEventType(AuthPublisherConstants.STEP_EVENT);
         authenticationData.setAuthnSuccess(false);
-        authenticationData.setRemoteIp(IdentityUtil.getClientIpAddress(request));
+        if (request != null) {
+            authenticationData.setRemoteIp(IdentityUtil.getClientIpAddress(request));
+        } else {
+            authenticationData.setRemoteIp(AuthPublisherConstants.NOT_AVAILABLE);
+        }
         authenticationData.setServiceProvider(context.getServiceProviderName());
         authenticationData.setInboundProtocol(context.getRequestType());
         authenticationData.setRememberMe(context.isRememberMe());
@@ -173,7 +177,11 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
         authenticationData.setEventId(UUID.randomUUID().toString());
         authenticationData.setEventType(AuthPublisherConstants.STEP_EVENT);
         authenticationData.setAuthnSuccess(false);
-        authenticationData.setRemoteIp(IdentityUtil.getClientIpAddress(request));
+        if (request != null) {
+            authenticationData.setRemoteIp(IdentityUtil.getClientIpAddress(request));
+        } else {
+            authenticationData.setRemoteIp(AuthPublisherConstants.NOT_AVAILABLE);
+        }
         authenticationData.setServiceProvider(context.getServiceProviderName());
         authenticationData.setInboundProtocol(context.getRequestType());
         authenticationData.setRememberMe(context.isRememberMe());
@@ -254,7 +262,11 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
         authenticationData.setContextId(context.getContextIdentifier());
         authenticationData.setEventId(UUID.randomUUID().toString());
         authenticationData.setAuthnSuccess(true);
-        authenticationData.setRemoteIp(IdentityUtil.getClientIpAddress(request));
+        if (request != null) {
+            authenticationData.setRemoteIp(IdentityUtil.getClientIpAddress(request));
+        } else {
+            authenticationData.setRemoteIp(AuthPublisherConstants.NOT_AVAILABLE);
+        }
         authenticationData.setServiceProvider(context.getServiceProviderName());
         authenticationData.setInboundProtocol(context.getRequestType());
         authenticationData.setRememberMe(context.isRememberMe());
@@ -299,7 +311,11 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
         authenticationData.setEventId(UUID.randomUUID().toString());
         authenticationData.setEventType(AuthPublisherConstants.OVERALL_EVENT);
         authenticationData.setAuthnSuccess(false);
-        authenticationData.setRemoteIp(IdentityUtil.getClientIpAddress(request));
+        if (request != null) {
+            authenticationData.setRemoteIp(IdentityUtil.getClientIpAddress(request));
+        } else {
+            authenticationData.setRemoteIp(AuthPublisherConstants.NOT_AVAILABLE);
+        }
         authenticationData.setServiceProvider(context.getServiceProviderName());
         authenticationData.setInboundProtocol(context.getRequestType());
         authenticationData.setRememberMe(context.isRememberMe());
