@@ -30,6 +30,7 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.wso2.carbon.event.stream.core.EventStreamService;
 import org.wso2.carbon.identity.data.publisher.authentication.analytics.login.AnalyticsLoginDataPublishHandler;
+import org.wso2.carbon.identity.data.publisher.authentication.analytics.login.AnalyticsLoginDataPublishHandlerV110;
 import org.wso2.carbon.identity.event.handler.AbstractEventHandler;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -53,6 +54,8 @@ public class AnalyticsLoginDataPublishServiceComponent {
             BundleContext bundleContext = context.getBundleContext();
             bundleContext.registerService(AbstractEventHandler.class,
                     new AnalyticsLoginDataPublishHandler(), null);
+            bundleContext.registerService(AbstractEventHandler.class,
+                    new AnalyticsLoginDataPublishHandlerV110(), null);
 
             if (log.isDebugEnabled()) {
                 log.debug("org.wso2.carbon.identity.data.publisher.authentication.analytics.login" +
