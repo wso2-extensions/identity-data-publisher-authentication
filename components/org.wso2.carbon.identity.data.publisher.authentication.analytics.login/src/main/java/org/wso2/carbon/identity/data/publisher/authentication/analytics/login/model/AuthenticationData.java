@@ -22,6 +22,7 @@ import org.wso2.carbon.identity.base.IdentityRuntimeException;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -50,6 +51,9 @@ public class AuthenticationData<T1 extends Object, T2 extends Object> {
     private String identityProvider;
     private String authenticator;
     private boolean success;
+    private long duration;
+    private String errorCode;
+    private List<String> customParams;
 
     public String getEventId() {
 
@@ -281,4 +285,33 @@ public class AuthenticationData<T1 extends Object, T2 extends Object> {
         return parameters.get(key);
     }
 
+    public long getDuration() {
+
+        return duration;
+    }
+
+    public void setDuration(long duration) {
+
+        this.duration = duration;
+    }
+
+    public String getErrorCode() {
+
+        return errorCode;
+    }
+
+    public void setErrorCode(String errorCode) {
+
+        this.errorCode = errorCode;
+    }
+
+    public List<String> getCustomParams() {
+
+        return customParams;
+    }
+
+    public void setCustomParams(List<String> customParams) {
+
+        this.customParams = customParams;
+    }
 }

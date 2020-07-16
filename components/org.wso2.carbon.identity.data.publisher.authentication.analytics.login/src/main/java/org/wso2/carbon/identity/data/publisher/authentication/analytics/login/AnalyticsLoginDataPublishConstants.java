@@ -25,7 +25,8 @@ public class AnalyticsLoginDataPublishConstants {
 
     public static final String ANALYTICS_LOGIN_PUBLISHER_NAME = "analyticsLoginDataPublisher";
     public static final String AUTHN_DATA_STREAM_NAME = "org.wso2.is.analytics.stream.OverallAuthentication:1.0.0";
-
+    public static final String AUTHN_DATA_STREAM_1_1_0_NAME =
+            "org.wso2.is.analytics.stream.OverallAuthentication:1.1.0";
     public static final String TENANT_DOMAIN_NAMES = "tenantDomainNames";
 
     // Event types
@@ -33,6 +34,9 @@ public class AnalyticsLoginDataPublishConstants {
     public static final String OVERALL_EVENT = "overall";
 
     public static final String ANALYTICS_LOGIN_DATA_PUBLISHER_ENABLED = "analyticsLoginDataPublisher.enable";
+    public static final String ANALYTICS_LOGIN_DATA_PUBLISHER_V110_ENABLED = "analyticsLoginDataPublisherV110.enable";
+    public static final long LONG_NOT_AVAILABLE = 0;
+    public static final String ANALYTICS_LOGIN_PUBLISHER_V110_NAME = "analyticsLoginDataPublisherV110";
 
     private AnalyticsLoginDataPublishConstants() {
 

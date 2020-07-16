@@ -75,7 +75,9 @@
                                     <includes>
                                         <include>p2.inf</include>
                                         <include>IsAnalytics-Publisher-wso2event-AuthenticationData.xml</include>
+                                        <include>IsAnalytics-Publisher-wso2event-AuthenticationData-1.1.0.xml</include>
                                         <include>org.wso2.is.analytics.stream.OverallAuthentication_1.0.0.json</include>
+                                        <include>org.wso2.is.analytics.stream.OverallAuthentication_1.1.0.json</include>
                                         <include>IsAnalytics-Publisher-wso2event-SessionData.xml</include>
                                         <include>org.wso2.is.analytics.stream.OverallSession_1.0.0.json</include>
                                     </includes>

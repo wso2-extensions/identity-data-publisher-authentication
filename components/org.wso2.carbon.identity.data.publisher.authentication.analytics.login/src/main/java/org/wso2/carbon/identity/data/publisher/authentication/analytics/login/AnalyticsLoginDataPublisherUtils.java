@@ -19,30 +19,26 @@
 package org.wso2.carbon.identity.data.publisher.authentication.analytics.login;
 
 import org.apache.commons.lang.StringUtils;
-import org.wso2.carbon.CarbonConstants;
-import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.identity.application.authentication.framework.AuthenticatorStatus;
-import org.wso2.carbon.identity.application.authentication.framework.config.model.SequenceConfig;
 import org.wso2.carbon.identity.application.authentication.framework.config.model.StepConfig;
 import org.wso2.carbon.identity.application.authentication.framework.context.AuthenticationContext;
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedIdPData;
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkConstants;
 import org.wso2.carbon.identity.application.common.model.User;
-import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.data.publisher.application.authentication.AuthPublisherConstants;
 import org.wso2.carbon.identity.data.publisher.application.authentication.AuthnDataPublisherUtils;
 import org.wso2.carbon.identity.data.publisher.authentication.analytics.login.model.AuthenticationData;
 import org.wso2.carbon.identity.event.IdentityEventConstants;
 import org.wso2.carbon.identity.event.event.Event;
-import org.wso2.carbon.user.core.UserCoreConstants;
-import org.wso2.carbon.user.core.util.UserCoreUtil;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -96,6 +92,27 @@ public class AnalyticsLoginDataPublisherUtils {
         setTenantDataForIdpStep(context, status, authenticationData);
 
         authenticationData.addParameter(AuthPublisherConstants.RELYING_PARTY, context.getRelyingParty());
+        return authenticationData;
+    }
+
+    /**
+     * Build authentication data object for authentication step from event.
+     * This method is for new stream definition.
+     *
+     * @param event
+     * @return Authentication data object
+     */
+    public static AuthenticationData buildAuthnDataForAuthnStepV110(Event event) {
+
+        AuthenticationData authenticationData = buildAuthnDataForAuthnStep(event);
+        Map<String, Object> properties = event.getEventProperties();
+        AuthenticationContext context = (AuthenticationContext) properties.get(IdentityEventConstants.EventProperty.
+                CONTEXT);
+        authenticationData.setDuration(AnalyticsLoginDataPublisherUtils.replaceIfLongNotAvailable(
+                context.getAnalyticsData(FrameworkConstants.AnalyticsData.CURRENT_AUTHENTICATOR_DURATION)));
+        authenticationData.setErrorCode(AnalyticsLoginDataPublisherUtils.replaceIfStringNotAvailable(
+                context.getAnalyticsData(FrameworkConstants.AnalyticsData.CURRENT_AUTHENTICATOR_ERROR_CODE)));
+        authenticationData.setCustomParams(getCustomParam(context));
         return authenticationData;
     }
 
@@ -201,6 +218,27 @@ public class AnalyticsLoginDataPublisherUtils {
 
         authenticationData.addParameter(AuthPublisherConstants.RELYING_PARTY, context.getRelyingParty());
 
+        return authenticationData;
+    }
+
+    /**
+     * Build authentication data object for authentication from event.
+     * This method is for new stream definition V110.
+     *
+     * @param event - triggerd event
+     * @return AuthenticationData - authentication data object
+     */
+    public static AuthenticationData buildAuthnDataForAuthenticationV110(Event event) {
+
+        AuthenticationData authenticationData = buildAuthnDataForAuthentication(event);
+        Map<String, Object> properties = event.getEventProperties();
+        AuthenticationContext context = (AuthenticationContext) properties.get(IdentityEventConstants.EventProperty.
+                CONTEXT);
+        authenticationData.setDuration(AnalyticsLoginDataPublisherUtils.replaceIfLongNotAvailable(
+                context.getAnalyticsData(FrameworkConstants.AnalyticsData.AUTHENTICATION_DURATION)));
+        authenticationData.setErrorCode(AnalyticsLoginDataPublisherUtils.replaceIfStringNotAvailable(
+                context.getAnalyticsData(FrameworkConstants.AnalyticsData.AUTHENTICATION_ERROR_CODE)));
+        authenticationData.setCustomParams(getCustomParam(context));
         return authenticationData;
     }
 
@@ -336,5 +374,44 @@ public class AnalyticsLoginDataPublisherUtils {
         } else {
             return AuthPublisherConstants.NOT_AVAILABLE;
         }
+    }
+
+    private static List<String> getCustomParam(AuthenticationContext context) {
+
+        List<String> customParams = new ArrayList<>();
+        for (int i = 0; i < FrameworkConstants.AnalyticsData.CUSTOM_PARAM_LENGTH; i++) {
+            customParams.add(AnalyticsLoginDataPublisherUtils
+                    .replaceIfStringNotAvailable(
+                            context.getAnalyticsData(FrameworkConstants.AnalyticsData.CUSTOM_PARAM_PREFIX + i)));
+        }
+        return customParams;
+    }
+
+    /**
+     * Add default values if the values coming in are null.
+     *
+     * @param serializable Authentication related param .
+     * @return the object with type long.
+     */
+    public static long replaceIfLongNotAvailable(Serializable serializable) {
+
+        if (serializable instanceof Long) {
+            return (long) serializable;
+        }
+        return AnalyticsLoginDataPublishConstants.LONG_NOT_AVAILABLE;
+    }
+
+    /**
+     * Add default values if the values coming in are null.
+     *
+     * @param serializable Authentication related param .
+     * @return the object with type String.
+     */
+    public static String replaceIfStringNotAvailable(Serializable serializable) {
+
+        if (serializable instanceof String) {
+            return (String) serializable;
+        }
+        return AuthPublisherConstants.NOT_AVAILABLE;
     }
 }
