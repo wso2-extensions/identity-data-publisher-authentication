@@ -31,6 +31,7 @@ public class AuthPublisherConstants {
     public static final String DAS_SESSION_PUBLISHER_NAME = "DAS_SESSION_DATA_PUBLISHER";
     public static final String CONFIG_PREFIX = "ISAnalytics.DefaultValues.";
     public static final String USERNAME = "userName";
+    public static final String REMOTE_IP_ADDRESS = "remote-ip-address";
     public static final String SESSION_ID = "sessionId";
     public static final String TENANT_ID = "tenantId";
     public static final String RELYING_PARTY = "relyingParty";

@@ -78,7 +78,11 @@ public class AnalyticsLoginDataPublisherUtils {
         authenticationData.setEventId(UUID.randomUUID().toString());
         authenticationData.setEventType(AnalyticsLoginDataPublishConstants.STEP_EVENT);
         authenticationData.setAuthnSuccess(false);
-        authenticationData.setRemoteIp(getRemoteIP(request));
+        if (request != null) {
+            authenticationData.setRemoteIp(IdentityUtil.getClientIpAddress(request));
+        } else {
+            authenticationData.setRemoteIp((String) params.get(AuthPublisherConstants.REMOTE_IP_ADDRESS));
+        }
         authenticationData.setServiceProvider(context.getServiceProviderName());
         authenticationData.setInboundProtocol(context.getRequestType());
         authenticationData.setRememberMe(context.isRememberMe());
@@ -207,7 +211,11 @@ public class AnalyticsLoginDataPublisherUtils {
         } else if (AuthenticatorStatus.FAIL.equals(status)) {
             authenticationData.setAuthnSuccess(false);
         }
-        authenticationData.setRemoteIp(getRemoteIP(request));
+        if (request != null) {
+            authenticationData.setRemoteIp(IdentityUtil.getClientIpAddress(request));
+        } else {
+            authenticationData.setRemoteIp((String) params.get(AuthPublisherConstants.REMOTE_IP_ADDRESS));
+        }
         authenticationData.setServiceProvider(context.getServiceProviderName());
         authenticationData.setInboundProtocol(context.getRequestType());
         authenticationData.setRememberMe(context.isRememberMe());
@@ -365,15 +373,6 @@ public class AnalyticsLoginDataPublisherUtils {
             }
         }
         return stepNo;
-    }
-
-    private static String getRemoteIP(HttpServletRequest request) {
-
-        if (request != null) {
-            return IdentityUtil.getClientIpAddress(request);
-        } else {
-            return AuthPublisherConstants.NOT_AVAILABLE;
-        }
     }
 
     private static List<String> getCustomParam(AuthenticationContext context) {
