@@ -104,7 +104,7 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
         if (request != null) {
             authenticationData.setRemoteIp(IdentityUtil.getClientIpAddress(request));
         } else {
-            authenticationData.setRemoteIp(AuthPublisherConstants.NOT_AVAILABLE);
+            authenticationData.setRemoteIp((String) params.get(AuthPublisherConstants.REMOTE_IP_ADDRESS));
         }
         authenticationData.setServiceProvider(context.getServiceProviderName());
         authenticationData.setInboundProtocol(context.getRequestType());
@@ -180,7 +180,7 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
         if (request != null) {
             authenticationData.setRemoteIp(IdentityUtil.getClientIpAddress(request));
         } else {
-            authenticationData.setRemoteIp(AuthPublisherConstants.NOT_AVAILABLE);
+            authenticationData.setRemoteIp((String) params.get(AuthPublisherConstants.REMOTE_IP_ADDRESS));
         }
         authenticationData.setServiceProvider(context.getServiceProviderName());
         authenticationData.setInboundProtocol(context.getRequestType());
@@ -265,7 +265,7 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
         if (request != null) {
             authenticationData.setRemoteIp(IdentityUtil.getClientIpAddress(request));
         } else {
-            authenticationData.setRemoteIp(AuthPublisherConstants.NOT_AVAILABLE);
+            authenticationData.setRemoteIp((String) params.get(AuthPublisherConstants.REMOTE_IP_ADDRESS));
         }
         authenticationData.setServiceProvider(context.getServiceProviderName());
         authenticationData.setInboundProtocol(context.getRequestType());
@@ -314,7 +314,7 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
         if (request != null) {
             authenticationData.setRemoteIp(IdentityUtil.getClientIpAddress(request));
         } else {
-            authenticationData.setRemoteIp(AuthPublisherConstants.NOT_AVAILABLE);
+            authenticationData.setRemoteIp((String) params.get(AuthPublisherConstants.REMOTE_IP_ADDRESS));
         }
         authenticationData.setServiceProvider(context.getServiceProviderName());
         authenticationData.setInboundProtocol(context.getRequestType());
