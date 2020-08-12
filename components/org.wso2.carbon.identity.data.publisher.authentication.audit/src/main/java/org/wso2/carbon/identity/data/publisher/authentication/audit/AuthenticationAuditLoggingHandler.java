@@ -20,6 +20,7 @@ package org.wso2.carbon.identity.data.publisher.authentication.audit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.MDC;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.identity.application.authentication.framework.config.model.ExternalIdPConfig;
 import org.wso2.carbon.identity.application.authentication.framework.config.model.SequenceConfig;
@@ -43,6 +44,11 @@ public class AuthenticationAuditLoggingHandler extends AbstractEventHandler {
 
     private static final Log AUDIT_LOG = CarbonConstants.AUDIT_LOG;
     private static final Log LOG = LogFactory.getLog(AuthenticationAuditLoggingHandler.class);
+
+    public static final String USER_AGENT_QUERY_KEY = "User-Agent";
+    public static final String USER_AGENT_KEY = "User Agent";
+    public static final String REMOTE_ADDRESS_QUERY_KEY = "remoteAddress";
+    public static final String REMOTE_ADDRESS_KEY = "RemoteAddress";
 
     @Override
     public String getName() {
@@ -97,6 +103,7 @@ public class AuthenticationAuditLoggingHandler extends AbstractEventHandler {
                 + "\",\"" + "RelyingParty" + "\" : \"" + authenticationData.getRelyingParty()
                 + "\",\"" + "AuthenticatedIdP" + "\" : \"" + authenticationData.getAuthenticatedIdps()
                 + "\"";
+        addContextualInfo(auditData);
 
         AUDIT_LOG.info(String.format(
                 FrameworkConstants.AUDIT_MESSAGE,
@@ -114,6 +121,7 @@ public class AuthenticationAuditLoggingHandler extends AbstractEventHandler {
                 + "\",\"" + "RelyingParty" + "\" : \"" + authenticationData.getRelyingParty()
                 + "\",\"" + "StepNo" + "\" : \"" + authenticationData.getStepNo()
                 + "\"";
+        addContextualInfo(auditData);
 
         AUDIT_LOG.info(String.format(
                 FrameworkConstants.AUDIT_MESSAGE,
@@ -134,6 +142,7 @@ public class AuthenticationAuditLoggingHandler extends AbstractEventHandler {
                 + "\",\"" + "RelyingParty" + "\" : \"" + authenticationData.getRelyingParty()
                 + "\",\"" + "AuthenticatedIdPs" + "\" : \"" + authenticationData.getAuthenticatedIdps()
                 + "\"";
+        addContextualInfo(auditData);
 
         AUDIT_LOG.info(String.format(
                 FrameworkConstants.AUDIT_MESSAGE,
@@ -150,6 +159,7 @@ public class AuthenticationAuditLoggingHandler extends AbstractEventHandler {
                 + "\",\"" + "RelyingParty" + "\" : \"" + authenticationData.getRelyingParty()
                 + "\",\"" + "StepNo" + "\" : \"" + authenticationData.getStepNo()
                 + "\"";
+        addContextualInfo(auditData);
 
         AUDIT_LOG.info(String.format(
                 FrameworkConstants.AUDIT_MESSAGE,
@@ -226,5 +236,12 @@ public class AuthenticationAuditLoggingHandler extends AbstractEventHandler {
         }
 
         return false;
+    }
+
+    private void addContextualInfo(String data) {
+
+        data += "\",\"" + USER_AGENT_KEY + "\" : \"" + MDC.get(USER_AGENT_QUERY_KEY)
+                + "\",\"" + REMOTE_ADDRESS_KEY + "\" : \"" + MDC.get(REMOTE_ADDRESS_QUERY_KEY)
+                + "\"";
     }
 }
