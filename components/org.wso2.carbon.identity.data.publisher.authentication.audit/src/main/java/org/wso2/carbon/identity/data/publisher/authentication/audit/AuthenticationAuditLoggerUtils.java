@@ -58,6 +58,8 @@ public class AuthenticationAuditLoggerUtils {
         authenticationAuditData.setServiceProvider(getServiceProvider(context));
         authenticationAuditData.setInboundProtocol(getInboundProtocol(context));
         authenticationAuditData.setRelyingParty(getRelyingParty(context));
+        Object userObj = params.get(FrameworkConstants.AnalyticsAttributes.USER);
+        setUserStoreDomain(authenticationAuditData, userObj);
 
         if (AuthenticationAuditLoggerConstants.AUDIT_AUTHENTICATION_STEP.equals(authType)) {
             authenticationAuditData.setAuthenticatedUser(getUserNameForAuthenticationStep(params));
@@ -74,6 +76,14 @@ public class AuthenticationAuditLoggerUtils {
         }
 
         return authenticationAuditData;
+    }
+
+    private static void setUserStoreDomain(AuthenticationAuditData authenticationAuditData, Object userObj) {
+
+        if (userObj instanceof User) {
+            User user = (User) userObj;
+            authenticationAuditData.setUserStoreDomain(user.getUserStoreDomain());
+        }
     }
 
     private static String getContextIdentifier(AuthenticationContext context) {
