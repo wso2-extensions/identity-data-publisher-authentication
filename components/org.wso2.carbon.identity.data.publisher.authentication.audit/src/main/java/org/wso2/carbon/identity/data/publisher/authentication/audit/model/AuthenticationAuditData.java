@@ -30,6 +30,7 @@ public class AuthenticationAuditData {
     private String inboundProtocol;
     private String relyingParty;
     private String authenticatedIdps;
+    private String userStoreDomain;
     private int stepNo;
 
     public String getContextIdentifier() {
@@ -110,5 +111,15 @@ public class AuthenticationAuditData {
     public void setStepNo(int stepNo) {
 
         this.stepNo = stepNo;
+    }
+
+    public String getUserStoreDomain() {
+
+        return userStoreDomain;
+    }
+
+    public void setUserStoreDomain(String userStoreDomain) {
+
+        this.userStoreDomain = userStoreDomain;
     }
 }

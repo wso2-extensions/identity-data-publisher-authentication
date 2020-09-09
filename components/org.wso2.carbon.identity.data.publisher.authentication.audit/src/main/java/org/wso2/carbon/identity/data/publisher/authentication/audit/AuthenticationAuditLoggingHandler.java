@@ -49,6 +49,7 @@ public class AuthenticationAuditLoggingHandler extends AbstractEventHandler {
     public static final String USER_AGENT_KEY = "User Agent";
     public static final String REMOTE_ADDRESS_QUERY_KEY = "remoteAddress";
     public static final String REMOTE_ADDRESS_KEY = "RemoteAddress";
+    public static final String USER_STORE_DOMAIN_KEY = "UserStoreDomain";
 
     @Override
     public String getName() {
@@ -103,7 +104,7 @@ public class AuthenticationAuditLoggingHandler extends AbstractEventHandler {
                 + "\",\"" + "RelyingParty" + "\" : \"" + authenticationData.getRelyingParty()
                 + "\",\"" + "AuthenticatedIdP" + "\" : \"" + authenticationData.getAuthenticatedIdps()
                 + "\"";
-        addContextualInfo(auditData);
+        auditData = addContextualInfo(auditData, authenticationData);
 
         AUDIT_LOG.info(String.format(
                 FrameworkConstants.AUDIT_MESSAGE,
@@ -121,7 +122,7 @@ public class AuthenticationAuditLoggingHandler extends AbstractEventHandler {
                 + "\",\"" + "RelyingParty" + "\" : \"" + authenticationData.getRelyingParty()
                 + "\",\"" + "StepNo" + "\" : \"" + authenticationData.getStepNo()
                 + "\"";
-        addContextualInfo(auditData);
+        auditData = addContextualInfo(auditData, authenticationData);
 
         AUDIT_LOG.info(String.format(
                 FrameworkConstants.AUDIT_MESSAGE,
@@ -142,7 +143,7 @@ public class AuthenticationAuditLoggingHandler extends AbstractEventHandler {
                 + "\",\"" + "RelyingParty" + "\" : \"" + authenticationData.getRelyingParty()
                 + "\",\"" + "AuthenticatedIdPs" + "\" : \"" + authenticationData.getAuthenticatedIdps()
                 + "\"";
-        addContextualInfo(auditData);
+        auditData = addContextualInfo(auditData, authenticationData);
 
         AUDIT_LOG.info(String.format(
                 FrameworkConstants.AUDIT_MESSAGE,
@@ -159,7 +160,7 @@ public class AuthenticationAuditLoggingHandler extends AbstractEventHandler {
                 + "\",\"" + "RelyingParty" + "\" : \"" + authenticationData.getRelyingParty()
                 + "\",\"" + "StepNo" + "\" : \"" + authenticationData.getStepNo()
                 + "\"";
-        addContextualInfo(auditData);
+        auditData = addContextualInfo(auditData, authenticationData);
 
         AUDIT_LOG.info(String.format(
                 FrameworkConstants.AUDIT_MESSAGE,
@@ -238,10 +239,12 @@ public class AuthenticationAuditLoggingHandler extends AbstractEventHandler {
         return false;
     }
 
-    private void addContextualInfo(String data) {
+    private String addContextualInfo(String data, AuthenticationAuditData authenticationData) {
 
-        data += "\",\"" + USER_AGENT_KEY + "\" : \"" + MDC.get(USER_AGENT_QUERY_KEY)
+        data += ",\"" + USER_AGENT_KEY + "\" : \"" + MDC.get(USER_AGENT_QUERY_KEY)
                 + "\",\"" + REMOTE_ADDRESS_KEY + "\" : \"" + MDC.get(REMOTE_ADDRESS_QUERY_KEY)
+                + "\",\"" + USER_STORE_DOMAIN_KEY + "\" : \"" + authenticationData.getUserStoreDomain()
                 + "\"";
+        return data;
     }
 }
