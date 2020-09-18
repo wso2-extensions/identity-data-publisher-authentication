@@ -39,6 +39,7 @@ public class SessionData<T1 extends Object, T2 extends Object> {
     private boolean isRememberMe;
     private String remoteIP;
     private String userAgent;
+    private int activeSessionCount;
 
     public String getServiceProvider() {
 
@@ -167,6 +168,16 @@ public class SessionData<T1 extends Object, T2 extends Object> {
                     key);
         }
         parameters.put(key, value);
+    }
+
+    public int getActiveSessionCount() {
+
+        return activeSessionCount;
+    }
+
+    public void setActiveSessionCount(int activeSessionCount) {
+
+        this.activeSessionCount = activeSessionCount;
     }
 
     public void addParameters(Map<T1, T2> parameters) {

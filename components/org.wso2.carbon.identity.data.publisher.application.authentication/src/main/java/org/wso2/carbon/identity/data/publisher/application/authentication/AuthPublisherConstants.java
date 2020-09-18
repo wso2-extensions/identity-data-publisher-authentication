@@ -23,6 +23,9 @@ public class AuthPublisherConstants {
     // Stream definition names
     public static final String AUTHN_DATA_STREAM_NAME = "org.wso2.is.analytics.stream.OverallAuthentication:1.0.0";
     public static final String SESSION_DATA_STREAM_NAME = "org.wso2.is.analytics.stream.OverallSession:1.0.0";
+    public static final String SESSION_DATA_STREAM_WITH_SESSION_COUNT_NAME =
+            "org.wso2.is.analytics.stream.OverallSession:1.0.1";
+
     // Event types
     public static final String STEP_EVENT = "step";
     public static final String OVERALL_EVENT = "overall";

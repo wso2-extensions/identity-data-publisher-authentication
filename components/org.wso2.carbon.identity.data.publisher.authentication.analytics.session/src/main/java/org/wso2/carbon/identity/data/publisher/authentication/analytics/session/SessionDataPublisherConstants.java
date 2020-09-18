@@ -26,6 +26,8 @@ public class SessionDataPublisherConstants {
     public static final String ANALYTICS_SESSION_PUBLISHER_NAME = "analyticsSessionDataPublisher";
 
     public static final String SESSION_DATA_STREAM_NAME = "org.wso2.is.analytics.stream.OverallSession:1.0.0";
+    public static final String SESSION_DATA_STREAM_WITH_SESSION_COUNT_NAME =
+            "org.wso2.is.analytics.stream.OverallSession:1.0.1";
 
     // Session status codes
     public static final int SESSION_CREATION_STATUS = 1;

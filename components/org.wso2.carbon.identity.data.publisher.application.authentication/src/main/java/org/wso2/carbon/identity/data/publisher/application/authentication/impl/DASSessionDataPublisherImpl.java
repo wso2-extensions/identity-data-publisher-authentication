@@ -18,12 +18,15 @@
 
 package org.wso2.carbon.identity.data.publisher.application.authentication.impl;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.databridge.commons.Event;
 import org.wso2.carbon.identity.application.authentication.framework.context.AuthenticationContext;
+import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkConstants;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkUtils;
 import org.wso2.carbon.identity.base.IdentityRuntimeException;
+import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.data.publisher.application.authentication.AbstractAuthenticationDataPublisher;
 import org.wso2.carbon.identity.data.publisher.application.authentication.AuthPublisherConstants;
 import org.wso2.carbon.identity.data.publisher.application.authentication.AuthnDataPublisherUtils;
@@ -126,45 +129,25 @@ public class DASSessionDataPublisherImpl extends AbstractAuthenticationDataPubli
     protected void publishSessionData(SessionData sessionData, int actionId) {
 
         if (sessionData != null) {
-            Object[] payloadData = new Object[15];
-            try {
-                payloadData[0] = AuthnDataPublisherUtils.replaceIfNotAvailable(AuthPublisherConstants.CONFIG_PREFIX +
-                        AuthPublisherConstants.SESSION_ID, sessionData.getSessionId());
-                payloadData[1] = sessionData.getCreatedTimestamp();
-                payloadData[2] = sessionData.getUpdatedTimestamp();
-                payloadData[3] = sessionData.getTerminationTimestamp();
-                payloadData[4] = actionId;
-                payloadData[5] = AuthnDataPublisherUtils.replaceIfNotAvailable(AuthPublisherConstants.CONFIG_PREFIX +
-                        AuthPublisherConstants.USERNAME, sessionData.getUser());
-                payloadData[6] = AuthnDataPublisherUtils.replaceIfNotAvailable(AuthPublisherConstants.CONFIG_PREFIX +
-                        AuthPublisherConstants.USER_STORE_DOMAIN, sessionData.getUserStoreDomain());
-                payloadData[7] = sessionData.getRemoteIP();
-                payloadData[8] = AuthPublisherConstants.NOT_AVAILABLE;
-                payloadData[9] = sessionData.getTenantDomain();
-                payloadData[10] = sessionData.getServiceProvider();
-                payloadData[11] = sessionData.getIdentityProviders();
-                payloadData[12] = sessionData.isRememberMe();
-                payloadData[13] = sessionData.getUserAgent();
-                payloadData[14] = System.currentTimeMillis();
-
-                if (LOG.isDebugEnabled()) {
-                    for (int i = 0; i < 14; i++) {
-                        if (payloadData[i] != null) {
-                            LOG.debug("Payload data for entry " + i + " " + payloadData[i].toString());
-                        } else {
-                            LOG.debug("Payload data for entry " + i + " is null");
-                        }
-                    }
+                String eventStreamName;
+                Object[] payloadData;
+                if (isPublishingSessionCountEnabled()) {
+                    payloadData = createPayloadWithSessionCount(sessionData, actionId);
+                    eventStreamName = AuthPublisherConstants.SESSION_DATA_STREAM_WITH_SESSION_COUNT_NAME;
+                } else {
+                    payloadData = createPayload(sessionData, actionId);
+                    eventStreamName = AuthPublisherConstants.SESSION_DATA_STREAM_NAME;
                 }
 
+            try {
                 String[] publishingDomains = (String[]) sessionData.getParameter(AuthPublisherConstants.TENANT_ID);
                 if (publishingDomains != null && publishingDomains.length > 0) {
                     try {
                         FrameworkUtils.startTenantFlow(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
                         for (String publishingDomain : publishingDomains) {
                             Object[] metadataArray = AuthnDataPublisherUtils.getMetaDataArray(publishingDomain);
-                            Event event = new Event(AuthPublisherConstants.SESSION_DATA_STREAM_NAME, System
-                                    .currentTimeMillis(), metadataArray, null, payloadData);
+                            Event event = new Event(eventStreamName, System.currentTimeMillis(), metadataArray, null,
+                                    payloadData);
                             AuthenticationDataPublisherDataHolder.getInstance().getPublisherService().publish(event);
                             if (LOG.isDebugEnabled() && event != null) {
                                 LOG.debug("Sending out event : " + event.toString());
@@ -181,5 +164,82 @@ public class DASSessionDataPublisherImpl extends AbstractAuthenticationDataPubli
                 }
             }
         }
+    }
+
+    private boolean isPublishingSessionCountEnabled() {
+
+        String isPublishingSessionCountEnabledValue = IdentityUtil.getProperty(FrameworkConstants.Config
+                .PUBLISH_ACTIVE_SESSION_COUNT);
+
+        return Boolean.parseBoolean(isPublishingSessionCountEnabledValue);
+    }
+
+    private Object[] createPayload(SessionData sessionData, int actionId) {
+
+        Object[] payloadData = new Object[15];
+        payloadData[0] = AuthnDataPublisherUtils.replaceIfNotAvailable(AuthPublisherConstants.CONFIG_PREFIX +
+                AuthPublisherConstants.SESSION_ID, sessionData.getSessionId());
+        payloadData[1] = sessionData.getCreatedTimestamp();
+        payloadData[2] = sessionData.getUpdatedTimestamp();
+        payloadData[3] = sessionData.getTerminationTimestamp();
+        payloadData[4] = actionId;
+        payloadData[5] = AuthnDataPublisherUtils.replaceIfNotAvailable(AuthPublisherConstants.CONFIG_PREFIX +
+                AuthPublisherConstants.USERNAME, sessionData.getUser());
+        payloadData[6] = AuthnDataPublisherUtils.replaceIfNotAvailable(AuthPublisherConstants.CONFIG_PREFIX +
+                AuthPublisherConstants.USER_STORE_DOMAIN, sessionData.getUserStoreDomain());
+        payloadData[7] = sessionData.getRemoteIP();
+        payloadData[8] = AuthPublisherConstants.NOT_AVAILABLE;
+        payloadData[9] = sessionData.getTenantDomain();
+        payloadData[10] = sessionData.getServiceProvider();
+        payloadData[11] = sessionData.getIdentityProviders();
+        payloadData[12] = sessionData.isRememberMe();
+        payloadData[13] = sessionData.getUserAgent();
+        payloadData[14] = System.currentTimeMillis();
+
+        if (LOG.isDebugEnabled()) {
+            for (int i = 0; i < payloadData.length; i++) {
+                if (payloadData[i] != null) {
+                    LOG.debug("Payload data for entry " + i + " " + payloadData[i].toString());
+                } else {
+                    LOG.debug("Payload data for entry " + i + " is null");
+                }
+            }
+        }
+        return payloadData;
+    }
+
+    private Object[] createPayloadWithSessionCount(SessionData sessionData, int actionId) {
+
+        Object[] payloadData = new Object[16];
+        payloadData[0] = AuthnDataPublisherUtils.replaceIfNotAvailable(AuthPublisherConstants.CONFIG_PREFIX +
+                AuthPublisherConstants.SESSION_ID, sessionData.getSessionId());
+        payloadData[1] = sessionData.getCreatedTimestamp();
+        payloadData[2] = sessionData.getUpdatedTimestamp();
+        payloadData[3] = sessionData.getTerminationTimestamp();
+        payloadData[4] = actionId;
+        payloadData[5] = AuthnDataPublisherUtils.replaceIfNotAvailable(AuthPublisherConstants.CONFIG_PREFIX +
+                AuthPublisherConstants.USERNAME, sessionData.getUser());
+        payloadData[6] = AuthnDataPublisherUtils.replaceIfNotAvailable(AuthPublisherConstants.CONFIG_PREFIX +
+                AuthPublisherConstants.USER_STORE_DOMAIN, sessionData.getUserStoreDomain());
+        payloadData[7] = sessionData.getRemoteIP();
+        payloadData[8] = AuthPublisherConstants.NOT_AVAILABLE;
+        payloadData[9] = sessionData.getTenantDomain();
+        payloadData[10] = sessionData.getServiceProvider();
+        payloadData[11] = sessionData.getIdentityProviders();
+        payloadData[12] = sessionData.isRememberMe();
+        payloadData[13] = sessionData.getUserAgent();
+        payloadData[14] = sessionData.getActiveSessionCount();
+        payloadData[15] = System.currentTimeMillis();
+
+        if (LOG.isDebugEnabled()) {
+            for (int i = 0; i < payloadData.length; i++) {
+                if (payloadData[i] != null) {
+                    LOG.debug("Payload data for entry " + i + " " + payloadData[i].toString());
+                } else {
+                    LOG.debug("Payload data for entry " + i + " is null");
+                }
+            }
+        }
+        return payloadData;
     }
 }
