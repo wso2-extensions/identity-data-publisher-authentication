@@ -390,6 +390,10 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
         } else {
             sessionData.addParameter(AuthPublisherConstants.TENANT_ID, new String[]{sessionData.getTenantDomain()});
         }
+        if (params.containsKey(FrameworkConstants.AnalyticsAttributes.ACTIVE_SESSION_COUNT)){
+            int activeSessionCount = (int) params.get(FrameworkConstants.AnalyticsAttributes.ACTIVE_SESSION_COUNT);
+            sessionData.setActiveSessionCount(activeSessionCount);
+        }
         doPublishSessionCreation(sessionData);
     }
 
@@ -449,6 +453,10 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
         } else {
             sessionData.addParameter(AuthPublisherConstants.TENANT_ID, new String[]{sessionData.getTenantDomain()});
         }
+        if (params.containsKey(FrameworkConstants.AnalyticsAttributes.ACTIVE_SESSION_COUNT)){
+            int activeSessionCount = (int) params.get(FrameworkConstants.AnalyticsAttributes.ACTIVE_SESSION_COUNT);
+            sessionData.setActiveSessionCount(activeSessionCount);
+        }
         doPublishSessionUpdate(sessionData);
     }
 
@@ -504,6 +512,10 @@ public abstract class AbstractAuthenticationDataPublisher extends AbstractIdenti
         }
         if (request != null) {
             sessionData.setRemoteIP(IdentityUtil.getClientIpAddress(request));
+        }
+        if (params.containsKey(FrameworkConstants.AnalyticsAttributes.ACTIVE_SESSION_COUNT)){
+            int activeSessionCount = (int) params.get(FrameworkConstants.AnalyticsAttributes.ACTIVE_SESSION_COUNT);
+            sessionData.setActiveSessionCount(activeSessionCount);
         }
         doPublishSessionTermination(sessionData);
     }

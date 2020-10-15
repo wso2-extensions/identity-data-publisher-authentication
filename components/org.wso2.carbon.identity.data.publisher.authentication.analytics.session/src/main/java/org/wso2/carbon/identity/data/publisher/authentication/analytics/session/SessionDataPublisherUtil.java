@@ -84,6 +84,11 @@ public class SessionDataPublisherUtil {
             sessionData.setRemoteIP(IdentityUtil.getClientIpAddress(request));
         }
 
+        if (params.containsKey(FrameworkConstants.AnalyticsAttributes.ACTIVE_SESSION_COUNT)){
+            int activeSessionCount = (int) params.get(FrameworkConstants.AnalyticsAttributes.ACTIVE_SESSION_COUNT);
+            sessionData.setActiveSessionCount(activeSessionCount);
+        }
+
         if (LOG.isDebugEnabled()) {
             LOG.debug("A Session data object created for event :" + event.getEventName());
         }

@@ -43,6 +43,7 @@ public class SessionData<T1 extends Object, T2 extends Object> {
     private String remoteIP;
     private String userAgent;
     private SessionContext sessionContext;
+    private int activeSessionCount;
 
     public SessionContext getSessionContext() {
 
@@ -172,6 +173,14 @@ public class SessionData<T1 extends Object, T2 extends Object> {
     public void setUserAgent(String userAgent) {
 
         this.userAgent = userAgent;
+    }
+
+    public int getActiveSessionCount() {
+        return activeSessionCount;
+    }
+
+    public void setActiveSessionCount(int activeSessionCount) {
+        this.activeSessionCount = activeSessionCount;
     }
 
     public void addParameter(T1 key, T2 value) {
