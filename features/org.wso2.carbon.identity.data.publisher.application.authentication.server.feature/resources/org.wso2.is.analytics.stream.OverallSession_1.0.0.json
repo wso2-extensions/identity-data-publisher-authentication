@@ -7,6 +7,10 @@
     {
       "name": "tenantId",
       "type": "INT"
+    },
+    {
+      "name": "eventType",
+      "type": "STRING"
     }
   ],
   "payloadData": [
