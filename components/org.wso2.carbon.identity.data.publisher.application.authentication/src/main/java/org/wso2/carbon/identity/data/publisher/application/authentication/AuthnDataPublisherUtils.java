@@ -104,15 +104,17 @@ public class AuthnDataPublisherUtils {
     /**
      * Get metadata array for different tenants with tenant domain
      * @param tenantDomain
-     * @return
+     * @param eventType type of the event
+     * @return metadata array
      */
-    public static Object[] getMetaDataArray(String tenantDomain) {
-        Object[] metaData = new Object[1];
+    public static Object[] getMetaDataArray(String tenantDomain, String eventType) {
+        Object[] metaData = new Object[2];
         if (StringUtils.isBlank(tenantDomain)) {
             metaData[0] = MultitenantConstants.SUPER_TENANT_ID;
         } else {
             metaData[0] = IdentityTenantUtil.getTenantId(tenantDomain);
         }
+        metaData[1] = eventType;
         return metaData;
     }
 

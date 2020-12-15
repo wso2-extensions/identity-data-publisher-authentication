@@ -19,6 +19,9 @@
 package org.wso2.carbon.identity.data.publisher.application.authentication;
 
 public class AuthPublisherConstants {
+    // Event type names
+    public static final String AUTH_EVENT = "AUTH";
+    public static final String SESSION_EVENT = "SESSION";
 
     // Stream definition names
     public static final String AUTHN_DATA_STREAM_NAME = "org.wso2.is.analytics.stream.OverallAuthentication:1.0.0";

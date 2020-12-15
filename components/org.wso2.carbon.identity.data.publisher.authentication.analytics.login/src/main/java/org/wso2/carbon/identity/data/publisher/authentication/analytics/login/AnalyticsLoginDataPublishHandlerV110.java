@@ -172,7 +172,7 @@ public class AnalyticsLoginDataPublishHandlerV110 extends AbstractEventHandler {
             try {
                 FrameworkUtils.startTenantFlow(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
                 for (String publishingDomain : publishingDomains) {
-                    Object[] metadataArray = AuthnDataPublisherUtils.getMetaDataArray(publishingDomain);
+                    Object[] metadataArray = AuthnDataPublisherUtils.getMetaDataArray(publishingDomain, AuthPublisherConstants.AUTH_EVENT);
                     payloadData[1] = UUID.randomUUID().toString();
 
                     org.wso2.carbon.databridge.commons.Event event = new org.wso2.carbon.databridge.commons

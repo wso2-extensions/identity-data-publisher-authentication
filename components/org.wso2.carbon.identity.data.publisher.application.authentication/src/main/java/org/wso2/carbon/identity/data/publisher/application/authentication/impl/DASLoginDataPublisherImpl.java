@@ -190,7 +190,7 @@ public class DASLoginDataPublisherImpl extends AbstractAuthenticationDataPublish
                 try {
                     FrameworkUtils.startTenantFlow(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
                     for (String publishingDomain : publishingDomains) {
-                        Object[] metadataArray = AuthnDataPublisherUtils.getMetaDataArray(publishingDomain);
+                        Object[] metadataArray = AuthnDataPublisherUtils.getMetaDataArray(publishingDomain, AuthPublisherConstants.AUTH_EVENT);
 
                         Event event = new Event(AuthPublisherConstants.AUTHN_DATA_STREAM_NAME, System.currentTimeMillis(),
                                 metadataArray, null, payloadData);

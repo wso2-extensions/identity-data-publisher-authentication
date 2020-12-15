@@ -145,7 +145,7 @@ public class DASSessionDataPublisherImpl extends AbstractAuthenticationDataPubli
                     try {
                         FrameworkUtils.startTenantFlow(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
                         for (String publishingDomain : publishingDomains) {
-                            Object[] metadataArray = AuthnDataPublisherUtils.getMetaDataArray(publishingDomain);
+                            Object[] metadataArray = AuthnDataPublisherUtils.getMetaDataArray(publishingDomain, AuthPublisherConstants.SESSION_EVENT);
                             Event event = new Event(eventStreamName, System.currentTimeMillis(), metadataArray, null,
                                     payloadData);
                             AuthenticationDataPublisherDataHolder.getInstance().getPublisherService().publish(event);
