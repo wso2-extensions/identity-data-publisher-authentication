@@ -144,7 +144,7 @@ public class AuthenticationAuditLoggerUtils {
             if (localIDPData != null) {
                 tenantDomain = localIDPData.getUser().getTenantDomain();
             }
-            if (tenantDomain == null) {
+            if (StringUtils.isBlank(tenantDomain)) {
                 tenantDomain = context.getTenantDomain();
             }
         }
