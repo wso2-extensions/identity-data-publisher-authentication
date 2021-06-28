@@ -27,6 +27,7 @@ import org.wso2.carbon.identity.application.authentication.framework.model.Authe
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkConstants;
 import org.wso2.carbon.identity.application.common.model.User;
+import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.data.publisher.authentication.audit.model.AuthenticationAuditData;
 import org.wso2.carbon.identity.event.IdentityEventConstants;
 import org.wso2.carbon.identity.event.event.Event;
@@ -37,6 +38,8 @@ import java.util.Map;
  * Utilities for authentication audit logger.
  */
 public class AuthenticationAuditLoggerUtils {
+
+    private static final String ENABLE_USERNAME_IN_AUDIT_LOGS = "Authentication.Audit.UserNameEnableForAuditLogs";
 
     /**
      * Create authentication data object from event for respective authentication step.
@@ -68,7 +71,12 @@ public class AuthenticationAuditLoggerUtils {
             authenticationAuditData.setStepNo(getStepNoForAuthenticationStep(context));
 
         } else if (AuthenticationAuditLoggerConstants.AUDIT_AUTHENTICATION.equals(authType)) {
-            authenticationAuditData.setAuthenticatedUser(getSubjectIdentifier(context, status));
+            if (isAuditUsernameEnabled()) {
+                authenticationAuditData.setAuthenticatedUser(getAuthenticatedUserName(context, status));
+            } else {
+                authenticationAuditData.setAuthenticatedUser(getSubjectIdentifier(context, status));
+            }
+            authenticationAuditData.setAuthenticatedUser(getAuthenticatedUserName(context, status));
             authenticationAuditData.setTenantDomain(getTenantDomainForAuthentication(context, params, status));
             authenticationAuditData.setStepNo(getStepNoForAuthentication(context, status));
             authenticationAuditData.setAuthenticatedIdps(getIdentityProviderList(context, status));
@@ -206,6 +214,14 @@ public class AuthenticationAuditLoggerUtils {
         return subjectIdentifier;
     }
 
+    private static String getAuthenticatedUserName(AuthenticationContext context, AuthenticatorStatus status) {
+        String userName = null;
+        if (status == AuthenticatorStatus.PASS) {
+            userName = context.getSequenceConfig().getAuthenticatedUser().getUserName();
+        }
+        return userName;
+    }
+
     private static String getIdentityProviderList(AuthenticationContext context, AuthenticatorStatus status) {
 
         String authenticatedIdps = null;
@@ -265,6 +281,11 @@ public class AuthenticationAuditLoggerUtils {
             }
         }
         return stepNo;
+    }
+
+    private static boolean isAuditUsernameEnabled() {
+
+        return Boolean.parseBoolean(IdentityUtil.getProperty(ENABLE_USERNAME_IN_AUDIT_LOGS));
     }
 
 }
