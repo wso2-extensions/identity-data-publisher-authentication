@@ -40,14 +40,12 @@ import java.util.Map;
  */
 public class AuthenticationAuditLoggerUtils {
 
-//    private static final String ENABLE_USERNAME_IN_AUDIT_LOGS = "Authentication.Audit.UserNameEnableForAuditLogs";
-    private static final String ENABLE_USERNAME_IN_AUDIT_LOGS = "AuthenticationAuditLogger.UserName.Attribute";
-
     /**
      * Create authentication data object from event for respective authentication step.
      *
      * @param event - triggered event
      * @param authType - authentication type
+     * @param isUsernameEnabled - is username enable in audit logs
      * @return populated AuthenticationAuditData object
      */
     public static AuthenticationAuditData createAuthenticationAudiDataObject(Event event, String authType,
