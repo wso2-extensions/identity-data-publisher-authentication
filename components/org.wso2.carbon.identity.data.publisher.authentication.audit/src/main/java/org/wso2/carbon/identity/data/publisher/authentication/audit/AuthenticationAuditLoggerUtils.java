@@ -27,10 +27,8 @@ import org.wso2.carbon.identity.application.authentication.framework.model.Authe
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkConstants;
 import org.wso2.carbon.identity.application.common.model.User;
-import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.data.publisher.authentication.audit.model.AuthenticationAuditData;
 import org.wso2.carbon.identity.event.IdentityEventConstants;
-import org.wso2.carbon.identity.event.IdentityEventException;
 import org.wso2.carbon.identity.event.event.Event;
 
 import java.util.Map;
@@ -216,6 +214,7 @@ public class AuthenticationAuditLoggerUtils {
     }
 
     private static String getAuthenticatedUserName(AuthenticationContext context, AuthenticatorStatus status) {
+
         String userName = null;
         if (status == AuthenticatorStatus.PASS) {
             userName = context.getSequenceConfig().getAuthenticatedUser().getUserName();

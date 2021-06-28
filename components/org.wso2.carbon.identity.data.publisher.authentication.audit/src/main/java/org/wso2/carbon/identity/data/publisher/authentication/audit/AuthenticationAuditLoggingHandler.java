@@ -243,16 +243,15 @@ public class AuthenticationAuditLoggingHandler extends AbstractEventHandler {
 
     private boolean isAuditLoggerUserNameEnabled(Event event) throws IdentityEventException {
 
+        boolean isEnabled = false;
         if (this.configs.getModuleProperties() != null) {
-            boolean isEnabled = false;
             String handlerEnabled = this.configs.getModuleProperties().getProperty(AuthenticationAuditLoggerConstants.
                     AUTHENTICATION_AUDIT_LOGGER_USERNAME_ENABLED);
             if (StringUtils.isNotBlank(handlerEnabled) && handlerEnabled.equals("username")) {
                 isEnabled = true;
             }
-            return isEnabled;
         }
-        return false;
+        return isEnabled;
     }
 
     private String addContextualInfo(String data, AuthenticationAuditData authenticationData) {
