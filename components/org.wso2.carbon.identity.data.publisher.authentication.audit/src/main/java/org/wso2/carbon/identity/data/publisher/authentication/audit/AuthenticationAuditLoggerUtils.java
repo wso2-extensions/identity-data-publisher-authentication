@@ -30,6 +30,7 @@ import org.wso2.carbon.identity.application.common.model.User;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.data.publisher.authentication.audit.model.AuthenticationAuditData;
 import org.wso2.carbon.identity.event.IdentityEventConstants;
+import org.wso2.carbon.identity.event.IdentityEventException;
 import org.wso2.carbon.identity.event.event.Event;
 
 import java.util.Map;
@@ -39,7 +40,8 @@ import java.util.Map;
  */
 public class AuthenticationAuditLoggerUtils {
 
-    private static final String ENABLE_USERNAME_IN_AUDIT_LOGS = "Authentication.Audit.UserNameEnableForAuditLogs";
+//    private static final String ENABLE_USERNAME_IN_AUDIT_LOGS = "Authentication.Audit.UserNameEnableForAuditLogs";
+    private static final String ENABLE_USERNAME_IN_AUDIT_LOGS = "AuthenticationAuditLogger.UserName.Attribute";
 
     /**
      * Create authentication data object from event for respective authentication step.
@@ -48,7 +50,8 @@ public class AuthenticationAuditLoggerUtils {
      * @param authType - authentication type
      * @return populated AuthenticationAuditData object
      */
-    public static AuthenticationAuditData createAuthenticationAudiDataObject(Event event, String authType) {
+    public static AuthenticationAuditData createAuthenticationAudiDataObject(Event event, String authType,
+                                                                             boolean isUsernameEnabled) {
 
         Map<String, Object> properties = event.getEventProperties();
         AuthenticationContext context = getAuthenticationContextFromProperties(properties);
@@ -71,7 +74,7 @@ public class AuthenticationAuditLoggerUtils {
             authenticationAuditData.setStepNo(getStepNoForAuthenticationStep(context));
 
         } else if (AuthenticationAuditLoggerConstants.AUDIT_AUTHENTICATION.equals(authType)) {
-            if (isAuditUsernameEnabled()) {
+            if (isUsernameEnabled) {
                 authenticationAuditData.setAuthenticatedUser(getAuthenticatedUserName(context, status));
             } else {
                 authenticationAuditData.setAuthenticatedUser(getSubjectIdentifier(context, status));
@@ -282,10 +285,4 @@ public class AuthenticationAuditLoggerUtils {
         }
         return stepNo;
     }
-
-    private static boolean isAuditUsernameEnabled() {
-
-        return Boolean.parseBoolean(IdentityUtil.getProperty(ENABLE_USERNAME_IN_AUDIT_LOGS));
-    }
-
 }

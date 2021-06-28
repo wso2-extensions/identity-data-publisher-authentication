@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.identity.data.publisher.authentication.audit;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.slf4j.MDC;
@@ -61,6 +62,7 @@ public class AuthenticationAuditLoggingHandler extends AbstractEventHandler {
     public void handleEvent(Event event) throws IdentityEventException {
 
         boolean isEnabled = isAuthenticationAuditLoggingEnabled(event);
+        boolean isUserNameEnabled = isAuditLoggerUserNameEnabled(event);
 
         if (!isEnabled) {
             return;
@@ -69,22 +71,22 @@ public class AuthenticationAuditLoggingHandler extends AbstractEventHandler {
         AuthenticationAuditData authenticationAuditData = null;
         if (IdentityEventConstants.EventName.AUTHENTICATION_STEP_SUCCESS.name().equals(event.getEventName())) {
             authenticationAuditData = AuthenticationAuditLoggerUtils.createAuthenticationAudiDataObject(event,
-                    AuthenticationAuditLoggerConstants.AUDIT_AUTHENTICATION_STEP);
+                    AuthenticationAuditLoggerConstants.AUDIT_AUTHENTICATION_STEP, isUserNameEnabled);
             doPublishAuthenticationStepSuccess(authenticationAuditData);
 
         } else if (IdentityEventConstants.EventName.AUTHENTICATION_STEP_FAILURE.name().equals(event.getEventName())) {
             authenticationAuditData = AuthenticationAuditLoggerUtils.createAuthenticationAudiDataObject(event,
-                    AuthenticationAuditLoggerConstants.AUDIT_AUTHENTICATION_STEP);
+                    AuthenticationAuditLoggerConstants.AUDIT_AUTHENTICATION_STEP, isUserNameEnabled);
             doPublishAuthenticationStepFailure(authenticationAuditData);
 
         } else if (IdentityEventConstants.EventName.AUTHENTICATION_SUCCESS.name().equals(event.getEventName())) {
             authenticationAuditData = AuthenticationAuditLoggerUtils.createAuthenticationAudiDataObject(event,
-                    AuthenticationAuditLoggerConstants.AUDIT_AUTHENTICATION);
+                    AuthenticationAuditLoggerConstants.AUDIT_AUTHENTICATION, isUserNameEnabled);
             doPublishAuthenticationSuccess(authenticationAuditData);
 
         } else if (IdentityEventConstants.EventName.AUTHENTICATION_FAILURE.name().equals(event.getEventName())) {
             authenticationAuditData = AuthenticationAuditLoggerUtils.createAuthenticationAudiDataObject(event,
-                    AuthenticationAuditLoggerConstants.AUDIT_AUTHENTICATION);
+                    AuthenticationAuditLoggerConstants.AUDIT_AUTHENTICATION, isUserNameEnabled);
             doPublishAuthenticationFailure(authenticationAuditData);
 
         } else if (IdentityEventConstants.EventName.SESSION_TERMINATE.name().equals(event.getEventName())) {
@@ -236,6 +238,20 @@ public class AuthenticationAuditLoggingHandler extends AbstractEventHandler {
             return Boolean.parseBoolean(handlerEnabled);
         }
 
+        return false;
+    }
+
+    private boolean isAuditLoggerUserNameEnabled(Event event) throws IdentityEventException {
+
+        if (this.configs.getModuleProperties() != null) {
+            boolean isEnabled = false;
+            String handlerEnabled = this.configs.getModuleProperties().getProperty(AuthenticationAuditLoggerConstants.
+                    AUTHENTICATION_AUDIT_LOGGER_USERNAME_ENABLED);
+            if (StringUtils.isNotBlank(handlerEnabled) && handlerEnabled.equals("username")) {
+                isEnabled = true;
+            }
+            return isEnabled;
+        }
         return false;
     }
 
