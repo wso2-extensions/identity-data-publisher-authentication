@@ -75,7 +75,6 @@ public class AuthenticationAuditLoggerUtils {
             } else {
                 authenticationAuditData.setAuthenticatedUser(getSubjectIdentifier(context, status));
             }
-            authenticationAuditData.setAuthenticatedUser(getAuthenticatedUserName(context, status));
             authenticationAuditData.setTenantDomain(getTenantDomainForAuthentication(context, params, status));
             authenticationAuditData.setStepNo(getStepNoForAuthentication(context, status));
             authenticationAuditData.setAuthenticatedIdps(getIdentityProviderList(context, status));
