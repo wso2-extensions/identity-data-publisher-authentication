@@ -43,9 +43,11 @@ public class AuthenticationAuditLoggerUtils {
      *
      * @param event - triggered event
      * @param authType - authentication type
+     * @param isUsernameEnabled - is username enable in audit logs
      * @return populated AuthenticationAuditData object
      */
-    public static AuthenticationAuditData createAuthenticationAudiDataObject(Event event, String authType) {
+    public static AuthenticationAuditData createAuthenticationAudiDataObject(Event event, String authType,
+                                                                             boolean isUsernameEnabled) {
 
         Map<String, Object> properties = event.getEventProperties();
         AuthenticationContext context = getAuthenticationContextFromProperties(properties);
@@ -68,7 +70,11 @@ public class AuthenticationAuditLoggerUtils {
             authenticationAuditData.setStepNo(getStepNoForAuthenticationStep(context));
 
         } else if (AuthenticationAuditLoggerConstants.AUDIT_AUTHENTICATION.equals(authType)) {
-            authenticationAuditData.setAuthenticatedUser(getSubjectIdentifier(context, status));
+            if (isUsernameEnabled) {
+                authenticationAuditData.setAuthenticatedUser(getAuthenticatedUserName(context, status));
+            } else {
+                authenticationAuditData.setAuthenticatedUser(getSubjectIdentifier(context, status));
+            }
             authenticationAuditData.setTenantDomain(getTenantDomainForAuthentication(context, params, status));
             authenticationAuditData.setStepNo(getStepNoForAuthentication(context, status));
             authenticationAuditData.setAuthenticatedIdps(getIdentityProviderList(context, status));
@@ -76,6 +82,15 @@ public class AuthenticationAuditLoggerUtils {
         }
 
         return authenticationAuditData;
+    }
+
+    private static String getAuthenticatedUserName(AuthenticationContext context, AuthenticatorStatus status) {
+
+        String userName = null;
+        if (status == AuthenticatorStatus.PASS) {
+            userName = context.getSequenceConfig().getAuthenticatedUser().getUserName();
+        }
+        return userName;
     }
 
     private static void setUserStoreDomain(AuthenticationAuditData authenticationAuditData, Object userObj) {
@@ -143,6 +158,9 @@ public class AuthenticationAuditLoggerUtils {
 
             if (localIDPData != null) {
                 tenantDomain = localIDPData.getUser().getTenantDomain();
+            }
+            if (StringUtils.isBlank(tenantDomain)) {
+                tenantDomain = context.getTenantDomain();
             }
         }
         return tenantDomain;
