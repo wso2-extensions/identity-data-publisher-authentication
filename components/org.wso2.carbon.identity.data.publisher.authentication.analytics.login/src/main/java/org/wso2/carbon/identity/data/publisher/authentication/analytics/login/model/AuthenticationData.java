@@ -37,6 +37,7 @@ public class AuthenticationData<T1 extends Object, T2 extends Object> {
     private String identityProviderType;
     private boolean authnSuccess;
     private String username;
+    private String userId;
     private String localUsername;
     private String userStoreDomain;
     private String tenantDomain;
@@ -123,6 +124,16 @@ public class AuthenticationData<T1 extends Object, T2 extends Object> {
     public void setUsername(String username) {
 
         this.username = username;
+    }
+
+    public String getUserId() {
+
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+
+        this.userId = userId;
     }
 
     public String getUserStoreDomain() {
