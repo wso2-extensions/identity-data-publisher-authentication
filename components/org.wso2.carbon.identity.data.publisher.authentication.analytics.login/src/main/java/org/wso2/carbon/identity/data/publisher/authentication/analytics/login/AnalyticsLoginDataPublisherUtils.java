@@ -325,7 +325,7 @@ public class AnalyticsLoginDataPublisherUtils {
                 authenticationData.setUserId(user.getUserId());
             } catch (UserIdNotFoundException e) {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("Null user id is found in the AuthenticateUser instance.");
+                    LOG.debug("Null user id is found in the AuthenticatedUser instance.");
                 }
             }
             authenticationData.setTenantDomain(user.getTenantDomain());
