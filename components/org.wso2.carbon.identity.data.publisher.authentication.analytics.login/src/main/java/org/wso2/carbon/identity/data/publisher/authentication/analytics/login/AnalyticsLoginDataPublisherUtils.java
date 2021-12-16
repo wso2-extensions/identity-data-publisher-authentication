@@ -19,9 +19,12 @@
 package org.wso2.carbon.identity.data.publisher.authentication.analytics.login;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.identity.application.authentication.framework.AuthenticatorStatus;
 import org.wso2.carbon.identity.application.authentication.framework.config.model.StepConfig;
 import org.wso2.carbon.identity.application.authentication.framework.context.AuthenticationContext;
+import org.wso2.carbon.identity.application.authentication.framework.exception.UserIdNotFoundException;
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedIdPData;
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkConstants;
@@ -45,6 +48,8 @@ import javax.servlet.http.HttpServletRequest;
  * Utils for Analytics Login data publisher.
  */
 public class AnalyticsLoginDataPublisherUtils {
+
+    private static final Log LOG = LogFactory.getLog(AnalyticsLoginDataPublisherUtils.class);
 
     private static final String APPLICATION_DOMAIN = "Application";
     private static final String WORKFLOW_DOMAIN = "Workflow";
@@ -316,6 +321,13 @@ public class AnalyticsLoginDataPublisherUtils {
         if (userObj instanceof AuthenticatedUser) {
             AuthenticatedUser user = (AuthenticatedUser) userObj;
             authenticationData.setUsername(user.getUserName());
+            try {
+                authenticationData.setUserId(user.getUserId());
+            } catch (UserIdNotFoundException e) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Null user id is found in the AuthenticatedUser instance.");
+                }
+            }
             authenticationData.setTenantDomain(user.getTenantDomain());
             authenticationData.setUserStoreDomain(user.getUserStoreDomain());
         }
