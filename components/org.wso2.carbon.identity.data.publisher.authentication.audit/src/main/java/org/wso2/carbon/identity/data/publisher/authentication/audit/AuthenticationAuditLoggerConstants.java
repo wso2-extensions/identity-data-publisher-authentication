@@ -29,6 +29,7 @@ public class AuthenticationAuditLoggerConstants {
     public static final String AUDIT_AUTHENTICATION = "auditAuth";
 
     public static final String AUTHENTICATION_AUDIT_LOGGER_ENABLED = "authenticationAuditLogger.enable";
+    public static final String AUTHENTICATION_AUDIT_LOGGER_USERNAME_ENABLED = "authenticationAuditLogger.userName.attribute";
 
     private AuthenticationAuditLoggerConstants(){
 
