@@ -183,6 +183,7 @@ public class AuthenticationAuditLoggingHandler extends AbstractEventHandler {
                 + "\",\"" + "RelyingParty" + "\" : \"" + context.getRelyingParty()
                 + "\",\"" + "AuthenticatedIdPs" + "\" : \"" + authenticatedIDPs
                 + "\"";
+        auditData = addRemoteAddressAndAgent(auditData);
 
         String idpName = null;
         ExternalIdPConfig externalIdPConfig = context.getExternalIdP();
@@ -259,6 +260,14 @@ public class AuthenticationAuditLoggingHandler extends AbstractEventHandler {
         data += ",\"" + USER_AGENT_KEY + "\" : \"" + MDC.get(USER_AGENT_QUERY_KEY)
                 + "\",\"" + REMOTE_ADDRESS_KEY + "\" : \"" + MDC.get(REMOTE_ADDRESS_QUERY_KEY)
                 + "\",\"" + USER_STORE_DOMAIN_KEY + "\" : \"" + authenticationData.getUserStoreDomain()
+                + "\"";
+        return data;
+    }
+
+    private String addRemoteAddressAndAgent(String data) {
+
+        data += ",\"" + USER_AGENT_KEY + "\" : \"" + MDC.get(USER_AGENT_QUERY_KEY)
+                + "\",\"" + REMOTE_ADDRESS_KEY + "\" : \"" + MDC.get(REMOTE_ADDRESS_QUERY_KEY)
                 + "\"";
         return data;
     }
