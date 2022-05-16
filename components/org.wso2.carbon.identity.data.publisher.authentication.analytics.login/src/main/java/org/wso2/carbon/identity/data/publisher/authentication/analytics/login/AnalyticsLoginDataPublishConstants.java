@@ -34,6 +34,8 @@ public class AnalyticsLoginDataPublishConstants {
     public static final String OVERALL_EVENT = "overall";
 
     public static final String ANALYTICS_LOGIN_DATA_PUBLISHER_ENABLED = "analyticsLoginDataPublisher.enable";
+    public static final String ANALYTICS_LOGIN_DATA_PUBLISHER_ENABLE_MULTIPLE_EVENT_PUBLISHING_FOR_SAAS_APPS =
+            "analyticsLoginDataPublisher.enableMultipleEventPublishingForSaasApps";
     public static final String ANALYTICS_LOGIN_DATA_PUBLISHER_V110_ENABLED = "analyticsLoginDataPublisherV110.enable";
     public static final long LONG_NOT_AVAILABLE = 0;
     public static final String ANALYTICS_LOGIN_PUBLISHER_V110_NAME = "analyticsLoginDataPublisherV110";
