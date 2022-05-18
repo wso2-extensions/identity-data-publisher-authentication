@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.identity.data.publisher.authentication.analytics.login;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -150,6 +151,7 @@ public class AnalyticsLoginDataPublishHandler extends AbstractEventHandler {
         String[] publishingDomains = (String[]) authenticationData
                 .getParameter(AnalyticsLoginDataPublishConstants.TENANT_DOMAIN_NAMES);
         if (publishingDomains != null && publishingDomains.length > 0) {
+            publishingDomains = processPublishingDomains(publishingDomains, authenticationData.getTenantDomain());
 
             try {
                 FrameworkUtils.startTenantFlow(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
@@ -231,5 +233,44 @@ public class AnalyticsLoginDataPublishHandler extends AbstractEventHandler {
         }
 
         return false;
+    }
+
+    private boolean isMultipleEventPublishingForSaasAppsEnabled() {
+
+        if (this.configs.getModuleProperties() != null) {
+            String multipleEventPublishingForSaasAppsEnabled = this.configs.getModuleProperties().
+                    getProperty(AnalyticsLoginDataPublishConstants.
+                            ANALYTICS_LOGIN_DATA_PUBLISHER_ENABLE_MULTIPLE_EVENT_PUBLISHING_FOR_SAAS_APPS);
+            if (StringUtils.isNotBlank(multipleEventPublishingForSaasAppsEnabled)) {
+                return Boolean.parseBoolean(multipleEventPublishingForSaasAppsEnabled);
+            }
+        }
+        // If Multiple Event Publishing For SaaS Apps property is not defined, return true as default value.
+        return true;
+    }
+
+    /**
+     * Process publishing tenant domains according to config `enableMultipleEventPublishingForSaasApps`.
+     * If multiple event publishing disabled for the SaaS apps, return only SP tenant domain as publishing domain.
+     *
+     * @param publishingDomains Publishing tenant domains array.
+     * @param userTenantDomain  User tenant domain.
+     * @return Processed publishing tenant domains.
+     */
+    private String[] processPublishingDomains(String[] publishingDomains, String userTenantDomain) {
+
+        if (!isMultipleEventPublishingForSaasAppsEnabled() && ArrayUtils.getLength(publishingDomains) == 2 &&
+                StringUtils.isNotBlank(userTenantDomain)) {
+            // If we have two publishing domains one is user tenant domain and other one is sp tenant domain.
+            String spTenantDomain;
+            if (userTenantDomain.equalsIgnoreCase(publishingDomains[0])) {
+                spTenantDomain = publishingDomains[1];
+            } else {
+                spTenantDomain = publishingDomains[0];
+            }
+            // If multiple event publishing disabled for the SaaS apps, publishing events only for the SP tenant domain.
+            return new String[]{spTenantDomain};
+        }
+        return publishingDomains;
     }
 }
