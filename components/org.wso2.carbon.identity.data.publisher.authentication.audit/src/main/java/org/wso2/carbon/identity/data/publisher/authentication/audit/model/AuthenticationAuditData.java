@@ -32,6 +32,7 @@ public class AuthenticationAuditData {
     private String authenticatedIdps;
     private String userStoreDomain;
     private int stepNo;
+    private String userId;
 
     public String getContextIdentifier() {
 
@@ -121,5 +122,15 @@ public class AuthenticationAuditData {
     public void setUserStoreDomain(String userStoreDomain) {
 
         this.userStoreDomain = userStoreDomain;
+    }
+
+    public String getUserId() {
+
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+
+        this.userId = userId;
     }
 }

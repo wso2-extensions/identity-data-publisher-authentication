@@ -30,11 +30,14 @@ import org.wso2.carbon.identity.application.authentication.framework.context.Ses
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticationResult;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkConstants;
+import org.wso2.carbon.identity.central.log.mgt.utils.LoggerUtils;
+import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.data.publisher.authentication.audit.model.AuthenticationAuditData;
 import org.wso2.carbon.identity.event.IdentityEventConstants;
 import org.wso2.carbon.identity.event.IdentityEventException;
 import org.wso2.carbon.identity.event.event.Event;
 import org.wso2.carbon.identity.event.handler.AbstractEventHandler;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.Map;
 
@@ -111,8 +114,12 @@ public class AuthenticationAuditLoggingHandler extends AbstractEventHandler {
 
     protected void doPublishAuthenticationStepSuccess(AuthenticationAuditData authenticationData) {
 
+        String username = authenticationData.getAuthenticatedUser();
+        if (LoggerUtils.isLogMaskingEnable) {
+            username = LoggerUtils.maskContent(username);
+        }
         String auditData = "\"" + "ContextIdentifier" + "\" : \"" + authenticationData.getContextIdentifier()
-                + "\",\"" + "AuthenticatedUser" + "\" : \"" + authenticationData.getAuthenticatedUser()
+                + "\",\"" + "AuthenticatedUser" + "\" : \"" + username
                 + "\",\"" + "AuthenticatedUserTenantDomain" + "\" : \"" + authenticationData.getTenantDomain()
                 + "\",\"" + "ServiceProviderName" + "\" : \"" + authenticationData.getServiceProvider()
                 + "\",\"" + "RequestType" + "\" : \"" + authenticationData.getInboundProtocol()
@@ -123,7 +130,7 @@ public class AuthenticationAuditLoggingHandler extends AbstractEventHandler {
 
         AUDIT_LOG.info(String.format(
                 FrameworkConstants.AUDIT_MESSAGE,
-                authenticationData.getAuthenticatedUser(),
+                username,
                 "LoginStepSuccess",
                 "ApplicationAuthenticationFramework", auditData, FrameworkConstants.AUDIT_SUCCESS));
 
@@ -131,6 +138,10 @@ public class AuthenticationAuditLoggingHandler extends AbstractEventHandler {
 
     protected void doPublishAuthenticationStepFailure(AuthenticationAuditData authenticationData) {
 
+        String username = authenticationData.getAuthenticatedUser();
+        if (LoggerUtils.isLogMaskingEnable) {
+            username = LoggerUtils.maskContent(username);
+        }
         String auditData = "\"" + "ContextIdentifier" + "\" : \"" + authenticationData.getContextIdentifier()
                 + "\",\"" + "ServiceProviderName" + "\" : \"" + authenticationData.getServiceProvider()
                 + "\",\"" + "RequestType" + "\" : \"" + authenticationData.getInboundProtocol()
@@ -141,7 +152,7 @@ public class AuthenticationAuditLoggingHandler extends AbstractEventHandler {
 
         AUDIT_LOG.info(String.format(
                 FrameworkConstants.AUDIT_MESSAGE,
-                authenticationData.getAuthenticatedUser(),
+                username,
                 "Login",
                 "ApplicationAuthenticationFramework", auditData, FrameworkConstants.AUDIT_FAILED));
     }
@@ -150,8 +161,14 @@ public class AuthenticationAuditLoggingHandler extends AbstractEventHandler {
 
         AuthenticationResult authenticationResult = new AuthenticationResult();
         authenticationResult.setAuthenticated(true);
+        String username = authenticationData.getAuthenticatedUser();
+        String initiator = authenticationData.getAuthenticatedUser();
+        if (LoggerUtils.isLogMaskingEnable) {
+            username = LoggerUtils.maskContent(username);
+            initiator = authenticationData.getUserId();
+        }
         String auditData = "\"" + "ContextIdentifier" + "\" : \"" + authenticationData.getContextIdentifier()
-                + "\",\"" + "AuthenticatedUser" + "\" : \"" + authenticationData.getAuthenticatedUser()
+                + "\",\"" + "AuthenticatedUser" + "\" : \"" + username
                 + "\",\"" + "AuthenticatedUserTenantDomain" + "\" : \"" + authenticationData.getTenantDomain()
                 + "\",\"" + "ServiceProviderName" + "\" : \"" + authenticationData.getServiceProvider()
                 + "\",\"" + "RequestType" + "\" : \"" + authenticationData.getInboundProtocol()
@@ -162,13 +179,17 @@ public class AuthenticationAuditLoggingHandler extends AbstractEventHandler {
 
         AUDIT_LOG.info(String.format(
                 FrameworkConstants.AUDIT_MESSAGE,
-                authenticationData.getAuthenticatedUser(),
+                initiator,
                 "Login",
                 "ApplicationAuthenticationFramework", auditData, FrameworkConstants.AUDIT_SUCCESS));
     }
 
     protected void doPublishAuthenticationFailure(AuthenticationAuditData authenticationData) {
 
+        String username = authenticationData.getAuthenticatedUser();
+        if (LoggerUtils.isLogMaskingEnable) {
+            username = LoggerUtils.maskContent(username);
+        }
         String auditData = "\"" + "ContextIdentifier" + "\" : \"" + authenticationData.getContextIdentifier()
                 + "\",\"" + "ServiceProviderName" + "\" : \"" + authenticationData.getServiceProvider()
                 + "\",\"" + "RequestType" + "\" : \"" + authenticationData.getInboundProtocol()
@@ -179,7 +200,7 @@ public class AuthenticationAuditLoggingHandler extends AbstractEventHandler {
 
         AUDIT_LOG.info(String.format(
                 FrameworkConstants.AUDIT_MESSAGE,
-                authenticationData.getAuthenticatedUser(),
+                username,
                 "Login",
                 "ApplicationAuthenticationFramework", auditData, FrameworkConstants.AUDIT_FAILED));
     }
@@ -187,6 +208,13 @@ public class AuthenticationAuditLoggingHandler extends AbstractEventHandler {
     protected void doPublishSessionTermination(AuthenticationContext context, String username,
                                                String tenantDomain, String authenticatedIDPs) {
 
+        String initiator;
+        if (LoggerUtils.isLogMaskingEnable) {
+            initiator = IdentityUtil.getInitiatorId(MultitenantUtils.getTenantAwareUsername(username), tenantDomain);
+            username = LoggerUtils.maskContent(username);
+        } else {
+            initiator = username;
+        }
         String auditData = "\"" + "ContextIdentifier" + "\" : \"" + context.getContextIdentifier()
 
                 + "\",\"" + "LoggedOutUser" + "\" : \"" + username
@@ -205,7 +233,7 @@ public class AuthenticationAuditLoggingHandler extends AbstractEventHandler {
         }
         AUDIT_LOG.info(String.format(
                 FrameworkConstants.AUDIT_MESSAGE,
-                username,
+                initiator,
                 "Logout", idpName, auditData, FrameworkConstants.AUDIT_SUCCESS));
     }
 
