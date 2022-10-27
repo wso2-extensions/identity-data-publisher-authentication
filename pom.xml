@@ -26,7 +26,7 @@
 
     <groupId>org.wso2.carbon.identity.datapublisher.authentication</groupId>
     <artifactId>identity-data-publisher-authentication</artifactId>
-    <version>5.5.1</version>
+    <version>5.5.2-SNAPSHOT</version>
     <modelVersion>4.0.0</modelVersion>
     <packaging>pom</packaging>
     <name>WSO2 Carbon authentication data publisher module</name>
@@ -40,7 +40,7 @@
         <developerConnection>scm:git:https://github.com/wso2-extensions/identity-data-publisher-authentication.git
         </developerConnection>
         <connection>scm:git:https://github.com/wso2-extensions/identity-data-publisher-authentication.git</connection>
-        <tag>v5.5.1</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <dependencyManagement>
