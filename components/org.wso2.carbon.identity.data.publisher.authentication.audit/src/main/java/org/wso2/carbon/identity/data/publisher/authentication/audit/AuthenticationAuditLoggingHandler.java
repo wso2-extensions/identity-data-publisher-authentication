@@ -133,7 +133,6 @@ public class AuthenticationAuditLoggingHandler extends AbstractEventHandler {
                 username,
                 "LoginStepSuccess",
                 "ApplicationAuthenticationFramework", auditData, FrameworkConstants.AUDIT_SUCCESS));
-
     }
 
     protected void doPublishAuthenticationStepFailure(AuthenticationAuditData authenticationData) {
