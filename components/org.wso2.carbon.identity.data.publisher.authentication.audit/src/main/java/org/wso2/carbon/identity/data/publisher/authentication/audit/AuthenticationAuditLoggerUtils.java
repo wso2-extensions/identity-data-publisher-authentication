@@ -43,10 +43,10 @@ public class AuthenticationAuditLoggerUtils {
     /**
      * Create authentication data object from event for respective authentication step.
      *
-     * @param event - triggered event
-     * @param authType - authentication type
-     * @param isUsernameEnabled - is username enable in audit logs
-     * @return populated AuthenticationAuditData object
+     * @param event             Triggered event.
+     * @param authType          Authentication type.
+     * @param isUsernameEnabled Is username enable in audit logs.
+     * @return Populated AuthenticationAuditData object.
      */
     public static AuthenticationAuditData createAuthenticationAudiDataObject(Event event, String authType,
                                                                              boolean isUsernameEnabled) {
@@ -92,7 +92,7 @@ public class AuthenticationAuditLoggerUtils {
             authenticationAuditData.setStepNo(getStepNoForAuthentication(context, status));
             authenticationAuditData.setAuthenticatedIdps(getIdentityProviderList(context, status));
         }
-        if (StringUtils.isNotBlank(tenantDomain)){
+        if (StringUtils.isNotBlank(tenantDomain) && StringUtils.isNotBlank(username)) {
             String userId = IdentityUtil.getInitiatorId(username, tenantDomain);
             authenticationAuditData.setUserId(userId);
         }
