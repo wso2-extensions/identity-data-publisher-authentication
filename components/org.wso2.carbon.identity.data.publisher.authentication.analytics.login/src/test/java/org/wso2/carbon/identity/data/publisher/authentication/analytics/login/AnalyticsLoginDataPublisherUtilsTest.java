@@ -44,6 +44,8 @@ import javax.servlet.http.HttpServletRequest;
 public class AnalyticsLoginDataPublisherUtilsTest {
 
     private static final String TENANT_DOMAIN = "abc.com";
+    private static final String USER_ID = "940ef81d-ea35-483e-aa5d-7e55c269e8cc";
+
     @Mock
     HttpServletRequest mockHttpServletRequest;
     @Mock
@@ -62,6 +64,7 @@ public class AnalyticsLoginDataPublisherUtilsTest {
         Map<String, Object> param = new HashMap<>();
         Object userObj = new AuthenticatedUser();
         ((AuthenticatedUser) userObj).setTenantDomain(TENANT_DOMAIN);
+        ((AuthenticatedUser) userObj).setUserId(USER_ID);
         param.put(FrameworkConstants.AnalyticsAttributes.USER, userObj);
         Event event = createEvent(mockHttpServletRequest, mockAuthenticationContext, mockSessionContext, param,
                 IdentityEventConstants.EventName.AUTHENTICATION_STEP_SUCCESS);
