@@ -44,7 +44,6 @@ import javax.servlet.http.HttpServletRequest;
 public class AnalyticsLoginDataPublisherUtilsTest {
 
     private static final String TENANT_DOMAIN = "abc.com";
-
     @Mock
     HttpServletRequest mockHttpServletRequest;
     @Mock
