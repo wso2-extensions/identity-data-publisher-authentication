@@ -64,7 +64,7 @@ public class AnalyticsLoginDataPublisherUtilsTest {
         Map<String, Object> param = new HashMap<>();
         Object userObj = new AuthenticatedUser();
         ((AuthenticatedUser) userObj).setTenantDomain(TENANT_DOMAIN);
-        ((AuthenticatedUser) userObj).setUserId(USER_ID);
+//        ((AuthenticatedUser) userObj).setUserId(USER_ID);
         param.put(FrameworkConstants.AnalyticsAttributes.USER, userObj);
         Event event = createEvent(mockHttpServletRequest, mockAuthenticationContext, mockSessionContext, param,
                 IdentityEventConstants.EventName.AUTHENTICATION_STEP_SUCCESS);
