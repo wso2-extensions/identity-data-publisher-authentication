@@ -124,7 +124,10 @@ public class AuthenticationAuditLoggingHandler extends AbstractEventHandler {
                 + "\",\"" + "AuthenticatedIdP" + "\" : \"" + authenticationData.getAuthenticatedIdps()
                 + "\"";
         auditData = addContextualInfo(auditData, authenticationData);
-
+        /*
+        Here username is used for the initiator instead of userId as userId is not resolved yet.User is not
+        authenticated yet.
+        */
         AUDIT_LOG.info(String.format(
                 FrameworkConstants.AUDIT_MESSAGE,
                 username,
@@ -142,6 +145,10 @@ public class AuthenticationAuditLoggingHandler extends AbstractEventHandler {
                 + "\"";
         auditData = addContextualInfo(auditData, authenticationData);
 
+        /*
+        Here username is used for the initiator instead of userId as userId is not resolved here due to the
+        authentication failure.
+        */
         AUDIT_LOG.info(String.format(
                 FrameworkConstants.AUDIT_MESSAGE,
                 getUsernameForAuditLog(authenticationData.getAuthenticatedUser()),
@@ -279,7 +286,6 @@ public class AuthenticationAuditLoggingHandler extends AbstractEventHandler {
      * Returns username for audit logs based on log masking config.
      *
      * @param username Username.
-     *
      * @return username. Returns masked username if log masking is enabled.
      * */
     private String getUsernameForAuditLog(String username) {
@@ -293,8 +299,8 @@ public class AuthenticationAuditLoggingHandler extends AbstractEventHandler {
     /**
      * Returns initiator for audit logs based on log masking config.
      *
-     * @param username      Username.
-     * @param tenantDomain  Tenant domain.
+     * @param username     Username.
+     * @param tenantDomain Tenant domain.
      * @return initiator. Returns userId if log masking is enabled, if userId cannot be resolved then returns the masked
      * username.
      * */
