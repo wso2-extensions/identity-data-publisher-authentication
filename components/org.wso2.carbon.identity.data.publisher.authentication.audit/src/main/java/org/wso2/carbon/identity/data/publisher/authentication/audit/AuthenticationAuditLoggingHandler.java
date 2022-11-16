@@ -125,8 +125,8 @@ public class AuthenticationAuditLoggingHandler extends AbstractEventHandler {
                 + "\"";
         auditData = addContextualInfo(auditData, authenticationData);
         /*
-        Here username is used for the initiator instead of userId as userId is not resolved yet.User is not
-        authenticated yet.
+        Here username is used for the initiator instead of userId when the log masking is enabled also, as userId is
+        not resolved yet.User is not authenticated yet.
         */
         AUDIT_LOG.info(String.format(
                 FrameworkConstants.AUDIT_MESSAGE,
@@ -146,8 +146,8 @@ public class AuthenticationAuditLoggingHandler extends AbstractEventHandler {
         auditData = addContextualInfo(auditData, authenticationData);
 
         /*
-        Here username is used for the initiator instead of userId as userId is not resolved here due to the
-        authentication failure.
+        Here username is used for the initiator instead of userId when the log masking is enabled also, as userId is not
+        resolved here due to the authentication failure.
         */
         AUDIT_LOG.info(String.format(
                 FrameworkConstants.AUDIT_MESSAGE,
