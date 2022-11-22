@@ -310,7 +310,8 @@ public class AuthenticationAuditLoggingHandler extends AbstractEventHandler {
         if (!LoggerUtils.isLogMaskingEnable) {
             return username;
         }
-        String tenantAwareUsername = MultitenantUtils.getTenantAwareUsername(username);
+        String tenantAwareUsername = StringUtils.isNotBlank(username) ?
+                MultitenantUtils.getTenantAwareUsername(username) : null;
         if (StringUtils.isNotBlank(tenantAwareUsername) && StringUtils.isNotBlank(tenantDomain)) {
             initiator = IdentityUtil.getInitiatorId(tenantAwareUsername, tenantDomain);
         }

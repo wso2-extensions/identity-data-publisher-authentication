@@ -84,7 +84,8 @@ public class AuthenticationAuditLoggerUtils {
                 authenticationAuditData.setAuthenticatedUser(authenticatedUser);
             } else {
                 authenticatedUser = getSubjectIdentifier(context, status);
-                username = MultitenantUtils.getTenantAwareUsername(authenticatedUser);
+                username = StringUtils.isNotBlank(authenticatedUser) ?
+                        MultitenantUtils.getTenantAwareUsername(authenticatedUser) : null;
                 authenticationAuditData.setAuthenticatedUser(authenticatedUser);
             }
             tenantDomain = getTenantDomainForAuthentication(context, params, status);
