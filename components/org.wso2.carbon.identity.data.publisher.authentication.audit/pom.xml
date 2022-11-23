@@ -55,6 +55,10 @@
             <artifactId>org.wso2.carbon.identity.event</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.wso2.carbon.identity.framework</groupId>
+            <artifactId>org.wso2.carbon.identity.central.log.mgt</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
             <scope>test</scope>
@@ -70,7 +74,7 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.ops4j.pax.logging</groupId>
+            <groupId>org.wso2.org.ops4j.pax.logging</groupId>
             <artifactId>pax-logging-api</artifactId>
         </dependency>
         <dependency>
@@ -102,8 +106,9 @@
                             org.osgi.framework; version="${osgi.framework.imp.pkg.version.range}",
                             org.osgi.service.component.*; version="${osgi.service.component.imp.pkg.version.range}",
                             org.wso2.carbon; version="${carbon.kernel.package.import.version.range}",
+                            org.wso2.carbon.utils.multitenancy; version="${carbon.kernel.package.import.version.range}",
                             org.wso2.carbon.identity.application.authentication.framework.*;version="${carbon.identity.framework.package.import.version.range}",
-
+                            org.wso2.carbon.identity.core.util;  version="${carbon.identity.framework.package.import.version.range}",
                             org.apache.commons.lang; version="${commons-lang.wso2.osgi.version.range}",
                             org.apache.commons.logging; version="${commons-logging.osgi.version.range}",
                             org.slf4j; version="${org.slf4j.imp.pkg.version.range}",
@@ -113,6 +118,7 @@
                             org.wso2.carbon.identity.event.services; version="${carbon.identity.package.import.version.range}",
                             org.wso2.carbon.identity.event.bean; version="${carbon.identity.package.import.version.range}",
                             org.wso2.carbon.identity.application.common.model; version="${carbon.identity.framework.imp.pkg.version.range}",
+                            org.wso2.carbon.identity.central.log.mgt.utils; version="${carbon.identity.framework.imp.pkg.version.range}",
                         </Import-Package>
                         <Export-Package>
                             !org.wso2.carbon.identity.data.publisher.authentication.audit.internal,

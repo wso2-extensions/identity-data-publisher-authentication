@@ -27,9 +27,12 @@ import org.wso2.carbon.identity.application.authentication.framework.model.Authe
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkConstants;
 import org.wso2.carbon.identity.application.common.model.User;
+import org.wso2.carbon.identity.central.log.mgt.utils.LoggerUtils;
+import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.data.publisher.authentication.audit.model.AuthenticationAuditData;
 import org.wso2.carbon.identity.event.IdentityEventConstants;
 import org.wso2.carbon.identity.event.event.Event;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.Map;
 
@@ -41,10 +44,10 @@ public class AuthenticationAuditLoggerUtils {
     /**
      * Create authentication data object from event for respective authentication step.
      *
-     * @param event - triggered event
-     * @param authType - authentication type
-     * @param isUsernameEnabled - is username enable in audit logs
-     * @return populated AuthenticationAuditData object
+     * @param event             Triggered event.
+     * @param authType          Authentication type.
+     * @param isUsernameEnabled Is username enable in audit logs.
+     * @return Populated AuthenticationAuditData object.
      */
     public static AuthenticationAuditData createAuthenticationAudiDataObject(Event event, String authType,
                                                                              boolean isUsernameEnabled) {
@@ -63,24 +66,43 @@ public class AuthenticationAuditLoggerUtils {
         Object userObj = params.get(FrameworkConstants.AnalyticsAttributes.USER);
         setUserStoreDomain(authenticationAuditData, userObj);
 
+        String authenticatedUser = null;
+        String username = null;
+        String tenantDomain = null;
+
         if (AuthenticationAuditLoggerConstants.AUDIT_AUTHENTICATION_STEP.equals(authType)) {
-            authenticationAuditData.setAuthenticatedUser(getUserNameForAuthenticationStep(params));
-            authenticationAuditData.setTenantDomain(getTenantDomainForAuthenticationStep(params));
+            authenticatedUser = getUserNameForAuthenticationStep(params);
+            username = authenticatedUser;
+            tenantDomain = getTenantDomainForAuthenticationStep(params);
+            authenticationAuditData.setAuthenticatedUser(authenticatedUser);
+            authenticationAuditData.setTenantDomain(tenantDomain);
             authenticationAuditData.setAuthenticatedIdps(getIdentityProviderForAuthenticationStep(context));
             authenticationAuditData.setStepNo(getStepNoForAuthenticationStep(context));
-
         } else if (AuthenticationAuditLoggerConstants.AUDIT_AUTHENTICATION.equals(authType)) {
             if (isUsernameEnabled) {
-                authenticationAuditData.setAuthenticatedUser(getAuthenticatedUserName(context, status));
+                authenticatedUser = getAuthenticatedUserName(context, status);
+                username = authenticatedUser;
+                authenticationAuditData.setAuthenticatedUser(authenticatedUser);
             } else {
-                authenticationAuditData.setAuthenticatedUser(getSubjectIdentifier(context, status));
+                authenticatedUser = getSubjectIdentifier(context, status);
+                /*
+                Tenant aware username is required only if masking logs has been enabled. Added this condition to avoid
+                unnecessary method call in the case of masking logs is disabled.
+                */
+                if (LoggerUtils.isLogMaskingEnable && StringUtils.isNotBlank(authenticatedUser)) {
+                    username = MultitenantUtils.getTenantAwareUsername(authenticatedUser);
+                }
+                authenticationAuditData.setAuthenticatedUser(authenticatedUser);
             }
-            authenticationAuditData.setTenantDomain(getTenantDomainForAuthentication(context, params, status));
+            tenantDomain = getTenantDomainForAuthentication(context, params, status);
+            authenticationAuditData.setTenantDomain(tenantDomain);
             authenticationAuditData.setStepNo(getStepNoForAuthentication(context, status));
             authenticationAuditData.setAuthenticatedIdps(getIdentityProviderList(context, status));
-
         }
-
+        if (LoggerUtils.isLogMaskingEnable && StringUtils.isNotBlank(tenantDomain) && StringUtils.isNotBlank(username)) {
+            String userId = IdentityUtil.getInitiatorId(username, tenantDomain);
+            authenticationAuditData.setUserId(userId);
+        }
         return authenticationAuditData;
     }
 
@@ -281,5 +303,4 @@ public class AuthenticationAuditLoggerUtils {
         }
         return stepNo;
     }
-
 }
