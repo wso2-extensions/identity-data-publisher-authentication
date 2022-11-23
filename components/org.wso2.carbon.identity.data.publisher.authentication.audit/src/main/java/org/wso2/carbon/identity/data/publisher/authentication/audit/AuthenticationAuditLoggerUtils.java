@@ -89,9 +89,8 @@ public class AuthenticationAuditLoggerUtils {
                 Tenant aware username is required only if masking logs has been enabled. Added this condition to avoid
                 unnecessary method call in the case of masking logs is disabled.
                 */
-                if (LoggerUtils.isLogMaskingEnable) {
-                    username = StringUtils.isNotBlank(authenticatedUser) ?
-                            MultitenantUtils.getTenantAwareUsername(authenticatedUser) : null;
+                if (LoggerUtils.isLogMaskingEnable && StringUtils.isNotBlank(authenticatedUser)) {
+                    username = MultitenantUtils.getTenantAwareUsername(authenticatedUser);
                 }
                 authenticationAuditData.setAuthenticatedUser(authenticatedUser);
             }
