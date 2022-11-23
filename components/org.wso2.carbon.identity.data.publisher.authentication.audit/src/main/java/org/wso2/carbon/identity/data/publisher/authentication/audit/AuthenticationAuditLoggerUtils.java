@@ -27,6 +27,7 @@ import org.wso2.carbon.identity.application.authentication.framework.model.Authe
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkConstants;
 import org.wso2.carbon.identity.application.common.model.User;
+import org.wso2.carbon.identity.central.log.mgt.utils.LoggerUtils;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.data.publisher.authentication.audit.model.AuthenticationAuditData;
 import org.wso2.carbon.identity.event.IdentityEventConstants;
@@ -84,8 +85,14 @@ public class AuthenticationAuditLoggerUtils {
                 authenticationAuditData.setAuthenticatedUser(authenticatedUser);
             } else {
                 authenticatedUser = getSubjectIdentifier(context, status);
-                username = StringUtils.isNotBlank(authenticatedUser) ?
-                        MultitenantUtils.getTenantAwareUsername(authenticatedUser) : null;
+                /*
+                Tenant aware username is required only if masking logs has been enabled. Added this condition to avoid
+                unnecessary method call in the case of masking logs is disabled.
+                */
+                if (LoggerUtils.isLogMaskingEnable) {
+                    username = StringUtils.isNotBlank(authenticatedUser) ?
+                            MultitenantUtils.getTenantAwareUsername(authenticatedUser) : null;
+                }
                 authenticationAuditData.setAuthenticatedUser(authenticatedUser);
             }
             tenantDomain = getTenantDomainForAuthentication(context, params, status);
@@ -93,7 +100,7 @@ public class AuthenticationAuditLoggerUtils {
             authenticationAuditData.setStepNo(getStepNoForAuthentication(context, status));
             authenticationAuditData.setAuthenticatedIdps(getIdentityProviderList(context, status));
         }
-        if (StringUtils.isNotBlank(tenantDomain) && StringUtils.isNotBlank(username)) {
+        if (LoggerUtils.isLogMaskingEnable && StringUtils.isNotBlank(tenantDomain) && StringUtils.isNotBlank(username)) {
             String userId = IdentityUtil.getInitiatorId(username, tenantDomain);
             authenticationAuditData.setUserId(userId);
         }
