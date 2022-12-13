@@ -242,7 +242,7 @@
         <carbon.identity.data.publisher.package.export.version>${project.version}</carbon.identity.data.publisher.package.export.version>
         <carbon.identity.data.publisher.package.import.version.range>[5.3.0, 6.0.0)</carbon.identity.data.publisher.package.import.version.range>
         <carbon.identity.framework.package.import.version.range>[5.14.67, 6.0.0)</carbon.identity.framework.package.import.version.range>
-        <carbon.analytics-common.version>5.2.10</carbon.analytics-common.version>
+        <carbon.analytics-common.version>5.2.50</carbon.analytics-common.version>
         <carbon.analytics-common.imp.pkg.version.range>[5.2.10,6.0.0)</carbon.analytics-common.imp.pkg.version.range>
         <carbon.p2.plugin.version>1.5.3</carbon.p2.plugin.version>
         <maven.buildnumber.plugin.version>1.4</maven.buildnumber.plugin.version>
