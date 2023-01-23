@@ -103,7 +103,7 @@ public class AnalyticsLoginDataPublishHandler extends AbstractEventHandler {
                     authenticationData.getLocalUsername(), authenticationData.getTenantDomain());
         }
 
-        Object[] payloadData = new Object[23];
+        Object[] payloadData = new Object[24];
         payloadData[0] = authenticationData.getContextId();
         payloadData[1] = authenticationData.getEventId();
         payloadData[2] = authenticationData.getEventType();
@@ -137,7 +137,10 @@ public class AnalyticsLoginDataPublishHandler extends AbstractEventHandler {
         payloadData[19] = authenticationData.getAuthenticator();
         payloadData[20] = authenticationData.isInitialLogin();
         payloadData[21] = authenticationData.getIdentityProviderType();
-        payloadData[22] = System.currentTimeMillis();
+        payloadData[22] = AuthnDataPublisherUtils.replaceIfNotAvailable(
+                AuthPublisherConstants.CONFIG_PREFIX + AuthPublisherConstants.USERNAME_USER_INPUT,
+                authenticationData.getUsernameUserInput());
+        payloadData[23] = System.currentTimeMillis();
 
         if (LOG.isDebugEnabled()) {
             LOG.debug("The created payload: " + Arrays.asList(payloadData));

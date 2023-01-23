@@ -99,6 +99,10 @@
       "type": "STRING"
     },
     {
+      "name": "usernameUserInput",
+      "type": "STRING"
+    },
+    {
       "name": "_timestamp",
       "type": "LONG"
     },

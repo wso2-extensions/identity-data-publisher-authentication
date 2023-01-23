@@ -39,6 +39,9 @@ public class AnalyticsLoginDataPublishConstants {
     public static final String ANALYTICS_LOGIN_DATA_PUBLISHER_V110_ENABLED = "analyticsLoginDataPublisherV110.enable";
     public static final long LONG_NOT_AVAILABLE = 0;
     public static final String ANALYTICS_LOGIN_PUBLISHER_V110_NAME = "analyticsLoginDataPublisherV110";
+    public static final String IS_INVALID_USERNAME = "isInvalidUsername";
+
+    public static final String USERNAME_USER_INPUT = "usernameUserInput";
 
     private AnalyticsLoginDataPublishConstants() {
 
