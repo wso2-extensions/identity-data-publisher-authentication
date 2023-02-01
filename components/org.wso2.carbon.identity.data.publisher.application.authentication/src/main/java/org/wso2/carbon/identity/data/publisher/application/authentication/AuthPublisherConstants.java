@@ -48,6 +48,7 @@ public class AuthPublisherConstants {
     public static final String SHA_256 = "SHA-256";
     public static final String USER_AGENT = "User-Agent";
     public static final String AUTHENTICATOR_NAME = "authenticatorName";
+    public static final String USERNAME_USER_INPUT = "usernameUserInput";
     // Session status codes
     public static final int SESSION_CREATION_STATUS = 1;
     public static final int SESSION_TERMINATION_STATUS = 0;

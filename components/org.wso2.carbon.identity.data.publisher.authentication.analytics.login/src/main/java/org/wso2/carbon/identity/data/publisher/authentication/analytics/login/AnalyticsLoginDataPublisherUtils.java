@@ -44,6 +44,9 @@ import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 
+import static org.wso2.carbon.identity.data.publisher.authentication.analytics.login.AnalyticsLoginDataPublishConstants.IS_INVALID_USERNAME;
+import static org.wso2.carbon.identity.data.publisher.authentication.analytics.login.AnalyticsLoginDataPublishConstants.USERNAME_USER_INPUT;
+
 /**
  * Utils for Analytics Login data publisher.
  */
@@ -74,7 +77,10 @@ public class AnalyticsLoginDataPublisherUtils {
         AuthenticationData authenticationData = new AuthenticationData();
         setIdpForAuthnStep(context, authenticationData);
         Object userObj = params.get(FrameworkConstants.AnalyticsAttributes.USER);
-        setUserDataForAuthnStep(authenticationData, userObj);
+        boolean isInvalidUsername =
+                context.getProperty(IS_INVALID_USERNAME) != null && (boolean) context.getProperty(IS_INVALID_USERNAME);
+        context.setProperty(IS_INVALID_USERNAME, null);
+        setUserDataForAuthnStep(authenticationData, userObj, isInvalidUsername);
 
         Object isFederatedObj = params.get(FrameworkConstants.AnalyticsAttributes.IS_FEDERATED);
         setIdpTypeForAuthnStep(authenticationData, isFederatedObj);
@@ -97,7 +103,7 @@ public class AnalyticsLoginDataPublisherUtils {
         authenticationData.setAuthenticator(context.getCurrentAuthenticator());
         authenticationData.setSuccess(AuthenticatorStatus.PASS == status);
         authenticationData.setStepNo(context.getCurrentStep());
-
+        authenticationData.setUsernameUserInput((String) context.getProperty(USERNAME_USER_INPUT));
         setTenantDataForIdpStep(context, status, authenticationData);
 
         authenticationData.addParameter(AuthPublisherConstants.RELYING_PARTY, context.getRelyingParty());
@@ -161,13 +167,15 @@ public class AnalyticsLoginDataPublisherUtils {
         }
     }
 
-    private static void setUserDataForAuthnStep(AuthenticationData authenticationData, Object userObj) {
+    private static void setUserDataForAuthnStep(AuthenticationData authenticationData, Object userObj, boolean isInvalidUsername) {
 
         if (userObj instanceof User) {
             User user = (User) userObj;
             authenticationData.setTenantDomain(user.getTenantDomain());
             authenticationData.setUserStoreDomain(user.getUserStoreDomain());
-            authenticationData.setUsername(user.getUserName());
+            if (!isInvalidUsername) {
+                authenticationData.setUsername(user.getUserName());
+            }
         }
         if (userObj instanceof AuthenticatedUser) {
             AuthenticatedUser user = (AuthenticatedUser) userObj;
@@ -226,7 +234,7 @@ public class AnalyticsLoginDataPublisherUtils {
         authenticationData.setRememberMe(context.isRememberMe());
         authenticationData.setForcedAuthn(context.isForceAuthenticate());
         authenticationData.setPassive(context.isPassiveAuthenticate());
-
+        authenticationData.setUsernameUserInput((String) context.getProperty(USERNAME_USER_INPUT));
         setTenantDataForAuthentication(context, status, authenticationData);
 
         authenticationData.addParameter(AuthPublisherConstants.RELYING_PARTY, context.getRelyingParty());

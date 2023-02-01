@@ -55,6 +55,7 @@ public class AuthenticationData<T1 extends Object, T2 extends Object> {
     private long duration;
     private String errorCode;
     private List<String> customParams;
+    private String usernameUserInput;
 
     public String getEventId() {
 
@@ -324,5 +325,15 @@ public class AuthenticationData<T1 extends Object, T2 extends Object> {
     public void setCustomParams(List<String> customParams) {
 
         this.customParams = customParams;
+    }
+
+    public String getUsernameUserInput() {
+
+        return usernameUserInput;
+    }
+
+    public void setUsernameUserInput(String usernameUserInput) {
+
+        this.usernameUserInput = usernameUserInput;
     }
 }
