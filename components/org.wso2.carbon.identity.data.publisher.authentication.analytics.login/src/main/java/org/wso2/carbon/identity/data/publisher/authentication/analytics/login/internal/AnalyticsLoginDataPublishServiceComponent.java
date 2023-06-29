@@ -32,7 +32,6 @@ import org.wso2.carbon.event.stream.core.EventStreamService;
 import org.wso2.carbon.identity.data.publisher.authentication.analytics.login.AnalyticsLoginDataPublishHandler;
 import org.wso2.carbon.identity.data.publisher.authentication.analytics.login.AnalyticsLoginDataPublishHandlerV110;
 import org.wso2.carbon.identity.event.handler.AbstractEventHandler;
-import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
 
 /**
@@ -96,29 +95,6 @@ public class AnalyticsLoginDataPublishServiceComponent {
             log.debug("Un-setting the Realm Service.");
         }
         AnalyticsLoginDataPublishDataHolder.getInstance().setRealmService(null);
-    }
-
-    @Reference(
-            name = "RegistryService",
-            service = RegistryService.class,
-            cardinality = ReferenceCardinality.MANDATORY,
-            policy = ReferencePolicy.DYNAMIC,
-            unbind = "unsetRegistryService"
-    )
-    protected void setRegistryService(RegistryService registryService) {
-
-        if (log.isDebugEnabled()) {
-            log.debug("Setting the Registry Service");
-        }
-        AnalyticsLoginDataPublishDataHolder.getInstance().setRegistryService(registryService);
-    }
-
-    protected void unsetRegistryService(RegistryService registryService) {
-
-        if (log.isDebugEnabled()) {
-            log.debug("Un-setting the Registry Service.");
-        }
-        AnalyticsLoginDataPublishDataHolder.getInstance().setRegistryService(null);
     }
 
     @Reference(

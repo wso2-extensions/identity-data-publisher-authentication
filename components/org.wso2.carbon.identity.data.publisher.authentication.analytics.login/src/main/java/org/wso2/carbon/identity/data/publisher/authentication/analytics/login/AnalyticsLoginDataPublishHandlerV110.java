@@ -21,9 +21,7 @@ package org.wso2.carbon.identity.data.publisher.authentication.analytics.login;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.CarbonException;
 import org.wso2.carbon.base.MultitenantConstants;
-import org.wso2.carbon.core.util.AnonymousSessionUtil;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkConstants;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkUtils;
 import org.wso2.carbon.identity.base.IdentityRuntimeException;
@@ -35,7 +33,6 @@ import org.wso2.carbon.identity.event.IdentityEventConstants;
 import org.wso2.carbon.identity.event.IdentityEventException;
 import org.wso2.carbon.identity.event.event.Event;
 import org.wso2.carbon.identity.event.handler.AbstractEventHandler;
-import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.UserStoreManager;
@@ -203,15 +200,14 @@ public class AnalyticsLoginDataPublishHandlerV110 extends AbstractEventHandler {
             return StringUtils.EMPTY;
         }
 
-        RegistryService registryService = AnalyticsLoginDataPublishDataHolder.getInstance().getRegistryService();
         RealmService realmService = AnalyticsLoginDataPublishDataHolder.getInstance().getRealmService();
 
         UserRealm realm = null;
         UserStoreManager userstore = null;
 
         try {
-            realm = AnonymousSessionUtil.getRealmByTenantDomain(registryService,
-                    realmService, tenantDomain);
+            int tenantId = realmService.getTenantManager().getTenantId(tenantDomain);
+            realm = (UserRealm) realmService.getTenantUserRealm(tenantId);
             if (realm != null) {
                 userstore = realm.getUserStoreManager();
                 if (userstore.isExistingUser(userName)) {
@@ -233,8 +229,6 @@ public class AnalyticsLoginDataPublishHandlerV110 extends AbstractEventHandler {
                     LOG.debug("No realm found. for tenant domain : " + tenantDomain + ". Hence no roles added");
                 }
             }
-        } catch (CarbonException e) {
-            LOG.error("Error when getting realm for " + userName + "@" + tenantDomain, e);
         } catch (UserStoreException e) {
             LOG.error("Error when getting user store for " + userName + "@" + tenantDomain, e);
         }

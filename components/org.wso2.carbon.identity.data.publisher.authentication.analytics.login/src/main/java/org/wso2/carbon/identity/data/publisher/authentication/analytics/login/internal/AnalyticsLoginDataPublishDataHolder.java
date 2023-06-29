@@ -19,7 +19,6 @@
 package org.wso2.carbon.identity.data.publisher.authentication.analytics.login.internal;
 
 import org.wso2.carbon.event.stream.core.EventStreamService;
-import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
 
 public class AnalyticsLoginDataPublishDataHolder {
@@ -28,7 +27,6 @@ public class AnalyticsLoginDataPublishDataHolder {
             = new AnalyticsLoginDataPublishDataHolder();
     private EventStreamService publisherService;
     private RealmService realmService;
-    private RegistryService registryService;
 
     private AnalyticsLoginDataPublishDataHolder() {
 
@@ -57,16 +55,6 @@ public class AnalyticsLoginDataPublishDataHolder {
     public void setRealmService(RealmService realmService) {
 
         this.realmService = realmService;
-    }
-
-    public RegistryService getRegistryService() {
-
-        return registryService;
-    }
-
-    public void setRegistryService(RegistryService registryService) {
-
-        this.registryService = registryService;
     }
 
 }
