@@ -37,7 +37,6 @@ import org.wso2.carbon.identity.data.publisher.application.authentication.impl.A
 import org.wso2.carbon.identity.data.publisher.application.authentication.impl.DASLoginDataPublisherImpl;
 import org.wso2.carbon.identity.data.publisher.application.authentication.impl.DASSessionDataPublisherImpl;
 import org.wso2.carbon.identity.event.services.IdentityEventService;
-import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
 
 import java.util.Collections;
@@ -122,29 +121,6 @@ public class AuthenticationDataPublisherServiceComponent {
             log.debug("Un-setting the Event Stream Service");
         }
         AuthenticationDataPublisherDataHolder.getInstance().setPublisherService(null);
-    }
-
-    @Reference(
-            name = "RegistryService",
-            service = RegistryService.class,
-            cardinality = ReferenceCardinality.MANDATORY,
-            policy = ReferencePolicy.DYNAMIC,
-            unbind = "unsetRegistryService"
-    )
-    protected void setRegistryService(RegistryService registryService) {
-
-        if (log.isDebugEnabled()) {
-            log.debug("Setting the Registry Service");
-        }
-        AuthenticationDataPublisherDataHolder.getInstance().setRegistryService(registryService);
-    }
-
-    protected void unsetRegistryService(RegistryService registryService) {
-
-        if (log.isDebugEnabled()) {
-            log.debug("Un-setting the Registry Service.");
-        }
-        AuthenticationDataPublisherDataHolder.getInstance().setRegistryService(null);
     }
 
     @Reference(
