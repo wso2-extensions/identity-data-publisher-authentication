@@ -40,7 +40,7 @@
         <developerConnection>scm:git:https://github.com/wso2-extensions/identity-data-publisher-authentication.git
         </developerConnection>
         <connection>scm:git:https://github.com/wso2-extensions/identity-data-publisher-authentication.git</connection>
-        <tag>v5.7.1</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <dependencyManagement>
