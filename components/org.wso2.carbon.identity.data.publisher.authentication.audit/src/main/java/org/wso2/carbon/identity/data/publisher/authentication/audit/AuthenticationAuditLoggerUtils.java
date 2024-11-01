@@ -32,6 +32,7 @@ import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.data.publisher.authentication.audit.model.AuthenticationAuditData;
 import org.wso2.carbon.identity.event.IdentityEventConstants;
 import org.wso2.carbon.identity.event.event.Event;
+import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.Map;
@@ -100,8 +101,12 @@ public class AuthenticationAuditLoggerUtils {
             authenticationAuditData.setAuthenticatedIdps(getIdentityProviderList(context, status));
         }
         if (LoggerUtils.isLogMaskingEnable && StringUtils.isNotBlank(tenantDomain) && StringUtils.isNotBlank(username)) {
-            String userId = IdentityUtil.getInitiatorId(username, tenantDomain);
-            authenticationAuditData.setUserId(userId);
+            /* When username is disabled for audit authentication step, skip user ID resolving as the username is set
+            as the authenticated subject identifier which might not be always the username. */
+            if (!AuthenticationAuditLoggerConstants.AUDIT_AUTHENTICATION.equals(authType) || isUsernameEnabled) {
+                String userId = IdentityUtil.getInitiatorId(username, tenantDomain);
+                authenticationAuditData.setUserId(userId);
+            }
         }
         return authenticationAuditData;
     }
@@ -134,7 +139,7 @@ public class AuthenticationAuditLoggerUtils {
         Object userObj = params.get(FrameworkConstants.AnalyticsAttributes.USER);
         if (userObj instanceof User) {
             User user = (User) userObj;
-            userName = user.getUserName();
+            userName = UserCoreUtil.addDomainToName(user.getUserName(), user.getUserStoreDomain());
         }
         if (userObj instanceof AuthenticatedUser) {
             AuthenticatedUser user = (AuthenticatedUser) userObj;
