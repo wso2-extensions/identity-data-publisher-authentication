@@ -98,6 +98,7 @@ public class AuthenticationAuditLoggerUtils {
             authenticationAuditData.setTenantDomain(tenantDomain);
             authenticationAuditData.setStepNo(getStepNoForAuthentication(context, status));
             authenticationAuditData.setAuthenticatedIdps(getIdentityProviderList(context, status));
+            authenticationAuditData.setAccessingOrganizationId(getAccessingOrganization(context, status));
         }
         if (LoggerUtils.isLogMaskingEnable && StringUtils.isNotBlank(tenantDomain) && StringUtils.isNotBlank(username)) {
             String userId = IdentityUtil.getInitiatorId(username, tenantDomain);
@@ -113,6 +114,18 @@ public class AuthenticationAuditLoggerUtils {
             userName = context.getSequenceConfig().getAuthenticatedUser().getUserName();
         }
         return userName;
+    }
+
+    private static String getAccessingOrganization(AuthenticationContext context, AuthenticatorStatus status) {
+
+        String accessingOrganization = null;
+        if (status == AuthenticatorStatus.PASS) {
+            accessingOrganization = context.getSequenceConfig().getAuthenticatedUser().getAccessingOrganization();
+        }
+        if (StringUtils.isBlank(accessingOrganization)) {
+            accessingOrganization = context.getSequenceConfig().getAuthenticatedUser().getUserResidentOrganization();
+        }
+        return accessingOrganization;
     }
 
     private static void setUserStoreDomain(AuthenticationAuditData authenticationAuditData, Object userObj) {
