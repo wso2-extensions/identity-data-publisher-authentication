@@ -19,6 +19,8 @@
 package org.wso2.carbon.identity.data.publisher.authentication.audit;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.identity.application.authentication.framework.AuthenticatorStatus;
 import org.wso2.carbon.identity.application.authentication.framework.config.model.StepConfig;
 import org.wso2.carbon.identity.application.authentication.framework.context.AuthenticationContext;
@@ -29,9 +31,11 @@ import org.wso2.carbon.identity.application.authentication.framework.util.Framew
 import org.wso2.carbon.identity.application.common.model.User;
 import org.wso2.carbon.identity.central.log.mgt.utils.LoggerUtils;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
+import org.wso2.carbon.identity.data.publisher.authentication.audit.internal.AuthenticationAuditLoggingServiceDataHolder;
 import org.wso2.carbon.identity.data.publisher.authentication.audit.model.AuthenticationAuditData;
 import org.wso2.carbon.identity.event.IdentityEventConstants;
 import org.wso2.carbon.identity.event.event.Event;
+import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementException;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.Map;
@@ -40,6 +44,8 @@ import java.util.Map;
  * Utilities for authentication audit logger.
  */
 public class AuthenticationAuditLoggerUtils {
+
+    private static final Log LOG = LogFactory.getLog(AuthenticationAuditLoggerUtils.class);
 
     /**
      * Create authentication data object from event for respective authentication step.
@@ -98,7 +104,9 @@ public class AuthenticationAuditLoggerUtils {
             authenticationAuditData.setTenantDomain(tenantDomain);
             authenticationAuditData.setStepNo(getStepNoForAuthentication(context, status));
             authenticationAuditData.setAuthenticatedIdps(getIdentityProviderList(context, status));
-            authenticationAuditData.setAccessingOrganizationId(getAccessingOrganization(context, status));
+            String accessingOrganizationId = getAccessingOrganization(context, status);
+            authenticationAuditData.setAccessingOrganizationId(accessingOrganizationId);
+            authenticationAuditData.setAccessingOrganizationName(resolveOrganizationName(accessingOrganizationId));
         }
         if (LoggerUtils.isLogMaskingEnable && StringUtils.isNotBlank(tenantDomain) && StringUtils.isNotBlank(username)) {
             String userId = IdentityUtil.getInitiatorId(username, tenantDomain);
@@ -124,8 +132,32 @@ public class AuthenticationAuditLoggerUtils {
         }
         if (StringUtils.isBlank(accessingOrganization)) {
             accessingOrganization = context.getSequenceConfig().getAuthenticatedUser().getUserResidentOrganization();
+            if (StringUtils.isBlank(accessingOrganization)) {
+                String tenantDomain = context.getSequenceConfig().getAuthenticatedUser().getTenantDomain();
+                if (StringUtils.isNotBlank(tenantDomain)) {
+                    try {
+                        accessingOrganization =
+                                AuthenticationAuditLoggingServiceDataHolder.getInstance().getOrganizationManager()
+                                        .resolveOrganizationId(tenantDomain);
+                    } catch (OrganizationManagementException e) {
+                        LOG.error("Error while resolving organization id for tenant domain: " + tenantDomain, e);
+                    }
+                }
+            }
         }
         return accessingOrganization;
+    }
+
+    private static String resolveOrganizationName(String organizationId) {
+
+        String organizationName = null;
+        try {
+            organizationName = AuthenticationAuditLoggingServiceDataHolder.getInstance().getOrganizationManager()
+                    .getOrganizationNameById(organizationId);
+        } catch (OrganizationManagementException e) {
+            LOG.error("Error while resolving organization name for organization id: " + organizationId, e);
+        }
+        return organizationName;
     }
 
     private static void setUserStoreDomain(AuthenticationAuditData authenticationAuditData, Object userObj) {

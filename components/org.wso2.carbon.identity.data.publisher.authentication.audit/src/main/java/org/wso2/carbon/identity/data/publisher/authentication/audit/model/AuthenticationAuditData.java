@@ -34,6 +34,7 @@ public class AuthenticationAuditData {
     private int stepNo;
     private String userId;
     private String accessingOrganizationId;
+    private String accessingOrganizationName;
 
     public String getContextIdentifier() {
 
@@ -143,5 +144,15 @@ public class AuthenticationAuditData {
     public void setAccessingOrganizationId(String accessingOrganizationId) {
 
         this.accessingOrganizationId = accessingOrganizationId;
+    }
+
+    public String getAccessingOrganizationName() {
+
+        return accessingOrganizationName;
+    }
+
+    public void setAccessingOrganizationName(String accessingOrganizationName) {
+
+        this.accessingOrganizationName = accessingOrganizationName;
     }
 }

@@ -25,8 +25,12 @@ import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import org.wso2.carbon.identity.data.publisher.authentication.audit.AuthenticationAuditLoggingHandler;
 import org.wso2.carbon.identity.event.handler.AbstractEventHandler;
+import org.wso2.carbon.identity.organization.management.service.OrganizationManager;
 
 /**
  * Service Component for authentication audit logger.
@@ -65,5 +69,21 @@ public class AuthenticationAudiLoggingServiceComponenet {
             log.debug("org.wso2.carbon.identity.data.publisher.authentication.audit bundle is deactivated");
         }
     }
+    @Reference(
+            name = "organization.management.service",
+            service = OrganizationManager.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetOrganizationManagementService")
+    protected void setOrganizationManagementService(OrganizationManager organizationManager) {
 
+        AuthenticationAuditLoggingServiceDataHolder.getInstance().setOrganizationManager(organizationManager);
+        log.debug("Set Organization Management Service");
+    }
+
+    protected void unsetOrganizationManagementService(OrganizationManager organizationManager) {
+
+        AuthenticationAuditLoggingServiceDataHolder.getInstance().setOrganizationManager(null);
+        log.debug("Unset Organization Management Service");
+    }
 }

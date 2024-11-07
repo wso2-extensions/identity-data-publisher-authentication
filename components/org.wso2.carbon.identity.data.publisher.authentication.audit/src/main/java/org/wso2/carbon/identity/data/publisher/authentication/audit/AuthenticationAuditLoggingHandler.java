@@ -169,6 +169,7 @@ public class AuthenticationAuditLoggingHandler extends AbstractEventHandler {
                 + "\",\"" + "RelyingParty" + "\" : \"" + authenticationData.getRelyingParty()
                 + "\",\"" + "AuthenticatedIdPs" + "\" : \"" + authenticationData.getAuthenticatedIdps()
                 + "\",\"" + "AccessingOrgId" + "\" : \"" + authenticationData.getAccessingOrganizationId()
+                + "\",\"" + "AccessingOrgName" + "\" : \"" + authenticationData.getAccessingOrganizationName()
                 + "\"";
         auditData = addContextualInfo(auditData, authenticationData);
 
