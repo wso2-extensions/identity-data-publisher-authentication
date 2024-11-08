@@ -285,6 +285,10 @@ public class AuthenticationAuditLoggerUtils {
         if (status == AuthenticatorStatus.PASS) {
             subjectIdentifier = context.getSequenceConfig().getAuthenticatedUser().getAuthenticatedSubjectIdentifier();
         }
+        // Temp fix to remove the domain name from the subject identifier.
+        if (StringUtils.isNotEmpty(subjectIdentifier) && subjectIdentifier.contains("@")) {
+            subjectIdentifier = subjectIdentifier.split("@")[0];
+        }
         return subjectIdentifier;
     }
 
