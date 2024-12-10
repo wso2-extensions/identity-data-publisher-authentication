@@ -93,7 +93,7 @@ public class AuthenticationAuditLoggingHandler extends AbstractEventHandler {
             doPublishAuthenticationFailure(authenticationAuditData);
 
         } else if (IdentityEventConstants.EventName.SESSION_TERMINATE.name().equals(event.getEventName())) {
-            publishSessionTermination(event);
+            publishSessionTermination(event, isUserNameEnabled);
         } else {
             LOG.error("Event " + event.getEventName() + " cannot be handled");
         }
@@ -195,8 +195,33 @@ public class AuthenticationAuditLoggingHandler extends AbstractEventHandler {
                 "ApplicationAuthenticationFramework", auditData, FrameworkConstants.AUDIT_FAILED));
     }
 
+    /**
+     * Publish session termination.
+     *
+     * @param context Authentication context.
+     * @param username Username.
+     * @param tenantDomain Tenant domain.
+     * @param authenticatedIDPs Authenticated IDPs.
+     *
+     */
     protected void doPublishSessionTermination(AuthenticationContext context, String username,
                                                String tenantDomain, String authenticatedIDPs) {
+
+        // Default behavior when isUserNameEnabled is not provided
+        doPublishSessionTermination(context, username, tenantDomain, authenticatedIDPs, false);
+    }
+
+    /**
+     * Publish session termination.
+     *
+     * @param context Authentication context.
+     * @param username Username.
+     * @param tenantDomain Tenant domain.
+     * @param authenticatedIDPs Authenticated IDPs.
+     * @param isUserNameEnabled Is username enabled.
+     */
+    protected void doPublishSessionTermination(AuthenticationContext context, String username, String tenantDomain,
+                                               String authenticatedIDPs, boolean isUserNameEnabled) {
 
         String auditData = "\"" + "ContextIdentifier" + "\" : \"" + context.getContextIdentifier()
                 + "\",\"" + "LoggedOutUser" + "\" : \"" + getUsernameForAuditLog(username)
@@ -215,11 +240,28 @@ public class AuthenticationAuditLoggingHandler extends AbstractEventHandler {
         }
         AUDIT_LOG.info(String.format(
                 FrameworkConstants.AUDIT_MESSAGE,
-                getInitiator(username, tenantDomain),
+                getInitiator(username, tenantDomain, isUserNameEnabled),
                 "Logout", idpName, auditData, FrameworkConstants.AUDIT_SUCCESS));
     }
 
+    /**
+     * Publish session termination.
+     *
+     * @param event Event.
+     */
     protected void publishSessionTermination(Event event) {
+
+        // Default behavior when isUserNameEnabled is not provided
+        publishSessionTermination(event, false);
+    }
+
+    /**
+     * Publish session termination.
+     *
+     * @param event Event.
+     * @param isUserNameEnabled Is username enabled.
+     */
+    protected void publishSessionTermination(Event event, boolean isUserNameEnabled) {
 
         Map<String, Object> properties = event.getEventProperties();
         SessionContext sessionContext = (SessionContext) properties.get(IdentityEventConstants.EventProperty.
@@ -251,7 +293,7 @@ public class AuthenticationAuditLoggingHandler extends AbstractEventHandler {
             tenantDomain = authenticatedUser.getTenantDomain();
         }
 
-        doPublishSessionTermination(context, username, tenantDomain, authenticatedIDPs);
+        doPublishSessionTermination(context, username, tenantDomain, authenticatedIDPs, isUserNameEnabled);
     }
 
     private boolean isAuthenticationAuditLoggingEnabled(Event event) throws IdentityEventException {
@@ -301,10 +343,11 @@ public class AuthenticationAuditLoggingHandler extends AbstractEventHandler {
      *
      * @param username     Username.
      * @param tenantDomain Tenant domain.
+     * @param isUserNameEnabled Is username enabled.
      * @return initiator. Returns userId if log masking is enabled, if userId cannot be resolved then returns the masked
      * username.
-     * */
-    private String getInitiator(String username, String tenantDomain) {
+     */
+    private String getInitiator(String username, String tenantDomain, boolean isUserNameEnabled) {
 
         String initiator = null;
         if (!LoggerUtils.isLogMaskingEnable) {
@@ -312,7 +355,7 @@ public class AuthenticationAuditLoggingHandler extends AbstractEventHandler {
         }
         String tenantAwareUsername = StringUtils.isNotBlank(username) ?
                 MultitenantUtils.getTenantAwareUsername(username) : null;
-        if (StringUtils.isNotBlank(tenantAwareUsername) && StringUtils.isNotBlank(tenantDomain)) {
+        if (StringUtils.isNotBlank(tenantAwareUsername) && StringUtils.isNotBlank(tenantDomain) && isUserNameEnabled) {
             initiator = IdentityUtil.getInitiatorId(tenantAwareUsername, tenantDomain);
         }
         if (StringUtils.isBlank(initiator)) {
