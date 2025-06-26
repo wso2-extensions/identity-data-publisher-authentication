@@ -301,7 +301,7 @@ public class AuthenticationAuditLoggingHandler extends AbstractEventHandler {
         if (this.configs.getModuleProperties() != null) {
             String handlerEnabled = this.configs.getModuleProperties().getProperty(AuthenticationAuditLoggerConstants.
                     AUTHENTICATION_AUDIT_LOGGER_ENABLED);
-            return Boolean.parseBoolean(handlerEnabled);
+            return Boolean.parseBoolean(handlerEnabled) && !LoggerUtils.isEnableV2AuditLogs();
         }
 
         return false;
