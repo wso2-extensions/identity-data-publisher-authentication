@@ -10,6 +10,7 @@ import org.wso2.carbon.identity.application.authentication.framework.context.Ses
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticationResult;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkConstants;
+import org.wso2.carbon.identity.central.log.mgt.utils.LoggerUtils;
 import org.wso2.carbon.identity.core.bean.context.MessageContext;
 import org.wso2.carbon.identity.core.handler.AbstractIdentityMessageHandler;
 import org.wso2.carbon.identity.core.model.IdentityEventListenerConfig;
@@ -199,7 +200,7 @@ public class AuthenticationAuditLogger extends AbstractAuthenticationDataPublish
             return false;
         }
 
-        return Boolean.parseBoolean(identityEventListenerConfig.getEnable());
+        return Boolean.parseBoolean(identityEventListenerConfig.getEnable()) && !LoggerUtils.isEnableV2AuditLogs();
     }
 
     @Override
