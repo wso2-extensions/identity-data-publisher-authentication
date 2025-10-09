@@ -22,7 +22,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.base.MultitenantConstants;
-import org.wso2.carbon.identity.application.authentication.framework.AuthenticatorStatus;
 import org.wso2.carbon.identity.application.authentication.framework.config.model.SequenceConfig;
 import org.wso2.carbon.identity.application.authentication.framework.context.AuthenticationContext;
 import org.wso2.carbon.identity.application.authentication.framework.exception.UserIdNotFoundException;
@@ -98,7 +97,7 @@ public class AnalyticsB2BLoginDataPublishHandler extends AbstractEventHandler  {
         }
     }
 
-    public static B2BAuthenticationData buildAuthnDataForAuthentication(Event event) {
+    private B2BAuthenticationData buildAuthnDataForAuthentication(Event event) {
 
         Map<String, Object> properties = event.getEventProperties();
         HttpServletRequest request = (HttpServletRequest) properties.get(IdentityEventConstants.EventProperty.REQUEST);
@@ -124,7 +123,7 @@ public class AnalyticsB2BLoginDataPublishHandler extends AbstractEventHandler  {
         return authenticationData;
     }
 
-    private static void setUserDataForAuthentication(B2BAuthenticationData authenticationData,
+    private void setUserDataForAuthentication(B2BAuthenticationData authenticationData,
                                                      Object userObj, AuthenticationContext context) {
 
         if (userObj instanceof AuthenticatedUser) {
@@ -152,7 +151,7 @@ public class AnalyticsB2BLoginDataPublishHandler extends AbstractEventHandler  {
 
 
 
-    protected void publishAuthenticationData(B2BAuthenticationData authenticationData, String spTenantDomain) {
+    private void publishAuthenticationData(B2BAuthenticationData authenticationData, String spTenantDomain) {
 
         try {
             Object[] payloadData = populatePayloadData(authenticationData);
@@ -162,7 +161,7 @@ public class AnalyticsB2BLoginDataPublishHandler extends AbstractEventHandler  {
         }
     }
 
-    protected Object[] populatePayloadData(B2BAuthenticationData authenticationData) {
+    private Object[] populatePayloadData(B2BAuthenticationData authenticationData) {
 
         Object[] payloadData = new Object[11];
         payloadData[0] = authenticationData.getContextId();
@@ -185,7 +184,7 @@ public class AnalyticsB2BLoginDataPublishHandler extends AbstractEventHandler  {
         return payloadData;
     }
 
-    protected void publishEvent(Object[] payloadData, String spTenantDomain) {
+    private void publishEvent(Object[] payloadData, String spTenantDomain) {
 
         try {
             FrameworkUtils.startTenantFlow(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
