@@ -18,6 +18,9 @@
 
 package org.wso2.carbon.identity.data.publisher.authentication.analytics.login.model;
 
+/**
+ * Data object class for B2B authentication data.
+ */
 public class B2BAuthenticationData {
 
     private String eventId;
