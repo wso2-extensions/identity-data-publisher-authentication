@@ -19,14 +19,12 @@
 package org.wso2.carbon.identity.data.publisher.authentication.analytics.login;
 
 import org.mockito.Mock;
-import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.mockito.MockitoAnnotations;
 import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import static org.mockito.MockitoAnnotations.initMocks;
-import static org.powermock.api.mockito.PowerMockito.when;
 
 import org.wso2.carbon.identity.application.authentication.framework.context.AuthenticationContext;
 import org.wso2.carbon.identity.application.authentication.framework.context.SessionContext;
@@ -40,7 +38,8 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
-@PrepareForTest({ AuthenticationContext.class })
+import static org.mockito.Mockito.when;
+
 public class AnalyticsLoginDataPublisherUtilsTest {
 
     private static final String TENANT_DOMAIN = "abc.com";
@@ -53,27 +52,27 @@ public class AnalyticsLoginDataPublisherUtilsTest {
 
     @BeforeTest
     public void setUp() {
-        initMocks(this);
+        MockitoAnnotations.openMocks(this);
         when(mockAuthenticationContext.getExternalIdP()).thenReturn(null);
     }
 
     @DataProvider(name = "getEvent")
     public Object[][] getEvent() {
         Map<String, Object> param = new HashMap<>();
-        Object userObj = new AuthenticatedUser();
-        ((AuthenticatedUser) userObj).setTenantDomain(TENANT_DOMAIN);
-        param.put(FrameworkConstants.AnalyticsAttributes.USER, userObj);
+        AuthenticatedUser user = new AuthenticatedUser();
+        user.setTenantDomain(TENANT_DOMAIN);
+        param.put(FrameworkConstants.AnalyticsAttributes.USER, user);
+
         Event event = createEvent(mockHttpServletRequest, mockAuthenticationContext, mockSessionContext, param,
                 IdentityEventConstants.EventName.AUTHENTICATION_STEP_SUCCESS);
 
-        return new Object[][] {
-                { event, TENANT_DOMAIN},
-                };
+        return new Object[][]{
+                {event, TENANT_DOMAIN},
+        };
     }
 
     @Test(dataProvider = "getEvent")
     public void testBuildAuthnDataForAuthnStep(Event event, String expectedTenantDomain) {
-
         AuthenticationData authenticationData = AnalyticsLoginDataPublisherUtils.buildAuthnDataForAuthnStep(event);
         Assert.assertEquals(authenticationData.getTenantDomain(), expectedTenantDomain);
     }
