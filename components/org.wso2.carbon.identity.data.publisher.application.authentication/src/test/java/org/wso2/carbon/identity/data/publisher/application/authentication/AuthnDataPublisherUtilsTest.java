@@ -40,7 +40,6 @@ import static org.testng.Assert.assertEquals;
 public class AuthnDataPublisherUtilsTest {
 
     private MockedStatic<IdPManagementUtil> idPManagementUtilMock;
-    private MockedStatic<IdentityUtil> identityUtilMock;
     
     private static final String TEST_TENANT = "test.tenant.com";
     private static final int REMEMBER_ME_TIMEOUT = 1209600; // 14 days in seconds.
@@ -59,7 +58,6 @@ public class AuthnDataPublisherUtilsTest {
     public void setUp() {
 
         idPManagementUtilMock = Mockito.mockStatic(IdPManagementUtil.class);
-        identityUtilMock = Mockito.mockStatic(IdentityUtil.class);
     }
 
     @AfterMethod
@@ -67,9 +65,6 @@ public class AuthnDataPublisherUtilsTest {
 
         if (idPManagementUtilMock != null) {
             idPManagementUtilMock.close();
-        }
-        if (identityUtilMock != null) {
-            identityUtilMock.close();
         }
     }
 
