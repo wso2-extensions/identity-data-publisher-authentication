@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.identity.data.publisher.application.authentication;
 
-import java.util.Optional;
 import org.apache.axiom.om.util.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -39,6 +38,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 public class AuthnDataPublisherUtils {
