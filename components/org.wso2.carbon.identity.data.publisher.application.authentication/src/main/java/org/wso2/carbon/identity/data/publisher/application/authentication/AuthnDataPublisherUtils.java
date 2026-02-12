@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2016-2026, WSO2 LLC. (http://www.wso2.com).
  *
- * WSO2 Inc. licenses this file to you under the Apache License,
+ * WSO2 LLC. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.identity.data.publisher.application.authentication;
 
+import java.util.Optional;
 import org.apache.axiom.om.util.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -78,13 +79,28 @@ public class AuthnDataPublisherUtils {
      */
     public static long getSessionExpirationTime(long createdTime, long updatedTime, String tenantDomain,
                                                 boolean isRememberMe) {
+
+        long sessionExpirationTime;
         // If remember me is enabled, Session termination time will be fixed
         if (isRememberMe) {
             long rememberMeTimeout = TimeUnit.SECONDS.toMillis(IdPManagementUtil.getRememberMeTimeout(tenantDomain));
-            return createdTime + rememberMeTimeout;
+            sessionExpirationTime = createdTime + rememberMeTimeout;
+        } else {
+            long idleSessionTimeOut = TimeUnit.SECONDS.toMillis(IdPManagementUtil.getIdleSessionTimeOut(tenantDomain));
+            sessionExpirationTime = idleSessionTimeOut + updatedTime;
         }
-        long idleSessionTimeOut = TimeUnit.SECONDS.toMillis(IdPManagementUtil.getIdleSessionTimeOut(tenantDomain));
-        return idleSessionTimeOut + updatedTime;
+
+        // If the maximum session timeout is configured, session expiration time should not exceed the maximum
+        // session timeout.
+        Optional<Integer> maxSessionTimeOut = IdPManagementUtil.getMaximumSessionTimeout(tenantDomain);
+        if (maxSessionTimeOut.isPresent()) {
+            long maxSessionTimeOutInMillis = TimeUnit.SECONDS.toMillis(maxSessionTimeOut.get());
+            if (sessionExpirationTime - createdTime > maxSessionTimeOutInMillis) {
+                sessionExpirationTime = createdTime + maxSessionTimeOutInMillis;
+            }
+        }
+
+        return sessionExpirationTime;
     }
 
     /**
