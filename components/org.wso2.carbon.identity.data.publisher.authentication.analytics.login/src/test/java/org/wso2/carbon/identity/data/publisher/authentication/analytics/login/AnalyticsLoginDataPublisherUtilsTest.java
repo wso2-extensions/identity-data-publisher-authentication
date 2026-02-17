@@ -19,14 +19,13 @@
 package org.wso2.carbon.identity.data.publisher.authentication.analytics.login;
 
 import org.mockito.Mock;
-import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.powermock.api.mockito.PowerMockito.when;
 
 import org.wso2.carbon.identity.application.authentication.framework.context.AuthenticationContext;
 import org.wso2.carbon.identity.application.authentication.framework.context.SessionContext;
@@ -40,7 +39,6 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
-@PrepareForTest({ AuthenticationContext.class })
 public class AnalyticsLoginDataPublisherUtilsTest {
 
     private static final String TENANT_DOMAIN = "abc.com";

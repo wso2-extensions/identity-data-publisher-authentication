@@ -105,21 +105,9 @@
                 <version>${jacoco.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.powermock</groupId>
-                <artifactId>powermock-module-testng</artifactId>
-                <version>${org.powermock.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.powermock</groupId>
-                <artifactId>powermock-api-mockito</artifactId>
-                <version>${org.powermock.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.powermock</groupId>
-                <artifactId>powermock-module-testng-common</artifactId>
-                <version>${org.powermock.version}</version>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-core</artifactId>
+                <version>${mockito.version}</version>
                 <scope>test</scope>
             </dependency>
             <!-- Pax Logging -->
@@ -252,9 +240,9 @@
 
         <!-- Unit test versions -->
         <testng.version>6.9.10</testng.version>
-        <jacoco.version>0.8.8</jacoco.version>
+        <jacoco.version>0.8.11</jacoco.version>
         <maven.surefire.plugin.version>2.18.1</maven.surefire.plugin.version>
-        <org.powermock.version>1.6.6</org.powermock.version>
+        <mockito.version>5.21.0</mockito.version>
 
         <commons-lang.wso2.osgi.version.range>[2.6.0,3.0.0)</commons-lang.wso2.osgi.version.range>
         <carbon.identity.framework.imp.pkg.version.range>[5.14.67, 6.0.0)</carbon.identity.framework.imp.pkg.version.range>
