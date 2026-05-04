@@ -115,6 +115,18 @@
       "type": "STRING"
     },
     {
+      "name": "userLoginOrgId",
+      "type": "STRING"
+    },
+    {
+      "name": "userResidingOrgId",
+      "type": "STRING"
+    },
+    {
+      "name": "spResidingOrgId",
+      "type": "STRING"
+    },
+    {
       "name": "customParam1",
       "type": "STRING"
     },

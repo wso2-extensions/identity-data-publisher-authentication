@@ -56,6 +56,9 @@ public class AuthenticationData<T1 extends Object, T2 extends Object> {
     private String errorCode;
     private List<String> customParams;
     private String usernameUserInput;
+    private String serviceProviderResidingOrgId;
+    private String userResidingOrgId;
+    private String userLoginOrgId;
 
     public String getEventId() {
 
@@ -335,5 +338,29 @@ public class AuthenticationData<T1 extends Object, T2 extends Object> {
     public void setUsernameUserInput(String usernameUserInput) {
 
         this.usernameUserInput = usernameUserInput;
+    }
+
+    public String getServiceProviderResidingOrgId() {
+        return serviceProviderResidingOrgId;
+    }
+
+    public void setServiceProviderResidingOrgId(String serviceProviderResidingOrgId) {
+        this.serviceProviderResidingOrgId = serviceProviderResidingOrgId;
+    }
+
+    public String getUserResidingOrgId() {
+        return userResidingOrgId;
+    }
+
+    public void setUserResidingOrgId(String userResidingOrgId) {
+        this.userResidingOrgId = userResidingOrgId;
+    }
+
+    public String getUserLoginOrgId() {
+        return userLoginOrgId;
+    }
+
+    public void setUserLoginOrgId(String userLoginOrgId) {
+        this.userLoginOrgId = userLoginOrgId;
     }
 }
