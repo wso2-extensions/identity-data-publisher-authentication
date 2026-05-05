@@ -19,41 +19,80 @@
 package org.wso2.carbon.identity.data.publisher.authentication.analytics.login;
 
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-
 
 import org.wso2.carbon.identity.application.authentication.framework.context.AuthenticationContext;
 import org.wso2.carbon.identity.application.authentication.framework.context.SessionContext;
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkConstants;
+import org.wso2.carbon.identity.application.mgt.ApplicationManagementService;
+import org.wso2.carbon.identity.data.publisher.authentication.analytics.login.internal.AnalyticsLoginDataPublishDataHolder;
 import org.wso2.carbon.identity.data.publisher.authentication.analytics.login.model.AuthenticationData;
 import org.wso2.carbon.identity.event.IdentityEventConstants;
 import org.wso2.carbon.identity.event.event.Event;
+import org.wso2.carbon.user.api.Tenant;
+import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.user.core.tenant.TenantManager;
 
 import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 public class AnalyticsLoginDataPublisherUtilsTest {
 
+    private AutoCloseable mocks;
+
     private static final String TENANT_DOMAIN = "abc.com";
+    private static final String ORG_UUID = "test-org-uuid";
+
     @Mock
     HttpServletRequest mockHttpServletRequest;
     @Mock
     AuthenticationContext mockAuthenticationContext;
     @Mock
     SessionContext mockSessionContext;
+    @Mock
+    RealmService mockRealmService;
+    @Mock
+    TenantManager mockTenantManager;
+    @Mock
+    Tenant mockTenant;
+    @Mock
+    ApplicationManagementService mockApplicationManagementService;
 
     @BeforeTest
-    public void setUp() {
-        MockitoAnnotations.openMocks(this);
+    public void setUp() throws Exception {
+
+        mocks = MockitoAnnotations.openMocks(this);
+
         when(mockAuthenticationContext.getExternalIdP()).thenReturn(null);
+
+        Mockito.doReturn(mockTenantManager).when(mockRealmService).getTenantManager();
+        when(mockTenantManager.getTenantByDomain(eq(TENANT_DOMAIN))).thenReturn(mockTenant);
+        when(mockTenantManager.getTenantByDomain(eq(null))).thenReturn(null);
+        when(mockTenant.getAssociatedOrganizationUUID()).thenReturn(ORG_UUID);
+
+        when(mockApplicationManagementService.getServiceProvider(any(), any())).thenReturn(null);
+
+        AnalyticsLoginDataPublishDataHolder.getInstance().setRealmService(mockRealmService);
+        AnalyticsLoginDataPublishDataHolder.getInstance()
+                .setApplicationManagementService(mockApplicationManagementService);
+    }
+
+    @AfterClass
+    public void tearDown() throws Exception {
+
+        mocks.close();
     }
 
     @DataProvider(name = "getEvent")
