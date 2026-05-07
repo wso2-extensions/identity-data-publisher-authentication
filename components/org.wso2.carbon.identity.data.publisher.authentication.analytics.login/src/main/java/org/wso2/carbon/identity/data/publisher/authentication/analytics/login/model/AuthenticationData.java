@@ -59,6 +59,10 @@ public class AuthenticationData<T1 extends Object, T2 extends Object> {
     private String serviceProviderResidingOrgId;
     private String userResidingOrgId;
     private String userLoginOrgId;
+    private boolean isOrganizationLogin;
+    private boolean isSharedAppLogin;
+    private List<String> authenticators;
+    private List<String> idps;
 
     public String getEventId() {
 
@@ -362,5 +366,37 @@ public class AuthenticationData<T1 extends Object, T2 extends Object> {
 
     public void setUserLoginOrgId(String userLoginOrgId) {
         this.userLoginOrgId = userLoginOrgId;
+    }
+
+    public boolean isOrganizationLogin() {
+        return isOrganizationLogin;
+    }
+
+    public void setOrganizationLogin(boolean organizationLogin) {
+        isOrganizationLogin = organizationLogin;
+    }
+
+    public boolean isSharedAppLogin() {
+        return isSharedAppLogin;
+    }
+
+    public void setSharedAppLogin(boolean sharedAppLogin) {
+        isSharedAppLogin = sharedAppLogin;
+    }
+
+    public List<String> getAuthenticators() {
+        return authenticators;
+    }
+
+    public void setAuthenticators(List<String> authenticators) {
+        this.authenticators = authenticators;
+    }
+
+    public List<String> getIdps() {
+        return idps;
+    }
+
+    public void setIdps(List<String> idps) {
+        this.idps = idps;
     }
 }

@@ -18,11 +18,13 @@
 
 package org.wso2.carbon.identity.data.publisher.authentication.analytics.login;
 
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.identity.application.authentication.framework.AuthenticatorStatus;
+import org.wso2.carbon.identity.application.authentication.framework.config.model.AuthenticatorConfig;
 import org.wso2.carbon.identity.application.authentication.framework.config.model.StepConfig;
 import org.wso2.carbon.identity.application.authentication.framework.context.AuthenticationContext;
 import org.wso2.carbon.identity.application.authentication.framework.exception.UserIdNotFoundException;
@@ -30,6 +32,7 @@ import org.wso2.carbon.identity.application.authentication.framework.model.Authe
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkConstants;
 import org.wso2.carbon.identity.application.common.IdentityApplicationManagementException;
+import org.wso2.carbon.identity.application.common.model.IdentityProvider;
 import org.wso2.carbon.identity.application.common.model.ServiceProvider;
 import org.wso2.carbon.identity.application.common.model.ServiceProviderProperty;
 import org.wso2.carbon.identity.application.common.model.User;
@@ -45,6 +48,8 @@ import org.wso2.carbon.identity.organization.management.service.constant.Organiz
 import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementException;
 import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementServerException;
 import org.wso2.carbon.identity.organization.management.service.util.OrganizationManagementUtil;
+import org.wso2.carbon.idp.mgt.IdentityProviderManagementException;
+import org.wso2.carbon.idp.mgt.IdentityProviderManager;
 import org.wso2.carbon.user.api.Tenant;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
@@ -59,6 +64,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -391,8 +397,96 @@ public class AnalyticsLoginDataPublisherUtils {
         updateSpResidingData(context, authenticationData, tenantCache);
 
         authenticationData.addParameter(AuthPublisherConstants.RELYING_PARTY, context.getRelyingParty());
+        setIdPAndAuthenticatorData(context, authenticationData);
 
         return authenticationData;
+    }
+
+    private static void setIdPAndAuthenticatorData(AuthenticationContext authContext,
+                                                          AuthenticationData authenticationData) {
+
+        Map<String, AuthenticatedIdPData> authenticatedIdPs = authContext.getCurrentAuthenticatedIdPs();
+        if (MapUtils.isEmpty(authenticatedIdPs)) {
+            return;
+        }
+        String serviceProvider = authContext.getServiceProviderName();
+        List<String> idpIdList = new ArrayList<>();
+        List authenticatorList = new ArrayList<>();
+        authenticatedIdPs.values().forEach(authenticatedIdPData -> {
+            addIdPResourceId(authenticatedIdPData, idpIdList, authContext.getTenantDomain(), serviceProvider);
+            authenticatorList.add(authenticatedIdPData.getAuthenticators().stream()
+                    .map(AuthenticatorConfig::getName).collect(Collectors.toList()));
+        });
+        List<String> flattenedAuthenticatorList = new ArrayList<>();
+        for (List<String> authenticators : (List<List<String>>) authenticatorList) {
+            for (Object authenticator : authenticators) {
+                flattenedAuthenticatorList.add(authenticator.toString().replaceAll("[\\[\\]]", ""));
+            }
+        }
+        if (!idpIdList.isEmpty()) {
+            authenticationData.setIdps(idpIdList);
+        }
+        if (!authenticatorList.isEmpty()) {
+            authenticationData.setAuthenticators(flattenedAuthenticatorList);
+        }
+    }
+
+    /**
+     * Set the IdP ID data to the Authentication IdP list.
+     * @param authenticatedIdPData  Authenticated IdP data.
+     * @param idpIdList             IdP ID list.
+     * @param tenantDomain          Tenant domain.
+     */
+    private static void addIdPResourceId(AuthenticatedIdPData authenticatedIdPData, List<String> idpIdList,
+                                  String tenantDomain, String serviceProvider) {
+
+        String key = authenticatedIdPData.getIdpName();
+        String resourceId = null;
+        if (authenticatedIdPData != null && authenticatedIdPData.getAuthenticators() != null &&
+                !authenticatedIdPData.getAuthenticators().isEmpty()) {
+            for (AuthenticatorConfig config : authenticatedIdPData.getAuthenticators()) {
+                if (config.getIdps().containsKey(key) && config.getIdps().get(key).getResourceId() != null) {
+                    resourceId = config.getIdps().get(key).getResourceId();
+                    break;
+                }
+            }
+        }
+        // If the resource ID is not found in the authenticator config, fetch from the database.
+        if (resourceId == null) {
+            resourceId = getIdPResourceIdByName(key, tenantDomain);
+        }
+        if (resourceId != null && !idpIdList.contains(resourceId)) {
+            idpIdList.add(resourceId);
+        }
+        if (resourceId == null) {
+            LOG.warn("Unable to resolve authenticated IdP resource Id for tenant: " + tenantDomain + " and IdP: " +
+                    key + " and service provider: " + serviceProvider);
+        }
+    }
+
+    /**
+     * Get the IdP ID by name.
+     *
+     * @param idpName       IdP name.
+     * @param tenantDomain  Tenant domain.
+     * @return IdP ID.
+     */
+    private static String getIdPResourceIdByName(String idpName, String tenantDomain) {
+
+        String resourceId = null;
+        try {
+            IdentityProvider identityProvider = IdentityProviderManager.getInstance().getIdPByName(idpName,
+                    tenantDomain);
+            if (identityProvider != null) {
+                resourceId = identityProvider.getResourceId();
+            }
+        } catch (IdentityProviderManagementException e) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Error while retrieving Identity Provider for name: " + idpName + " and tenant: " +
+                        tenantDomain, e);
+            }
+        }
+        return resourceId;
     }
 
     /**
@@ -535,11 +629,15 @@ public class AnalyticsLoginDataPublisherUtils {
                                           AuthenticatedUser authenticatedUser, User user,
                                           Map<String, Tenant> tenantCache) {
 
+        authenticationData.setOrganizationLogin(context.isOrgApplicationLogin());
+        authenticationData.setSharedAppLogin(context.isSharedAppLogin());
         if (authenticatedUser != null && authenticatedUser.getUserResidentOrganization() != null) {
             authenticationData.setUserResidingOrgId(authenticatedUser.getUserResidentOrganization());
         } else {
             if (ORGANIZATION_AUTHENTICATOR.equals(context.getCurrentAuthenticator())) {
                 authenticationData.setUserResidingOrgId((String) context.getProperty(ORG_ID));
+                // Legacy SSO login flow.
+                authenticationData.setSharedAppLogin(true);
             } else {
                 authenticationData.setUserResidingOrgId(getOrgUuid(user.getTenantDomain(), tenantCache).orElse(null));
             }
@@ -636,6 +734,14 @@ public class AnalyticsLoginDataPublisherUtils {
 
         if (serializable instanceof String) {
             return (String) serializable;
+        }
+        return AuthPublisherConstants.NOT_AVAILABLE;
+    }
+
+    public static Object replaceIfNotAvailable(Object object) {
+
+        if (object != null) {
+            return object;
         }
         return AuthPublisherConstants.NOT_AVAILABLE;
     }

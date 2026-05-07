@@ -133,11 +133,13 @@
                             org.wso2.carbon.identity.core.model; version="${carbon.identity.package.import.version.range}",
                             org.wso2.carbon.identity.core.bean.context; version="${carbon.identity.package.import.version.range}",
                             org.wso2.carbon.identity.core.util; version="${carbon.identity.package.import.version.range}",
+                            org.wso2.carbon.idp.mgt.*; version="${carbon.identity.framework.imp.pkg.version.range}",
                             org.wso2.carbon.identity.data.publisher.application.authentication; version="${imp.pkg.version.data.publisher.authentication}",
                             org.wso2.carbon.user.core.tenant; version="${carbon.kernel.package.import.version.range}",
                             org.wso2.carbon.identity.organization.management.*; version="${identity.organization.management.core.imp.pkg.version.range}",
                             org.wso2.carbon.identity.application.mgt.*; version="${carbon.identity.framework.imp.pkg.version.range}",
-                            org.wso2.carbon.identity.application.common.*; version="${carbon.identity.framework.imp.pkg.version.range}"
+                            org.wso2.carbon.identity.application.common.*; version="${carbon.identity.framework.imp.pkg.version.range}",
+                            org.apache.commons.collections; version="${commons-collections.wso2.osgi.version.range}"
                         </Import-Package>
                         <Export-Package>
                             !org.wso2.carbon.identity.data.publisher.authentication.analytics.login.internal,

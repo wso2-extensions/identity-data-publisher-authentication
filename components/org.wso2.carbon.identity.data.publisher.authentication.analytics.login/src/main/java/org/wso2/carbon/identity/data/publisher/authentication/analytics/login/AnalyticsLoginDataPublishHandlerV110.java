@@ -49,7 +49,7 @@ import java.util.UUID;
 public class AnalyticsLoginDataPublishHandlerV110 extends AbstractEventHandler {
 
     private static final Log LOG = LogFactory.getLog(AnalyticsLoginDataPublishHandlerV110.class);
-    private static final int PAYLOAD_LENGTH = 34;
+    private static final int PAYLOAD_LENGTH = 38;
 
     @Override
     public String getName() {
@@ -151,9 +151,14 @@ public class AnalyticsLoginDataPublishHandlerV110 extends AbstractEventHandler {
                 AnalyticsLoginDataPublisherUtils.replaceIfStringNotAvailable(authenticationData.getUserResidingOrgId());
         payloadData[28] = AnalyticsLoginDataPublisherUtils.replaceIfStringNotAvailable(
                 authenticationData.getServiceProviderResidingOrgId());
+        payloadData[29] = authenticationData.isOrganizationLogin();
+        payloadData[30] = authenticationData.isSharedAppLogin();
+
+        payloadData[31] = AnalyticsLoginDataPublisherUtils.replaceIfNotAvailable(authenticationData.getIdps());
+        payloadData[32] = AnalyticsLoginDataPublisherUtils.replaceIfStringNotAvailable(authenticationData.getAuthenticator());
         List<String> customParams = authenticationData.getCustomParams();
         for (int i = 0; i < customParams.size(); i++) {
-            payloadData[29 + i] = customParams.get(i);
+            payloadData[33 + i] = customParams.get(i);
         }
 
         if (LOG.isDebugEnabled()) {
