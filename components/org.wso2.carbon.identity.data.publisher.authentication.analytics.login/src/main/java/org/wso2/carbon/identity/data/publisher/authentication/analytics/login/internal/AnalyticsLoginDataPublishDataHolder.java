@@ -62,18 +62,22 @@ public class AnalyticsLoginDataPublishDataHolder {
     }
 
     public ApplicationManagementService getApplicationManagementService() {
+
         return applicationManagementService;
     }
 
     public void setApplicationManagementService(ApplicationManagementService applicationManagementService) {
+
         this.applicationManagementService = applicationManagementService;
     }
 
     public OrganizationManager getOrganizationManager() {
+
         return organizationManager;
     }
 
     public void setOrganizationManager(OrganizationManager organizationManager) {
+
         this.organizationManager = organizationManager;
     }
 }
