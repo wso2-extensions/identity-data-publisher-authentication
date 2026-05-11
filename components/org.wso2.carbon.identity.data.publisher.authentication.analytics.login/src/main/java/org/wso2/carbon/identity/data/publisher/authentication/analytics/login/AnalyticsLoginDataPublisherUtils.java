@@ -199,18 +199,18 @@ public class AnalyticsLoginDataPublisherUtils {
         if (resolvePrimaryTenantDomain) {
             // Resolve SP domain first; reuse the result for user domain when both are identical
             // (most common case) to avoid a second call.
-            String resolvedSp = StringUtils.isNotBlank(spTenantDomain)
+            String resolvedSpTenantDomain = StringUtils.isNotBlank(spTenantDomain)
                     ? getPrimaryOrgTenantDomain(spTenantDomain) : spTenantDomain;
-            String resolvedUser;
+            String resolvedUserTenantDomain;
             if (StringUtils.isNotBlank(userTenantDomain)) {
-                resolvedUser = userTenantDomain.equals(spTenantDomain)
-                        ? resolvedSp
+                resolvedUserTenantDomain = userTenantDomain.equals(spTenantDomain)
+                        ? resolvedSpTenantDomain
                         : getPrimaryOrgTenantDomain(userTenantDomain);
             } else {
-                resolvedUser = userTenantDomain;
+                resolvedUserTenantDomain = userTenantDomain;
             }
-            spTenantDomain = resolvedSp;
-            userTenantDomain = resolvedUser;
+            spTenantDomain = resolvedSpTenantDomain;
+            userTenantDomain = resolvedUserTenantDomain;
         }
 
         if (AuthenticatorStatus.PASS == status) {
