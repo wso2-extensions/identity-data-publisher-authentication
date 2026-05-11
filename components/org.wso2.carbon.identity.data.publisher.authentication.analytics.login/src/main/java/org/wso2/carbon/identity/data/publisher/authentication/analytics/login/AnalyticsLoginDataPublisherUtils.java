@@ -115,7 +115,7 @@ public class AnalyticsLoginDataPublisherUtils {
                 AUTHENTICATION_STATUS);
 
         // Tenant cache: avoids redundant DB lookups for the same domain within this call.
-        Map<String, Tenant> tenantCache = new HashMap<>();
+        Map<String, Tenant> tenantMap = new HashMap<>();
 
         AuthenticationData authenticationData = new AuthenticationData();
         setIdpForAuthnStep(context, authenticationData);
@@ -123,7 +123,7 @@ public class AnalyticsLoginDataPublisherUtils {
         boolean isInvalidUsername =
                 context.getProperty(IS_INVALID_USERNAME) != null && (boolean) context.getProperty(IS_INVALID_USERNAME);
         context.setProperty(IS_INVALID_USERNAME, null);
-        setUserDataForAuthnStep(authenticationData, userObj, isInvalidUsername, context, tenantCache);
+        setUserDataForAuthnStep(authenticationData, userObj, isInvalidUsername, context, tenantMap);
 
         Object isFederatedObj = params.get(FrameworkConstants.AnalyticsAttributes.IS_FEDERATED);
         setIdpTypeForAuthnStep(authenticationData, isFederatedObj);
@@ -148,7 +148,7 @@ public class AnalyticsLoginDataPublisherUtils {
         authenticationData.setStepNo(context.getCurrentStep());
         authenticationData.setUsernameUserInput((String) context.getProperty(USERNAME_USER_INPUT));
         setTenantDataForIdpStep(context, status, authenticationData, resolvePrimaryTenantDomain);
-        updateSpResidingData(context, authenticationData, tenantCache);
+        updateSpResidingData(context, authenticationData, tenantMap);
 
         authenticationData.addParameter(AuthPublisherConstants.RELYING_PARTY, context.getRelyingParty());
         return authenticationData;
@@ -252,19 +252,19 @@ public class AnalyticsLoginDataPublisherUtils {
     }
 
     /**
-     * Loads a {@link Tenant} by domain, consulting {@code tenantCache} first so the same tenant
+     * Loads a {@link Tenant} by domain, consulting {@code tenantMap} first so the same tenant
      * is never fetched more than once per request.
      */
-    private static Tenant loadTenantByDomain(String domain, Map<String, Tenant> tenantCache)
+    private static Tenant loadTenantByDomain(String domain, Map<String, Tenant> tenantMap)
             throws UserStoreException {
 
-        if (tenantCache.containsKey(domain)) {
-            return tenantCache.get(domain);
+        if (tenantMap.containsKey(domain)) {
+            return tenantMap.get(domain);
         }
         Tenant tenant = AnalyticsLoginDataPublishDataHolder.getInstance()
                 .getRealmService().getTenantManager().getTenantByDomain(domain);
         // Cache even a null result so we don't hit the DB again for the same domain.
-        tenantCache.put(domain, tenant);
+        tenantMap.put(domain, tenant);
         return tenant;
     }
 
@@ -283,7 +283,7 @@ public class AnalyticsLoginDataPublisherUtils {
 
     private static void setUserDataForAuthnStep(AuthenticationData authenticationData, Object userObj,
                                                 boolean isInvalidUsername, AuthenticationContext context,
-                                                Map<String, Tenant> tenantCache) {
+                                                Map<String, Tenant> tenantMap) {
 
         if (userObj instanceof User) {
             User user = (User) userObj;
@@ -305,7 +305,7 @@ public class AnalyticsLoginDataPublisherUtils {
                     LOG.debug("Null user id is found in the AuthenticatedUser instance.");
                 }
             }
-            updateUserOrgData(authenticationData, context, user, (User) userObj, tenantCache);
+            updateUserOrgData(authenticationData, context, user, (User) userObj, tenantMap);
         } else {
             try {
                 // Resolve userId and organization data for unauthenticated users.
@@ -318,7 +318,7 @@ public class AnalyticsLoginDataPublisherUtils {
                     org.wso2.carbon.user.core.common.User user1 = userStoreManager.getUser(null,
                             UserCoreUtil.addDomainToName(user.getUserName(), user.getUserStoreDomain()));
                     authenticationData.setUserId(user1.getUserID());
-                    updateUserOrgData(authenticationData, context, null, (User) userObj, tenantCache);
+                    updateUserOrgData(authenticationData, context, null, (User) userObj, tenantMap);
                 }
             } catch (UserStoreException e) {
                 throw new RuntimeException(e);
@@ -366,11 +366,11 @@ public class AnalyticsLoginDataPublisherUtils {
                 AUTHENTICATION_STATUS);
 
         // Tenant cache: avoids redundant DB lookups for the same domain within this call.
-        Map<String, Tenant> tenantCache = new HashMap<>();
+        Map<String, Tenant> tenantMap = new HashMap<>();
 
         AuthenticationData authenticationData = new AuthenticationData();
         Object userObj = params.get(FrameworkConstants.AnalyticsAttributes.USER);
-        setUserDataForAuthentication(authenticationData, userObj, context, tenantCache);
+        setUserDataForAuthentication(authenticationData, userObj, context, tenantMap);
 
         authenticationData = setIdpDataAndStepForAuthentication(context, status, authenticationData);
 
@@ -394,7 +394,7 @@ public class AnalyticsLoginDataPublisherUtils {
         authenticationData.setPassive(context.isPassiveAuthenticate());
         authenticationData.setUsernameUserInput((String) context.getProperty(USERNAME_USER_INPUT));
         setTenantDataForAuthentication(context, status, authenticationData, resolvePrimaryTenantDomain);
-        updateSpResidingData(context, authenticationData, tenantCache);
+        updateSpResidingData(context, authenticationData, tenantMap);
 
         authenticationData.addParameter(AuthPublisherConstants.RELYING_PARTY, context.getRelyingParty());
         setIdPAndAuthenticatorData(context, authenticationData);
@@ -607,7 +607,7 @@ public class AnalyticsLoginDataPublisherUtils {
 
     private static void setUserDataForAuthentication(AuthenticationData authenticationData,
                                                      Object userObj, AuthenticationContext context,
-                                                     Map<String, Tenant> tenantCache) {
+                                                     Map<String, Tenant> tenantMap) {
 
         if (userObj instanceof AuthenticatedUser) {
             AuthenticatedUser user = (AuthenticatedUser) userObj;
@@ -621,13 +621,13 @@ public class AnalyticsLoginDataPublisherUtils {
             }
             authenticationData.setTenantDomain(user.getTenantDomain());
             authenticationData.setUserStoreDomain(user.getUserStoreDomain());
-            updateUserOrgData(authenticationData, context, user, (User) userObj, tenantCache);
+            updateUserOrgData(authenticationData, context, user, (User) userObj, tenantMap);
         }
     }
 
     private static void updateUserOrgData(AuthenticationData authenticationData, AuthenticationContext context,
                                           AuthenticatedUser authenticatedUser, User user,
-                                          Map<String, Tenant> tenantCache) {
+                                          Map<String, Tenant> tenantMap) {
 
         authenticationData.setOrganizationLogin(context.isOrgApplicationLogin());
         authenticationData.setSharedAppLogin(context.isSharedAppLogin());
@@ -639,10 +639,10 @@ public class AnalyticsLoginDataPublisherUtils {
                 // Legacy SSO login flow.
                 authenticationData.setSharedAppLogin(true);
             } else {
-                authenticationData.setUserResidingOrgId(getOrgUuid(user.getTenantDomain(), tenantCache).orElse(null));
+                authenticationData.setUserResidingOrgId(getOrgUuid(user.getTenantDomain(), tenantMap).orElse(null));
             }
         }
-        authenticationData.setUserLoginOrgId(getOrgUuid(user.getTenantDomain(), tenantCache).orElse(null));
+        authenticationData.setUserLoginOrgId(getOrgUuid(user.getTenantDomain(), tenantMap).orElse(null));
     }
 
     private static AuthenticationData fillLocalEvent(AuthenticationData authenticationData,
@@ -747,7 +747,7 @@ public class AnalyticsLoginDataPublisherUtils {
     }
 
     private static void updateSpResidingData(AuthenticationContext context, AuthenticationData authenticationData,
-                                             Map<String, Tenant> tenantCache) {
+                                             Map<String, Tenant> tenantMap) {
 
         try {
             ServiceProvider sp = AnalyticsLoginDataPublishDataHolder.getInstance()
@@ -761,7 +761,7 @@ public class AnalyticsLoginDataPublisherUtils {
                     .findAny();
             String spResidingOrgId = null;
 
-            Tenant tenant = loadTenantByDomain(context.getTenantDomain(), tenantCache);
+            Tenant tenant = loadTenantByDomain(context.getTenantDomain(), tenantMap);
             if (tenant != null) {
                 if (fragmentAppProperty.isPresent()) {
                     spResidingOrgId = AnalyticsLoginDataPublishDataHolder.getInstance()
@@ -784,13 +784,13 @@ public class AnalyticsLoginDataPublisherUtils {
         }
     }
 
-    private static Optional<String> getOrgUuid(String tenantDomain, Map<String, Tenant> tenantCache) {
+    private static Optional<String> getOrgUuid(String tenantDomain, Map<String, Tenant> tenantMap) {
 
         try {
             if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                 return Optional.of(OrganizationManagementConstants.SUPER_ORG_ID);
             }
-            Tenant tenant = loadTenantByDomain(tenantDomain, tenantCache);
+            Tenant tenant = loadTenantByDomain(tenantDomain, tenantMap);
             return Optional.ofNullable(tenant.getAssociatedOrganizationUUID());
         } catch (UserStoreException e) {
             return Optional.empty();
