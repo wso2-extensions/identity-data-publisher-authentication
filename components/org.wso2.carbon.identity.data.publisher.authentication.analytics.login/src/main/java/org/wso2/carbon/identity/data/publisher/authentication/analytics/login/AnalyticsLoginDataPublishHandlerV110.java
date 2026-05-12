@@ -37,6 +37,7 @@ import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.user.core.util.UserCoreUtil;
 
 import java.util.List;
 import java.util.UUID;
@@ -48,7 +49,7 @@ import java.util.UUID;
 public class AnalyticsLoginDataPublishHandlerV110 extends AbstractEventHandler {
 
     private static final Log LOG = LogFactory.getLog(AnalyticsLoginDataPublishHandlerV110.class);
-    private static final int PAYLOAD_LENGTH = 31;
+    private static final int PAYLOAD_LENGTH = 38;
 
     @Override
     public String getName() {
@@ -96,11 +97,11 @@ public class AnalyticsLoginDataPublishHandlerV110 extends AbstractEventHandler {
 
         String roleList = null;
         if (FrameworkConstants.LOCAL_IDP_NAME.equalsIgnoreCase(authenticationData.getIdentityProviderType())) {
-            roleList = getCommaSeparatedUserRoles(authenticationData.getUserStoreDomain() + "/" +
-                    authenticationData.getUsername(), authenticationData.getTenantDomain());
+            roleList = getCommaSeparatedUserRoles(UserCoreUtil.addDomainToName(authenticationData.getUsername(),
+                    authenticationData.getUserStoreDomain()), authenticationData.getTenantDomain());
         } else if (StringUtils.isNotEmpty(authenticationData.getLocalUsername())) {
-            roleList = getCommaSeparatedUserRoles(authenticationData.getUserStoreDomain() + "/" +
-                    authenticationData.getLocalUsername(), authenticationData.getTenantDomain());
+            roleList = getCommaSeparatedUserRoles(UserCoreUtil.addDomainToName(authenticationData.getLocalUsername(),
+                    authenticationData.getUserStoreDomain()), authenticationData.getTenantDomain());
         }
 
         Object[] payloadData = new Object[PAYLOAD_LENGTH];
@@ -144,10 +145,20 @@ public class AnalyticsLoginDataPublishHandlerV110 extends AbstractEventHandler {
         payloadData[24] = AnalyticsLoginDataPublisherUtils.replaceIfLongNotAvailable(authenticationData.getDuration());
         payloadData[25] =
                 AnalyticsLoginDataPublisherUtils.replaceIfStringNotAvailable(authenticationData.getErrorCode());
+        payloadData[26] =
+                AnalyticsLoginDataPublisherUtils.replaceIfStringNotAvailable(authenticationData.getUserLoginOrgId());
+        payloadData[27] =
+                AnalyticsLoginDataPublisherUtils.replaceIfStringNotAvailable(authenticationData.getUserResidingOrgId());
+        payloadData[28] = AnalyticsLoginDataPublisherUtils.replaceIfStringNotAvailable(
+                authenticationData.getServiceProviderResidingOrgId());
+        payloadData[29] = authenticationData.isOrganizationLogin();
+        payloadData[30] = authenticationData.isSharedAppLogin();
 
+        payloadData[31] = AnalyticsLoginDataPublisherUtils.replaceIfNotAvailable(authenticationData.getIdps());
+        payloadData[32] = AnalyticsLoginDataPublisherUtils.replaceIfStringNotAvailable(authenticationData.getAuthenticator());
         List<String> customParams = authenticationData.getCustomParams();
         for (int i = 0; i < customParams.size(); i++) {
-            payloadData[26 + i] = customParams.get(i);
+            payloadData[33 + i] = customParams.get(i);
         }
 
         if (LOG.isDebugEnabled()) {
