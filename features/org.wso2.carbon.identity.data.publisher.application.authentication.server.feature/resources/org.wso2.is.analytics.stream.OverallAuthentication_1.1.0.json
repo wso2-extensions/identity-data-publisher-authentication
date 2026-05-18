@@ -115,7 +115,7 @@
       "type": "STRING"
     },
     {
-      "name": "userLoginOrgId",
+      "name": "userAccessingOrgId",
       "type": "STRING"
     },
     {
@@ -135,12 +135,16 @@
       "type": "BOOL"
     },
     {
-      "name": "idps",
+      "name": "identityProviders",
       "type": "ARRAY"
     },
     {
       "name": "authenticators",
       "type": "ARRAY"
+    },
+    {
+      "name": "isoTimestamp",
+      "type": "STRING"
     },
     {
       "name": "customParam1",
