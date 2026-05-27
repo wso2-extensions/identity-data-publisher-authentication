@@ -94,7 +94,7 @@ public class AnalyticsLoginDataPublishHandlerV110 extends AbstractEventHandler {
         }
     }
 
-    protected Object[] populatePayloadData(AuthenticationData authenticationData, boolean useIsoTimestamp) {
+    protected Object[] populatePayloadData(AuthenticationData authenticationData, boolean useISOTimestamp) {
 
         String roleList = null;
         if (FrameworkConstants.LOCAL_IDP_NAME.equalsIgnoreCase(authenticationData.getIdentityProviderType())) {
@@ -142,7 +142,7 @@ public class AnalyticsLoginDataPublishHandlerV110 extends AbstractEventHandler {
         payloadData[22] = AuthnDataPublisherUtils.replaceIfNotAvailable(
                 AuthPublisherConstants.CONFIG_PREFIX + AuthPublisherConstants.USERNAME_USER_INPUT,
                 authenticationData.getUsernameUserInput());
-        payloadData[23] = useIsoTimestamp ? Instant.now().toString() : String.valueOf(System.currentTimeMillis());
+        payloadData[23] = useISOTimestamp ? Instant.now().toString() : String.valueOf(System.currentTimeMillis());
         payloadData[24] = AnalyticsLoginDataPublisherUtils.replaceIfLongNotAvailable(authenticationData.getDuration());
         payloadData[25] =
                 AnalyticsLoginDataPublisherUtils.replaceIfStringNotAvailable(authenticationData.getErrorCode());

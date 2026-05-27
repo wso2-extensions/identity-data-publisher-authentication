@@ -97,27 +97,27 @@ public class AnalyticsSessionDataPublishHandler extends AbstractEventHandler {
      * rather than epoch milliseconds.
      *
      * <p>Subclasses (e.g. Moesif session publisher) should call this overload with
-     * {@code useIsoTimestamp = true} to obtain human-readable timestamps in the emitted payload.
+     * {@code useISOTimestamp = true} to obtain human-readable timestamps in the emitted payload.
      * All other callers can continue to use {@link #publishSessionData(SessionData, int)} which
-     * delegates here with {@code useIsoTimestamp = false}.
+     * delegates here with {@code useISOTimestamp = false}.
      *
      * @param sessionData     The session data object populated from the triggering event.
      * @param actionId        One of the SESSION_*_STATUS constants.
-     * @param useIsoTimestamp {@code true} to emit timestamps as ISO-8601 strings;
+     * @param useISOTimestamp {@code true} to emit timestamps as ISO-8601 strings;
      *                        {@code false} to emit epoch milliseconds (default behaviour).
      */
-    protected void publishSessionData(SessionData sessionData, int actionId, boolean useIsoTimestamp) {
+    protected void publishSessionData(SessionData sessionData, int actionId, boolean useISOTimestamp) {
 
         SessionDataPublisherUtil.updateTimeStamps(sessionData, actionId);
         try {
             Object[] payloadData;
             if (SessionDataPublisherUtil.isPublishingSessionCountEnabled()) {
                 payloadData = SessionDataPublisherUtil.buildSessionPayloadWithSessionCount(sessionData, actionId,
-                        useIsoTimestamp);
+                        useISOTimestamp);
                 publishToAnalytics(sessionData, payloadData, AuthPublisherConstants
                         .SESSION_DATA_STREAM_WITH_SESSION_COUNT_NAME);
             } else {
-                payloadData = SessionDataPublisherUtil.buildSessionPayload(sessionData, actionId, useIsoTimestamp);
+                payloadData = SessionDataPublisherUtil.buildSessionPayload(sessionData, actionId, useISOTimestamp);
                 publishToAnalytics(sessionData, payloadData, AuthPublisherConstants.SESSION_DATA_STREAM_NAME);
             }
 
