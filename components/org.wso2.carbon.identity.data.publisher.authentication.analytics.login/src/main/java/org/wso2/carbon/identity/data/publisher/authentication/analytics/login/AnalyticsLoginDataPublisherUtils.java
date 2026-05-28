@@ -424,7 +424,7 @@ public class AnalyticsLoginDataPublisherUtils {
             }
         }
         if (!idpIdList.isEmpty()) {
-            authenticationData.setIdps(idpIdList);
+            authenticationData.setIdentityProviders(idpIdList);
         }
         if (!authenticatorList.isEmpty()) {
             authenticationData.setAuthenticators(flattenedAuthenticatorList);
@@ -642,7 +642,7 @@ public class AnalyticsLoginDataPublisherUtils {
                 authenticationData.setUserResidingOrgId(getOrgUuid(user.getTenantDomain(), tenantMap).orElse(null));
             }
         }
-        authenticationData.setUserLoginOrgId(getOrgUuid(user.getTenantDomain(), tenantMap).orElse(null));
+        authenticationData.setUserAccessingOrgId(getOrgUuid(user.getTenantDomain(), tenantMap).orElse(null));
     }
 
     private static AuthenticationData fillLocalEvent(AuthenticationData authenticationData,

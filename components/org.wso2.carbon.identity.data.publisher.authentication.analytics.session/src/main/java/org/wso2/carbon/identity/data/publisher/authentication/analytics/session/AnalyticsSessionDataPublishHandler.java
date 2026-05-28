@@ -21,7 +21,6 @@ package org.wso2.carbon.identity.data.publisher.authentication.analytics.session
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkConstants;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkUtils;
 import org.wso2.carbon.identity.base.IdentityRuntimeException;
 import org.wso2.carbon.identity.core.bean.context.MessageContext;
@@ -37,8 +36,6 @@ import org.wso2.carbon.identity.event.IdentityEventException;
 import org.wso2.carbon.identity.event.event.Event;
 import org.wso2.carbon.identity.event.handler.AbstractEventHandler;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
-
-import java.util.Arrays;
 
 /**
  * Handle data publishing for analytics.
@@ -92,15 +89,35 @@ public class AnalyticsSessionDataPublishHandler extends AbstractEventHandler {
 
     protected void publishSessionData(SessionData sessionData, int actionId) {
 
+        publishSessionData(sessionData, actionId, false);
+    }
+
+    /**
+     * Builds and publishes session data, with an option to format all timestamps as ISO-8601 strings
+     * rather than epoch milliseconds.
+     *
+     * <p>Subclasses (e.g. Moesif session publisher) should call this overload with
+     * {@code useISOTimestamp = true} to obtain human-readable timestamps in the emitted payload.
+     * All other callers can continue to use {@link #publishSessionData(SessionData, int)} which
+     * delegates here with {@code useISOTimestamp = false}.
+     *
+     * @param sessionData     The session data object populated from the triggering event.
+     * @param actionId        One of the SESSION_*_STATUS constants.
+     * @param useISOTimestamp {@code true} to emit timestamps as ISO-8601 strings;
+     *                        {@code false} to emit epoch milliseconds (default behaviour).
+     */
+    protected void publishSessionData(SessionData sessionData, int actionId, boolean useISOTimestamp) {
+
         SessionDataPublisherUtil.updateTimeStamps(sessionData, actionId);
         try {
             Object[] payloadData;
-            if (isPublishingSessionCountEnabled()) {
-                payloadData = createPayloadWithSessionCount(sessionData, actionId);
+            if (SessionDataPublisherUtil.isPublishingSessionCountEnabled()) {
+                payloadData = SessionDataPublisherUtil.buildSessionPayloadWithSessionCount(sessionData, actionId,
+                        useISOTimestamp);
                 publishToAnalytics(sessionData, payloadData, AuthPublisherConstants
                         .SESSION_DATA_STREAM_WITH_SESSION_COUNT_NAME);
             } else {
-                payloadData = createPayload(sessionData, actionId);
+                payloadData = SessionDataPublisherUtil.buildSessionPayload(sessionData, actionId, useISOTimestamp);
                 publishToAnalytics(sessionData, payloadData, AuthPublisherConstants.SESSION_DATA_STREAM_NAME);
             }
 
@@ -136,62 +153,6 @@ public class AnalyticsSessionDataPublishHandler extends AbstractEventHandler {
         }
     }
 
-    private Object[] createPayload(SessionData sessionData, int actionId) {
-
-        Object[] payloadData = new Object[15];
-        payloadData[0] = AuthnDataPublisherUtils.replaceIfNotAvailable(AuthPublisherConstants.CONFIG_PREFIX +
-                AuthPublisherConstants.SESSION_ID, sessionData.getSessionId());
-        payloadData[1] = sessionData.getCreatedTimestamp();
-        payloadData[2] = sessionData.getUpdatedTimestamp();
-        payloadData[3] = sessionData.getTerminationTimestamp();
-        payloadData[4] = actionId;
-        payloadData[5] = AuthnDataPublisherUtils.replaceIfNotAvailable(AuthPublisherConstants.CONFIG_PREFIX +
-                AuthPublisherConstants.USERNAME, sessionData.getUser());
-        payloadData[6] = AuthnDataPublisherUtils.replaceIfNotAvailable(AuthPublisherConstants.CONFIG_PREFIX +
-                AuthPublisherConstants.USER_STORE_DOMAIN, sessionData.getUserStoreDomain());
-        payloadData[7] = sessionData.getRemoteIP();
-        payloadData[8] = AuthPublisherConstants.NOT_AVAILABLE;
-        payloadData[9] = sessionData.getTenantDomain();
-        payloadData[10] = sessionData.getServiceProvider();
-        payloadData[11] = sessionData.getIdentityProviders();
-        payloadData[12] = sessionData.isRememberMe();
-        payloadData[13] = sessionData.getUserAgent();
-        payloadData[14] = System.currentTimeMillis();
-
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("The created payload :" + Arrays.asList(payloadData));
-        }
-        return payloadData;
-    }
-
-    private Object[] createPayloadWithSessionCount(SessionData sessionData, int actionId) {
-
-        Object[] payloadData = new Object[16];
-        payloadData[0] = AuthnDataPublisherUtils.replaceIfNotAvailable(AuthPublisherConstants.CONFIG_PREFIX +
-                AuthPublisherConstants.SESSION_ID, sessionData.getSessionId());
-        payloadData[1] = sessionData.getCreatedTimestamp();
-        payloadData[2] = sessionData.getUpdatedTimestamp();
-        payloadData[3] = sessionData.getTerminationTimestamp();
-        payloadData[4] = actionId;
-        payloadData[5] = AuthnDataPublisherUtils.replaceIfNotAvailable(AuthPublisherConstants.CONFIG_PREFIX +
-                AuthPublisherConstants.USERNAME, sessionData.getUser());
-        payloadData[6] = AuthnDataPublisherUtils.replaceIfNotAvailable(AuthPublisherConstants.CONFIG_PREFIX +
-                AuthPublisherConstants.USER_STORE_DOMAIN, sessionData.getUserStoreDomain());
-        payloadData[7] = sessionData.getRemoteIP();
-        payloadData[8] = AuthPublisherConstants.NOT_AVAILABLE;
-        payloadData[9] = sessionData.getTenantDomain();
-        payloadData[10] = sessionData.getServiceProvider();
-        payloadData[11] = sessionData.getIdentityProviders();
-        payloadData[12] = sessionData.isRememberMe();
-        payloadData[13] = sessionData.getUserAgent();
-        payloadData[14] = sessionData.getActiveSessionCount();
-        payloadData[15] = System.currentTimeMillis();
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("The created payload :" + Arrays.asList(payloadData));
-        }
-        return payloadData;
-    }
-
     @Override
     public boolean isEnabled(MessageContext messageContext) {
         IdentityEventListenerConfig identityEventListenerConfig = IdentityUtil.readEventListenerProperty
@@ -213,12 +174,5 @@ public class AnalyticsSessionDataPublishHandler extends AbstractEventHandler {
         }
 
         return false;
-    }
-
-    private boolean isPublishingSessionCountEnabled() {
-
-        String isPublishingSessionCountEnabledValue = IdentityUtil.getProperty(FrameworkConstants.Config
-                .PUBLISH_ACTIVE_SESSION_COUNT);
-        return Boolean.parseBoolean(isPublishingSessionCountEnabledValue);
     }
 }

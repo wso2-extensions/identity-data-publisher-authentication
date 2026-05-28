@@ -39,6 +39,7 @@ import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.util.UserCoreUtil;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -93,7 +94,7 @@ public class AnalyticsLoginDataPublishHandlerV110 extends AbstractEventHandler {
         }
     }
 
-    protected Object[] populatePayloadData(AuthenticationData authenticationData) {
+    protected Object[] populatePayloadData(AuthenticationData authenticationData, boolean useISOTimestamp) {
 
         String roleList = null;
         if (FrameworkConstants.LOCAL_IDP_NAME.equalsIgnoreCase(authenticationData.getIdentityProviderType())) {
@@ -141,12 +142,12 @@ public class AnalyticsLoginDataPublishHandlerV110 extends AbstractEventHandler {
         payloadData[22] = AuthnDataPublisherUtils.replaceIfNotAvailable(
                 AuthPublisherConstants.CONFIG_PREFIX + AuthPublisherConstants.USERNAME_USER_INPUT,
                 authenticationData.getUsernameUserInput());
-        payloadData[23] = System.currentTimeMillis();
+        payloadData[23] = useISOTimestamp ? Instant.now().toString() : String.valueOf(System.currentTimeMillis());
         payloadData[24] = AnalyticsLoginDataPublisherUtils.replaceIfLongNotAvailable(authenticationData.getDuration());
         payloadData[25] =
                 AnalyticsLoginDataPublisherUtils.replaceIfStringNotAvailable(authenticationData.getErrorCode());
         payloadData[26] =
-                AnalyticsLoginDataPublisherUtils.replaceIfStringNotAvailable(authenticationData.getUserLoginOrgId());
+                AnalyticsLoginDataPublisherUtils.replaceIfStringNotAvailable(authenticationData.getUserAccessingOrgId());
         payloadData[27] =
                 AnalyticsLoginDataPublisherUtils.replaceIfStringNotAvailable(authenticationData.getUserResidingOrgId());
         payloadData[28] = AnalyticsLoginDataPublisherUtils.replaceIfStringNotAvailable(
@@ -154,7 +155,7 @@ public class AnalyticsLoginDataPublishHandlerV110 extends AbstractEventHandler {
         payloadData[29] = authenticationData.isOrganizationLogin();
         payloadData[30] = authenticationData.isSharedAppLogin();
 
-        payloadData[31] = AnalyticsLoginDataPublisherUtils.replaceIfNotAvailable(authenticationData.getIdps());
+        payloadData[31] = AnalyticsLoginDataPublisherUtils.replaceIfNotAvailable(authenticationData.getIdentityProviders());
         payloadData[32] = AnalyticsLoginDataPublisherUtils.replaceIfStringNotAvailable(authenticationData.getAuthenticator());
         List<String> customParams = authenticationData.getCustomParams();
         for (int i = 0; i < customParams.size(); i++) {
@@ -172,6 +173,11 @@ public class AnalyticsLoginDataPublishHandlerV110 extends AbstractEventHandler {
         }
 
         return payloadData;
+    }
+
+    protected Object[] populatePayloadData(AuthenticationData authenticationData) {
+
+        return populatePayloadData(authenticationData, false);
     }
 
     protected void publishEvent(Object[] payloadData, AuthenticationData authenticationData) {

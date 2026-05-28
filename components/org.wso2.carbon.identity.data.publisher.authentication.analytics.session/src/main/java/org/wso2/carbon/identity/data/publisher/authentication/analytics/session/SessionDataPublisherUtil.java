@@ -35,6 +35,8 @@ import org.wso2.carbon.identity.event.IdentityEventConstants;
 import org.wso2.carbon.identity.event.event.Event;
 import org.wso2.carbon.idp.mgt.util.IdPManagementUtil;
 
+import java.time.Instant;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -204,5 +206,138 @@ public class SessionDataPublisherUtil {
             return sb.substring(1); //remove the first comma
         }
         return StringUtils.EMPTY;
+    }
+
+    /**
+     * Build the 15-element session payload array from the given {@link SessionData} and action identifier.
+     * Both the analytics session publisher and the Moesif session publisher use this method so that
+     * they always emit the same payload structure.
+     *
+     * @param sessionData The session data object populated from the triggering event.
+     * @param actionId    One of {@link SessionDataPublisherConstants#SESSION_CREATION_STATUS},
+     *                    {@link SessionDataPublisherConstants#SESSION_UPDATE_STATUS}, or
+     *                    {@link SessionDataPublisherConstants#SESSION_TERMINATION_STATUS}.
+     * @return A 15-element {@code Object[]} ready to be attached to a databridge event.
+     */
+    public static Object[] buildSessionPayload(SessionData sessionData, int actionId) {
+
+        return buildSessionPayload(sessionData, actionId, false);
+    }
+
+    /**
+     * Build the 15-element session payload array, optionally formatting timestamps as ISO-8601 strings.
+     *
+     * @param sessionData     The session data object populated from the triggering event.
+     * @param actionId        One of the SESSION_*_STATUS constants.
+     * @param useIsoTimestamp {@code true} to emit timestamps as ISO-8601 strings; {@code false} for epoch millis.
+     * @return A 15-element {@code Object[]} ready to be attached to a databridge event.
+     */
+    public static Object[] buildSessionPayload(SessionData sessionData, int actionId, boolean useIsoTimestamp) {
+
+        Object[] payloadData = new Object[15];
+        payloadData[0] = AuthnDataPublisherUtils.replaceIfNotAvailable(AuthPublisherConstants.CONFIG_PREFIX +
+                AuthPublisherConstants.SESSION_ID, sessionData.getSessionId());
+        payloadData[1] = getTimestamp(sessionData.getCreatedTimestamp(), useIsoTimestamp);
+        payloadData[2] = getTimestamp(sessionData.getUpdatedTimestamp(), useIsoTimestamp);
+        payloadData[3] = getTimestamp(sessionData.getTerminationTimestamp(), useIsoTimestamp);
+        payloadData[4] = actionId;
+        payloadData[5] = AuthnDataPublisherUtils.replaceIfNotAvailable(AuthPublisherConstants.CONFIG_PREFIX +
+                AuthPublisherConstants.USERNAME, sessionData.getUser());
+        payloadData[6] = AuthnDataPublisherUtils.replaceIfNotAvailable(AuthPublisherConstants.CONFIG_PREFIX +
+                AuthPublisherConstants.USER_STORE_DOMAIN, sessionData.getUserStoreDomain());
+        payloadData[7] = sessionData.getRemoteIP();
+        payloadData[8] = AuthPublisherConstants.NOT_AVAILABLE;
+        payloadData[9] = sessionData.getTenantDomain();
+        payloadData[10] = sessionData.getServiceProvider();
+        payloadData[11] = sessionData.getIdentityProviders();
+        payloadData[12] = sessionData.isRememberMe();
+        payloadData[13] = sessionData.getUserAgent();
+        payloadData[14] = getTimestamp(System.currentTimeMillis(), useIsoTimestamp);
+
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("The created session payload: " + Arrays.asList(payloadData));
+        }
+        return payloadData;
+    }
+
+    /**
+     * Build the 16-element session payload array (with active session count) from the given
+     * {@link SessionData} and action identifier.
+     * Both the analytics session publisher and the Moesif session publisher use this method so that
+     * they always emit the same payload structure.
+     *
+     * @param sessionData The session data object populated from the triggering event.
+     * @param actionId    One of the SESSION_*_STATUS constants in {@link SessionDataPublisherConstants}.
+     * @return A 16-element {@code Object[]} including the active-session count.
+     */
+    public static Object[] buildSessionPayloadWithSessionCount(SessionData sessionData, int actionId) {
+
+        return buildSessionPayloadWithSessionCount(sessionData, actionId, false);
+    }
+
+    /**
+     * Build the 16-element session payload array (with active session count), optionally formatting
+     * timestamps as ISO-8601 strings.
+     *
+     * @param sessionData     The session data object populated from the triggering event.
+     * @param actionId        One of the SESSION_*_STATUS constants.
+     * @param useIsoTimestamp {@code true} to emit timestamps as ISO-8601 strings; {@code false} for epoch millis.
+     * @return A 16-element {@code Object[]} including the active-session count.
+     */
+    public static Object[] buildSessionPayloadWithSessionCount(SessionData sessionData, int actionId,
+                                                               boolean useIsoTimestamp) {
+
+        Object[] payloadData = new Object[16];
+        payloadData[0] = AuthnDataPublisherUtils.replaceIfNotAvailable(AuthPublisherConstants.CONFIG_PREFIX +
+                AuthPublisherConstants.SESSION_ID, sessionData.getSessionId());
+        payloadData[1] = getTimestamp(sessionData.getCreatedTimestamp(), useIsoTimestamp);
+        payloadData[2] = getTimestamp(sessionData.getUpdatedTimestamp(), useIsoTimestamp);
+        payloadData[3] = getTimestamp(sessionData.getTerminationTimestamp(), useIsoTimestamp);
+        payloadData[4] = actionId;
+        payloadData[5] = AuthnDataPublisherUtils.replaceIfNotAvailable(AuthPublisherConstants.CONFIG_PREFIX +
+                AuthPublisherConstants.USERNAME, sessionData.getUser());
+        payloadData[6] = AuthnDataPublisherUtils.replaceIfNotAvailable(AuthPublisherConstants.CONFIG_PREFIX +
+                AuthPublisherConstants.USER_STORE_DOMAIN, sessionData.getUserStoreDomain());
+        payloadData[7] = sessionData.getRemoteIP();
+        payloadData[8] = AuthPublisherConstants.NOT_AVAILABLE;
+        payloadData[9] = sessionData.getTenantDomain();
+        payloadData[10] = sessionData.getServiceProvider();
+        payloadData[11] = sessionData.getIdentityProviders();
+        payloadData[12] = sessionData.isRememberMe();
+        payloadData[13] = sessionData.getUserAgent();
+        payloadData[14] = sessionData.getActiveSessionCount();
+        payloadData[15] = getTimestamp(System.currentTimeMillis(), useIsoTimestamp);
+
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("The created session payload (with session count): " + Arrays.asList(payloadData));
+        }
+        return payloadData;
+    }
+
+    /**
+     * Returns {@code true} if active-session-count publishing is enabled in the identity configuration.
+     *
+     * @return Whether active session count should be included in session payloads.
+     */
+    public static boolean isPublishingSessionCountEnabled() {
+
+        String value = IdentityUtil.getProperty(FrameworkConstants.Config.PUBLISH_ACTIVE_SESSION_COUNT);
+        return Boolean.parseBoolean(value);
+    }
+
+    /**
+     * Returns the timestamp either as epoch milliseconds or as an ISO-8601 string depending on
+     * {@code useIsoTimestamp}. Returns {@code null} when {@code epochMillis} is {@code 0} (unset).
+     *
+     * @param epochMillis     Epoch milliseconds to convert.
+     * @param useIsoTimestamp {@code true} to return an ISO-8601 string; {@code false} to return the raw {@code long}.
+     * @return ISO-8601 {@code String} or {@code Long} epoch value, or {@code null} when unset.
+     */
+    private static Object getTimestamp(long epochMillis, boolean useIsoTimestamp) {
+
+        if (epochMillis == 0) {
+            return null;
+        }
+        return useIsoTimestamp ? Instant.ofEpochMilli(epochMillis).toString() : epochMillis;
     }
 }

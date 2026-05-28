@@ -58,11 +58,12 @@ public class AuthenticationData<T1 extends Object, T2 extends Object> {
     private String usernameUserInput;
     private String serviceProviderResidingOrgId;
     private String userResidingOrgId;
-    private String userLoginOrgId;
+    private String userAccessingOrgId;
     private boolean isOrganizationLogin;
     private boolean isSharedAppLogin;
     private List<String> authenticators;
-    private List<String> idps;
+    private List<String> identityProviders;
+    private String federatedSubOrg;
 
     public String getEventId() {
 
@@ -360,12 +361,12 @@ public class AuthenticationData<T1 extends Object, T2 extends Object> {
         this.userResidingOrgId = userResidingOrgId;
     }
 
-    public String getUserLoginOrgId() {
-        return userLoginOrgId;
+    public String getUserAccessingOrgId() {
+        return userAccessingOrgId;
     }
 
-    public void setUserLoginOrgId(String userLoginOrgId) {
-        this.userLoginOrgId = userLoginOrgId;
+    public void setUserAccessingOrgId(String userAccessingOrgId) {
+        this.userAccessingOrgId = userAccessingOrgId;
     }
 
     public boolean isOrganizationLogin() {
@@ -392,11 +393,19 @@ public class AuthenticationData<T1 extends Object, T2 extends Object> {
         this.authenticators = authenticators;
     }
 
-    public List<String> getIdps() {
-        return idps;
+    public List<String> getIdentityProviders() {
+        return identityProviders;
     }
 
-    public void setIdps(List<String> idps) {
-        this.idps = idps;
+    public void setIdentityProviders(List<String> identityProviders) {
+        this.identityProviders = identityProviders;
+    }
+
+    public String getFederatedSubOrg() {
+        return federatedSubOrg;
+    }
+
+    public void setFederatedSubOrg(String federatedSubOrg) {
+        this.federatedSubOrg = federatedSubOrg;
     }
 }
