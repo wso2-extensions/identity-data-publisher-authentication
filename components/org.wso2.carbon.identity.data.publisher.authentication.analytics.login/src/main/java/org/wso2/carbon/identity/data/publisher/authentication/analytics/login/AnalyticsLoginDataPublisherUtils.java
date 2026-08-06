@@ -321,7 +321,9 @@ public class AnalyticsLoginDataPublisherUtils {
                     updateUserOrgData(authenticationData, context, null, (User) userObj, tenantMap);
                 }
             } catch (UserStoreException e) {
-                throw new RuntimeException(e);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Error while resolving the user id and organization data for the user.", e);
+                }
             }
 
         }
