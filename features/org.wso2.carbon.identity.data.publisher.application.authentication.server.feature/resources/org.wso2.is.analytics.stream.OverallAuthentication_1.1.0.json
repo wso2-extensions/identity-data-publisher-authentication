@@ -143,8 +143,8 @@
       "type": "ARRAY"
     },
     {
-      "name": "isoTimestamp",
-      "type": "STRING"
+      "name": "groups",
+      "type": "ARRAY"
     },
     {
       "name": "customParam1",

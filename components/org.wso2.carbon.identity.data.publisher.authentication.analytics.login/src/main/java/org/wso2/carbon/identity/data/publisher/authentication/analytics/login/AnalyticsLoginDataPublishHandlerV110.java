@@ -40,8 +40,11 @@ import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.util.UserCoreUtil;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 /**
  * Publish authentication login data to analytics server.
@@ -50,7 +53,7 @@ import java.util.UUID;
 public class AnalyticsLoginDataPublishHandlerV110 extends AbstractEventHandler {
 
     private static final Log LOG = LogFactory.getLog(AnalyticsLoginDataPublishHandlerV110.class);
-    private static final int PAYLOAD_LENGTH = 38;
+    private static final int PAYLOAD_LENGTH = 39;
 
     @Override
     public String getName() {
@@ -97,12 +100,17 @@ public class AnalyticsLoginDataPublishHandlerV110 extends AbstractEventHandler {
     protected Object[] populatePayloadData(AuthenticationData authenticationData, boolean useISOTimestamp) {
 
         String roleList = null;
+        List<String> groupList = new ArrayList<>();
         if (FrameworkConstants.LOCAL_IDP_NAME.equalsIgnoreCase(authenticationData.getIdentityProviderType())) {
-            roleList = getCommaSeparatedUserRoles(UserCoreUtil.addDomainToName(authenticationData.getUsername(),
-                    authenticationData.getUserStoreDomain()), authenticationData.getTenantDomain());
+            String domainQualifiedUsername = UserCoreUtil.addDomainToName(authenticationData.getUsername(),
+                    authenticationData.getUserStoreDomain());
+            roleList = getCommaSeparatedUserRoles(domainQualifiedUsername, authenticationData.getTenantDomain());
+            groupList = getUserGroups(domainQualifiedUsername, authenticationData.getTenantDomain());
         } else if (StringUtils.isNotEmpty(authenticationData.getLocalUsername())) {
-            roleList = getCommaSeparatedUserRoles(UserCoreUtil.addDomainToName(authenticationData.getLocalUsername(),
-                    authenticationData.getUserStoreDomain()), authenticationData.getTenantDomain());
+            String domainQualifiedUsername = UserCoreUtil.addDomainToName(authenticationData.getLocalUsername(),
+                    authenticationData.getUserStoreDomain());
+            roleList = getCommaSeparatedUserRoles(domainQualifiedUsername, authenticationData.getTenantDomain());
+            groupList = getUserGroups(domainQualifiedUsername, authenticationData.getTenantDomain());
         }
 
         Object[] payloadData = new Object[PAYLOAD_LENGTH];
@@ -157,9 +165,11 @@ public class AnalyticsLoginDataPublishHandlerV110 extends AbstractEventHandler {
 
         payloadData[31] = AnalyticsLoginDataPublisherUtils.replaceIfNotAvailable(authenticationData.getIdentityProviders());
         payloadData[32] = AnalyticsLoginDataPublisherUtils.replaceIfStringNotAvailable(authenticationData.getAuthenticator());
+        // Publish groups as an array (a single group is still emitted as a one element array).
+        payloadData[33] = groupList;
         List<String> customParams = authenticationData.getCustomParams();
         for (int i = 0; i < customParams.size(); i++) {
-            payloadData[33 + i] = customParams.get(i);
+            payloadData[34 + i] = customParams.get(i);
         }
 
         if (LOG.isDebugEnabled()) {
@@ -253,6 +263,49 @@ public class AnalyticsLoginDataPublishHandlerV110 extends AbstractEventHandler {
             LOG.debug("No roles found. Returning empty string");
         }
         return StringUtils.EMPTY;
+    }
+
+    private List<String> getUserGroups(String userName, String tenantDomain) {
+
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Retrieving groups for user " + userName + ", tenant domain " + tenantDomain);
+        }
+        List<String> groups = new ArrayList<>();
+        if (tenantDomain == null || userName == null) {
+            return groups;
+        }
+
+        RealmService realmService = AnalyticsLoginDataPublishDataHolder.getInstance().getRealmService();
+
+        try {
+            int tenantId = realmService.getTenantManager().getTenantId(tenantDomain);
+            UserRealm realm = (UserRealm) realmService.getTenantUserRealm(tenantId);
+            if (realm == null) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("No realm found for tenant domain : " + tenantDomain + ". Hence no groups added");
+                }
+                return groups;
+            }
+            UserStoreManager userstore = realm.getUserStoreManager();
+            if (!userstore.isExistingUser(userName)) {
+                return groups;
+            }
+            // Read groups via the groups claim URI. The user store's getGroupListOfUser/role APIs return
+            // roles, so the claim value is the reliable source for the user's groups.
+            String groupClaimValue = userstore.getUserClaimValue(userName, FrameworkConstants.GROUPS_CLAIM, null);
+            if (StringUtils.isBlank(groupClaimValue)) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("No groups found. Returning empty list");
+                }
+                return groups;
+            }
+            // Multi-valued claims are joined by the user store's multi attribute separator.
+            groups.addAll(Arrays.asList(groupClaimValue.split(
+                    Pattern.quote(FrameworkUtils.getMultiAttributeSeparator()))));
+        } catch (UserStoreException e) {
+            LOG.error("Error when getting groups for " + userName + "@" + tenantDomain, e);
+        }
+        return groups;
     }
 
     private boolean isAnalyticsLoginDataPublishingEnabled(Event event) throws IdentityEventException {
